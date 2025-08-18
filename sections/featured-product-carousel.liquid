@@ -20,19 +20,19 @@
     justify-content: space-between;
     align-items: flex-end;
     margin-bottom: {{ section.settings.header_margin_bottom | default: 48 }}px;
-    padding: 0 24px;
+    padding: 0;
   }
 
   .featured-product-carousel__title {
     font-size: {{ section.settings.title_font_size | default: 3.2 }}rem;
-    font-weight: {{ section.settings.title_font_weight | default: 700 }};
+    font-weight: {{ section.settings.title_font_weight | default: 500 }};
     line-height: {{ section.settings.title_line_height | default: 120 }}%;
     color: {{ section.settings.title_color | default: '#000000' }};
     margin: 0;
   }
 
   .featured-product-carousel__description {
-    font-size: {{ section.settings.description_font_size | default: 1.1 }}rem;
+    font-size: {{ section.settings.description_font_size | default: 14 }}px;
     font-weight: {{ section.settings.description_font_weight | default: 400 }};
     line-height: {{ section.settings.description_line_height | default: 160 }}%;
     color: {{ section.settings.description_color | default: '#000000' }};
@@ -60,7 +60,7 @@
 
   .featured-product-carousel__carousel-container {
     position: relative;
-    overflow: hidden !important;
+    overflow: visible !important;
     width: 100% !important;
     max-width: 100% !important;
     /* Ensure container can show all 4 products */
@@ -89,7 +89,7 @@
   .featured-product-carousel__product-card {
     background: {{ section.settings.card_background_color | default: '#FFFFFF' }};
     border-radius: {{ section.settings.card_border_radius | default: 16 }}px;
-    overflow: hidden;
+    overflow: visible;
     transition: transform 0.3s ease;
     height: 100%;
     display: flex;
@@ -100,11 +100,24 @@
     transform: translateY(-8px);
   }
 
+  .featured-product-carousel__product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+  }
+
+  .featured-product-carousel__product-link:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+
   .featured-product-carousel__product-image {
     position: relative;
     width: 100%;
     aspect-ratio: 1;
     overflow: hidden;
+    border-radius: {{ section.settings.image_border_radius | default: 15 }}px;
   }
 
   .featured-product-carousel__product-image img {
@@ -119,30 +132,30 @@
   }
 
   .featured-product-carousel__product-content {
-    padding: {{ section.settings.card_padding | default: 20 }}px;
+    padding: 20px 0;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
   }
 
   .featured-product-carousel__product-title {
-    font-size: {{ section.settings.product_title_font_size | default: 1.1 }}rem;
-    font-weight: {{ section.settings.product_title_font_weight | default: 600 }};
+    font-size: {{ section.settings.product_title_font_size | default: 14 }}px;
+    font-weight: {{ section.settings.product_title_font_weight | default: 500 }};
     line-height: {{ section.settings.product_title_line_height | default: 140 }}%;
     color: {{ section.settings.product_title_color | default: '#000000' }};
     margin: 0 0 0.5rem 0;
   }
 
   .featured-product-carousel__product-volume {
-    font-size: {{ section.settings.product_volume_font_size | default: 0.9 }}rem;
+    font-size: {{ section.settings.product_volume_font_size | default: 14 }}px;
     font-weight: {{ section.settings.product_volume_font_weight | default: 400 }};
     color: {{ section.settings.product_volume_color | default: '#6B7280' }};
     margin: 0 0 0.5rem 0;
   }
 
   .featured-product-carousel__product-price {
-    font-size: {{ section.settings.product_price_font_size | default: 1.2 }}rem;
-    font-weight: {{ section.settings.product_price_font_weight | default: 700 }};
+    font-size: {{ section.settings.product_price_font_size | default: 14 }}px;
+    font-weight: {{ section.settings.product_price_font_weight | default: 500 }};
     color: {{ section.settings.product_price_color | default: '#000000' }};
     margin: 0 0 1rem 0;
   }
@@ -164,7 +177,7 @@
     color: {{ section.settings.add_to_cart_text_color | default: '#000000' }};
     border: 1px solid {{ section.settings.add_to_cart_border_color | default: '#E5E7EB' }};
     border-radius: 8px;
-    font-size: {{ section.settings.add_to_cart_font_size | default: 0.9 }}rem;
+    font-size: {{ section.settings.add_to_cart_font_size | default: 14 }}px;
     font-weight: {{ section.settings.add_to_cart_font_weight | default: 500 }};
     cursor: pointer;
     transition: all 0.3s ease;
@@ -218,15 +231,24 @@
     transition: all 0.3s ease;
   }
 
+  .featured-product-carousel__arrow[data-prev-arrow] {
+    display: none;
+  }
+
   .featured-product-carousel__arrow:hover {
     background-color: {{ section.settings.arrow_hover_background_color | default: '#F3F4F6' }};
     transform: translateY(-2px);
   }
 
-  .featured-product-carousel__arrow svg {
+  .featured-product-carousel__arrow .svg-wrapper {
     width: 16px;
     height: 16px;
-    fill: {{ section.settings.arrow_color | default: '#000000' }};
+    color: {{ section.settings.arrow_color | default: '#000000' }};
+  }
+
+  .featured-product-carousel__arrow .svg-wrapper svg {
+    width: 100%;
+    height: 100%;
   }
 
   /* Responsive Design */
@@ -287,11 +309,9 @@
           <p class="featured-product-carousel__description">{{ section.settings.description }}</p>
         {% endif %}
       </div>
-      {% if section.settings.view_all_link != blank %}
-        <a href="{{ section.settings.view_all_link }}" class="featured-product-carousel__view-all-button">
-          {{ section.settings.view_all_text | default: 'View All' }}
-        </a>
-      {% endif %}
+      <a href="{{ section.settings.view_all_link | default: '/collections/all' }}" class="featured-product-carousel__view-all-button">
+        {{ section.settings.view_all_text | default: 'View All' }}
+      </a>
     </div>
 
     <!-- Carousel -->
@@ -304,6 +324,51 @@
             {% if product %}
               {%- assign rendered_count = rendered_count | plus: 1 -%}
               <div class="featured-product-carousel__slide" data-slide>
+                <a href="{{ product.url }}" class="featured-product-carousel__product-link">
+                  <div class="featured-product-carousel__product-card">
+                    <div class="featured-product-carousel__product-image">
+                      {% if product.featured_image %}
+                        <img 
+                          src="{{ product.featured_image | image_url: width: 400, height: 400 }}" 
+                          alt="{{ product.title | escape }}"
+                          loading="lazy"
+                          width="400"
+                          height="400"
+                        >
+                      {% else %}
+                        <div style="background-color: #F3F4F6; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
+                          No Image
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div class="featured-product-carousel__product-content">
+                      <h3 class="featured-product-carousel__product-title">{{ product.title }}</h3>
+                      {% if product.variants.first.option1 != blank and product.variants.first.option1 != 'Default Title' %}
+                        <p class="featured-product-carousel__product-volume">{{ product.variants.first.option1 }}</p>
+                      {% endif %}
+                      <p class="featured-product-carousel__product-price">
+                        {% if product.compare_at_price > product.price %}
+                          <span class="featured-product-carousel__product-price--sale">{{ product.price | money }}</span>
+                          <span class="featured-product-carousel__product-price--compare">{{ product.compare_at_price | money }}</span>
+                        {% else %}
+                          {{ product.price | money }}
+                        {% endif %}
+                      </p>
+                      <button class="featured-product-carousel__add-to-cart-button" data-product-id="{{ product.id }}">
+                        {{ block.settings.add_to_cart_text | default: 'Add to cart' }}
+                      </button>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+
+        {%- if rendered_count == 0 -%}
+          {% for product in collections.all.products limit: section.settings.max_products %}
+            <div class="featured-product-carousel__slide" data-slide>
+              <a href="{{ product.url }}" class="featured-product-carousel__product-link">
                 <div class="featured-product-carousel__product-card">
                   <div class="featured-product-carousel__product-image">
                     {% if product.featured_image %}
@@ -334,52 +399,11 @@
                       {% endif %}
                     </p>
                     <button class="featured-product-carousel__add-to-cart-button" data-product-id="{{ product.id }}">
-                      {{ block.settings.add_to_cart_text | default: 'Add to cart' }}
+                      {{ section.settings.default_add_to_cart_text | default: 'Add to cart' }}
                     </button>
                   </div>
                 </div>
-              </div>
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-
-        {%- if rendered_count == 0 -%}
-          {% for product in collections.all.products limit: section.settings.max_products %}
-            <div class="featured-product-carousel__slide" data-slide>
-              <div class="featured-product-carousel__product-card">
-                <div class="featured-product-carousel__product-image">
-                  {% if product.featured_image %}
-                    <img 
-                      src="{{ product.featured_image | image_url: width: 400, height: 400 }}" 
-                      alt="{{ product.title | escape }}"
-                      loading="lazy"
-                      width="400"
-                      height="400"
-                    >
-                  {% else %}
-                    <div style="background-color: #F3F4F6; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                      No Image
-                    </div>
-                  {% endif %}
-                </div>
-                <div class="featured-product-carousel__product-content">
-                  <h3 class="featured-product-carousel__product-title">{{ product.title }}</h3>
-                  {% if product.variants.first.option1 != blank and product.variants.first.option1 != 'Default Title' %}
-                    <p class="featured-product-carousel__product-volume">{{ product.variants.first.option1 }}</p>
-                  {% endif %}
-                  <p class="featured-product-carousel__product-price">
-                    {% if product.compare_at_price > product.price %}
-                      <span class="featured-product-carousel__product-price--sale">{{ product.price | money }}</span>
-                      <span class="featured-product-carousel__product-price--compare">{{ product.compare_at_price | money }}</span>
-                    {% else %}
-                      {{ product.price | money }}
-                    {% endif %}
-                  </p>
-                  <button class="featured-product-carousel__add-to-cart-button" data-product-id="{{ product.id }}">
-                    {{ section.settings.default_add_to_cart_text | default: 'Add to cart' }}
-                  </button>
-                </div>
-              </div>
+              </a>
             </div>
           {% endfor %}
           
@@ -451,14 +475,14 @@
       <div class="featured-product-carousel__pagination" data-pagination></div>
       <div class="featured-product-carousel__arrows">
         <button class="featured-product-carousel__arrow" data-prev-arrow>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <span class="svg-wrapper icon-arrow flip-x">
+            {{- 'icon-arrow.svg' | inline_asset_content -}}
+          </span>
         </button>
         <button class="featured-product-carousel__arrow" data-next-arrow>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <span class="svg-wrapper icon-arrow">
+            {{- 'icon-arrow.svg' | inline_asset_content -}}
+          </span>
         </button>
       </div>
     </div>
@@ -521,6 +545,16 @@
         this.nextButton.addEventListener('click', () => this.next());
       }
 
+      // Handle add-to-cart button clicks to prevent link navigation
+      const addToCartButtons = this.container.querySelectorAll('.featured-product-carousel__add-to-cart-button');
+      addToCartButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleAddToCart(e.target);
+        });
+      });
+
       // Touch/swipe support
       let startX = 0;
       let endX = 0;
@@ -576,6 +610,21 @@
       dots.forEach((dot, index) => {
         dot.classList.toggle('active', index === this.currentSlide);
       });
+
+      // Update arrow visibility
+      this.updateArrowVisibility();
+    }
+
+    updateArrowVisibility() {
+      // Hide left arrow initially and show when user navigates
+      if (this.prevButton) {
+        this.prevButton.style.display = this.currentSlide > 0 ? 'flex' : 'none';
+      }
+      
+      // Hide right arrow when at the end
+      if (this.nextButton) {
+        this.nextButton.style.display = this.currentSlide < this.totalSlides - this.slidesPerView ? 'flex' : 'none';
+      }
     }
 
     next() {
@@ -608,6 +657,49 @@
           }
         }, {{ section.settings.auto_play_speed | default: 5 }} * 1000);
       {% endif %}
+    }
+
+    handleAddToCart(button) {
+      const productId = button.getAttribute('data-product-id');
+      if (!productId) return;
+
+      // Show loading state
+      const originalText = button.textContent;
+      button.textContent = 'Adding...';
+      button.disabled = true;
+
+      // Add to cart using Shopify's AJAX API
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: productId,
+          quantity: 1
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Success
+        button.textContent = 'Added!';
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 2000);
+        
+        // Trigger cart update event
+        document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
+      })
+      .catch(error => {
+        // Error
+        button.textContent = 'Error';
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 2000);
+        console.error('Error adding to cart:', error);
+      });
     }
   }
 
@@ -742,6 +834,15 @@
       "default": 15
     },
     {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius (px)",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "default": 15
+    },
+    {
       "type": "header",
       "content": "Typography"
     },
@@ -775,11 +876,11 @@
     {
       "type": "range",
       "id": "description_font_size",
-      "label": "Description font size (rem)",
-      "min": 0.8,
-      "max": 2,
-      "step": 0.1,
-      "default": 1.1
+      "label": "Description font size (px)",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "default": 14
     },
     {
       "type": "range",
@@ -802,11 +903,11 @@
     {
       "type": "range",
       "id": "product_title_font_size",
-      "label": "Product title font size (rem)",
-      "min": 0.8,
-      "max": 2,
-      "step": 0.1,
-      "default": 1.1
+      "label": "Product title font size (px)",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "default": 14
     },
     {
       "type": "range",
@@ -829,11 +930,11 @@
     {
       "type": "range",
       "id": "product_volume_font_size",
-      "label": "Product volume font size (rem)",
-      "min": 0.7,
-      "max": 1.5,
-      "step": 0.1,
-      "default": 0.9
+      "label": "Product volume font size (px)",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "default": 14
     },
     {
       "type": "range",
@@ -847,11 +948,11 @@
     {
       "type": "range",
       "id": "product_price_font_size",
-      "label": "Product price font size (rem)",
-      "min": 1,
-      "max": 2,
-      "step": 0.1,
-      "default": 1.2
+      "label": "Product price font size (px)",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "default": 14
     },
     {
       "type": "range",
@@ -971,11 +1072,11 @@
     {
       "type": "range",
       "id": "add_to_cart_font_size",
-      "label": "Add to cart font size (rem)",
-      "min": 0.8,
-      "max": 1.5,
-      "step": 0.1,
-      "default": 0.9
+      "label": "Add to cart font size (px)",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "default": 14
     },
     {
       "type": "range",

@@ -2424,7 +2424,7 @@ product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) > *:not(.tax-note) {
   tr:not(:has(td)),
   thead {
     background-color: rgb(var(--color-foreground-rgb) / var(--opacity-5));
-    font-weight: bold;
+    font-weight: 500;
     text-transform: uppercase;
   }
 
@@ -4276,5 +4276,64 @@ text-component {
   .h6.h6 textarea,
   .h6.h6 select {
     font-size: max(1rem, 100%);
+  }
+}
+
+/* Custom mobile font sizes and line heights */
+@media screen and (max-width: 749px) {
+  /* Body text */
+  body,
+  .paragraph:not(.button),
+  .paragraph > * {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* H1 */
+  h1,
+  .h1.h1,
+  .text-block.h1 > * {
+    font-size: 2.75rem !important;
+    line-height: 1.0 !important;
+  }
+
+  /* H2 */
+  h2,
+  .h2.h2,
+  .text-block.h2 > * {
+    font-size: 2.5rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* H3 */
+  h3,
+  .h3.h3,
+  .text-block.h3 > * {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* H4 */
+  h4,
+  .h4.h4,
+  .text-block.h4 > * {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+  }
+
+  /* H5 */
+  h5,
+  .h5.h5,
+  .text-block.h5 > * {
+    font-size: 1.25rem !important;
+    line-height: 1.4 !important;
+  }
+
+  /* H6 */
+  h6,
+  .h6.h6,
+  .text-block.h6 > * {
+    font-size: 1.125rem !important;
+    line-height: 1.4 !important;
   }
 }
