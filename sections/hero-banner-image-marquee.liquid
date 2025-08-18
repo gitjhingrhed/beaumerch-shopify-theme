@@ -1,0 +1,1033 @@
+{% comment %}
+  Hero Banner Image Marquee Section
+  Working version with proper tablet dimensions and marquee animations
+{% endcomment %}
+
+{% style %}
+  .hero-banner-image-marquee {
+    height: 70vh;
+    min-height: 70vh;
+    background-color: {{ section.settings.background_color | default: '#352118' }};
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    --page-margin: 16px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .hero-banner-image-marquee {
+      --page-margin: 40px;
+    }
+  }
+  
+  .hero-banner-image-marquee__container {
+    max-width: var(--page-width);
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--page-margin);
+    position: relative;
+  }
+
+  .hero-banner-image-marquee__content {
+    width: 60%;
+    padding: 4rem 2rem 4rem 0;
+    color: {{ section.settings.text_color | default: '#ffffff' }};
+    z-index: 2;
+    box-sizing: border-box;
+  }
+
+  .hero-banner-image-marquee__title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    line-height: 1.1;
+    color: {{ section.settings.text_color | default: '#ffffff' }};
+  }
+
+  .hero-banner-image-marquee__description {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    color: {{ section.settings.text_color | default: '#ffffff' }};
+  }
+
+  .hero-banner-image-marquee__search-form {
+    flex: 1;
+    max-width: 450px;
+  }
+
+  .hero-banner-image-marquee__search-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .hero-banner-image-marquee__search-input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: {{ section.settings.text_color | default: '#ffffff' }};
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .hero-banner-image-marquee__search-input:focus {
+    outline: none;
+    border-color: {{ section.settings.button_background_color | default: '#ff6b9d' }};
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.02);
+  }
+
+  .hero-banner-image-marquee__search-input::placeholder {
+    color: {{ section.settings.text_color | default: '#ffffff' }};
+    opacity: 0.7;
+  }
+
+  .hero-banner-image-marquee__search-button {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: {{ section.settings.text_color | default: '#ffffff' }};
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+
+  .hero-banner-image-marquee__search-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-banner-image-marquee__search-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .hero-banner-image-marquee__or-text {
+    display: flex;
+    align-items: center;
+    color: {{ section.settings.text_color | default: '#ffffff' }};
+    opacity: 0.8;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0 1rem;
+    flex-shrink: 0;
+  }
+
+  .hero-banner-image-marquee__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .hero-banner-image-marquee__shop-button {
+    background: {{ section.settings.button_background_color | default: '#ff6b9d' }};
+    color: {{ section.settings.button_text_color | default: '#ffffff' }};
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+    flex-shrink: 0;
+  }
+
+  .hero-banner-image-marquee__shop-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 107, 157, 0.4);
+  }
+
+  .hero-banner-image-marquee__images {
+    width: 40%;
+    height: 100%;
+    overflow: visible;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .hero-banner-image-marquee__marquee-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 2rem 0;
+    overflow: visible;
+  }
+
+  .hero-banner-image-marquee__marquee-track {
+    display: flex;
+    gap: clamp(8px, 1vw, 20px);
+    height: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+
+
+  .hero-banner-image-marquee__image-group {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1vw, 20px);
+    flex-shrink: 0;
+    margin: 0;
+    width: 50%;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-duration: {{ section.settings.animation_speed | default: 60 }}s;
+    animation-play-state: running !important;
+  }
+
+  .hero-banner-image-marquee__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: clamp(260px, 17.3vw, 404px);
+    border-radius: {{ section.settings.image_radius | default: 32 }}px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    .hero-banner-image-marquee__image-wrapper {
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      height: 300px !important;
+      min-height: 300px !important;
+      max-height: 300px !important;
+    }
+    
+    .hero-banner-image-marquee__image-group--left {
+      animation: marqueeLeft {{ section.settings.animation_speed | default: 78 }}s linear infinite !important;
+      animation-play-state: running !important;
+    }
+    
+    .hero-banner-image-marquee__image-group--right {
+      animation: marqueeRight {{ section.settings.animation_speed | default: 78 }}s linear infinite !important;
+      animation-play-state: running !important;
+    }
+  }
+
+
+
+  .hero-banner-image-marquee__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .hero-banner-image-marquee__image-placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .hero-banner-image-marquee__image-numbered-image {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .hero-banner-image-marquee__image-group--left {
+    animation: marqueeLeft {{ section.settings.animation_speed | default: 78 }}s linear infinite;
+  }
+
+  .hero-banner-image-marquee__image-group--right {
+    animation: marqueeRight {{ section.settings.animation_speed | default: 78 }}s linear infinite;
+  }
+  
+  /* Override vertical animations on tablet */
+  @media screen and (min-width: 769px) and (max-width: 1024px) {
+    .hero-banner-image-marquee__image-group--left {
+      animation: none !important;
+    }
+    
+    .hero-banner-image-marquee__image-group--right {
+      animation: none !important;
+    }
+    
+    /* Tablet horizontal marquee - 30% slower */
+    .hero-banner-image-marquee__image-group--left {
+      animation: tablet-ultra-slide-left 390s linear infinite !important;
+      will-change: transform !important;
+    }
+    
+    .hero-banner-image-marquee__image-group--right {
+      animation: tablet-ultra-slide-right 390s linear infinite !important;
+      will-change: transform !important;
+    }
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes marqueeLeft {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+
+  @keyframes marqueeRight {
+    0% { transform: translateY(-50%); }
+    100% { transform: translateY(0); }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .hero-banner-image-marquee__container {
+      padding: 0 var(--page-margin);
+    }
+    
+    .hero-banner-image-marquee__title {
+      font-size: 3rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-banner-image-marquee {
+      min-height: auto;
+      padding: 0;
+    }
+
+    .hero-banner-image-marquee__container {
+      flex-direction: column;
+      text-align: center;
+      padding: 0 1rem;
+    }
+
+    .hero-banner-image-marquee__content {
+      width: 80%;
+      padding: 0;
+      margin: 10% 0 0;
+    }
+    
+    .hero-banner-image-marquee__or-text {
+      display: none;
+    }
+    
+    .hero-banner-image-marquee__actions {
+      flex-direction: row-reverse;
+    }
+    
+    .hero-banner-image-marquee__search-form {
+      position: absolute;
+      bottom: 5%;
+      width: 75%;
+    }
+    
+    .hero-banner-image-marquee__shop-button {
+      width: 100%;
+    }
+
+    .hero-banner-image-marquee__title {
+      font-size: 2.5rem;
+    }
+
+    .hero-banner-image-marquee__description {
+      font-size: 1.1rem;
+    }
+
+    .hero-banner-image-marquee__images {
+      margin-top: 0;
+      position: absolute;
+      opacity: 0.1;
+      width: calc(100% - clamp(8px, 1vw, 20px) * 2);
+      left: clamp(8px, 1vw, 20px);
+      right: clamp(8px, 1vw, 20px);
+    }
+    
+    .hero-banner-image-marquee__image-group {
+      width: 49.4%;
+    }
+
+    .hero-banner-image-marquee__marquee-container {
+      height: 100%;
+      overflow: visible;
+      position: relative;
+    }
+
+    .hero-banner-image-marquee__image-wrapper {
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      height: 300px !important;
+      min-height: 300px !important;
+      max-height: 300px !important;
+    }
+    
+
+  }
+
+  @media (max-width: 480px) {
+    .hero-banner-image-marquee__title {
+      font-size: 2rem;
+    }
+
+    .hero-banner-image-marquee__description {
+      font-size: 1rem;
+    }
+
+    .hero-banner-image-marquee__shop-button {
+      padding: 14px 28px;
+      font-size: 1rem;
+    }
+
+    .hero-banner-image-marquee__actions {
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: stretch;
+    }
+
+    .hero-banner-image-marquee__search-form {
+      max-width: none;
+    }
+
+    .hero-banner-image-marquee__or-text {
+      text-align: center;
+      padding: 0;
+    }
+  }
+
+  /* Tablet specific styles for 250x190px dimensions and 15px gaps */
+  @media screen and (min-width: 769px) and (max-width: 1024px) {
+    .hero-banner-image-marquee {
+      padding: 4rem 0 clamp(8px, 1vw, 20px) 0 !important;
+      position: relative !important;
+      min-height: 800px;
+    }
+    .hero-banner-image-marquee__container {
+      flex-direction: column !important;
+      padding: 0 !important;
+      margin: 0 auto !important;
+      max-width: var(--page-width) !important;
+    }
+    
+    .hero-banner-image-marquee__content {
+      width: 100% !important;
+      text-align: left !important;
+      padding: 0 var(--page-margin) !important;
+      margin-bottom: clamp(8px, 1vw, 20px) !important;
+    }
+    
+    .hero-banner-image-marquee__images {
+      width: 100% !important;
+      height: auto !important;
+      min-height: 380px !important;
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    
+    .hero-banner-image-marquee__marquee-track {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: clamp(8px, 1vw, 20px) !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    
+    .hero-banner-image-marquee__image-group {
+      flex-direction: row !important;
+      gap: clamp(8px, 1vw, 20px) !important;
+      width: auto !important;
+      flex-shrink: 0 !important;
+      overflow: visible !important;
+      min-width: max-content !important;
+    }
+    
+    .hero-banner-image-marquee__marquee-container {
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+    
+    .hero-banner-image-marquee__image-group--left,
+    .hero-banner-image-marquee__image-group--right {
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: clamp(8px, 1vw, 20px) !important;
+    }
+    
+    /* Horizontal marquee animations for tablet - Force override */
+    .hero-banner-image-marquee__image-group--left {
+      animation: tablet-marquee-right {{ section.settings.animation_speed | default: 30 }}s linear infinite !important;
+      animation-play-state: running !important;
+      animation-fill-mode: none !important;
+      animation-delay: 0s !important;
+      will-change: transform !important;
+    }
+    
+    .hero-banner-image-marquee__image-group--right {
+      animation: tablet-marquee-left {{ section.settings.animation_speed | default: 30 }}s linear infinite !important;
+      animation-play-state: running !important;
+      animation-fill-mode: none !important;
+      animation-delay: 0s !important;
+      will-change: transform !important;
+    }
+    
+    /* CRITICAL: Set responsive image dimensions for tablets */
+    .hero-banner-image-marquee__image-wrapper {
+      flex-shrink: 0 !important;
+      width: 260px !important;
+      height: 190px !important;
+      border-radius: 20px !important;
+      overflow: hidden !important;
+    }
+    
+    /* Ensure the actual images inside the wrapper also have the correct dimensions */
+    .hero-banner-image-marquee__image-wrapper img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      border-radius: 20px !important;
+    }
+    
+    /* Critical: Ensure proper image duplication and seamless looping */
+    .hero-banner-image-marquee__image-group {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      width: max-content !important;
+      white-space: nowrap !important;
+      height: 190px !important;
+      min-height: 190px !important;
+      max-height: 190px !important;
+      border-radius: 20px !important;
+      animation-fill-mode: none !important;
+      animation-iteration-count: infinite !important;
+      animation-timing-function: linear !important;
+      animation-play-state: running !important;
+      /* Ensure content is wide enough for extended animation */
+      min-width: 400vw !important;
+    }
+    
+    /* Ensure seamless infinite loop for tablet horizontal marquee */
+    .hero-banner-image-marquee__marquee-container {
+      overflow: hidden !important;
+      position: relative !important;
+      width: 100% !important;
+    }
+    
+    .hero-banner-image-marquee__marquee-track {
+      display: flex !important;
+      overflow: visible !important;
+      white-space: nowrap !important;
+      width: 200% !important;
+    }
+  }
+
+     /* Ultra long animations with multiple cycles to minimize reset */
+   @keyframes tablet-ultra-slide-left {
+     0% {
+       transform: translateX(0%);
+     }
+     11.11% {
+       transform: translateX(-33.33%);
+     }
+     22.22% {
+       transform: translateX(-66.66%);
+     }
+     33.33% {
+       transform: translateX(-100%);
+     }
+     44.44% {
+       transform: translateX(-133.33%);
+     }
+     55.55% {
+       transform: translateX(-166.66%);
+     }
+     66.66% {
+       transform: translateX(-200%);
+     }
+     77.77% {
+       transform: translateX(-233.33%);
+     }
+     88.88% {
+       transform: translateX(-266.66%);
+     }
+     100% {
+       transform: translateX(-300%);
+     }
+   }
+
+   @keyframes tablet-ultra-slide-right {
+     0% {
+       transform: translateX(-300%);
+     }
+     11.11% {
+       transform: translateX(-266.66%);
+     }
+     22.22% {
+       transform: translateX(-233.33%);
+     }
+     33.33% {
+       transform: translateX(-200%);
+     }
+     44.44% {
+       transform: translateX(-166.66%);
+     }
+     55.55% {
+       transform: translateX(-133.33%);
+     }
+     66.66% {
+       transform: translateX(-100%);
+     }
+     77.77% {
+       transform: translateX(-66.66%);
+     }
+     88.88% {
+       transform: translateX(-33.33%);
+     }
+     100% {
+       transform: translateX(0%);
+     }
+   }
+   
+   /* Tablet-specific marquee keyframes - New names to avoid conflicts */
+   @keyframes tablet-marquee-right {
+     0% {
+       transform: translateX(0);
+     }
+     100% {
+       transform: translateX(-50%);
+     }
+   }
+
+   @keyframes tablet-marquee-left {
+     0% {
+       transform: translateX(-50%);
+     }
+     100% {
+       transform: translateX(0);
+     }
+   }
+   
+   /* Fallback keyframes for any conflicts */
+   @keyframes marquee-right {
+     0% {
+       transform: translateX(0);
+     }
+     100% {
+       transform: translateX(-50%);
+     }
+   }
+
+   @keyframes marquee-left {
+     0% {
+       transform: translateX(-50%);
+     }
+     100% {
+       transform: translateX(0);
+     }
+   }
+{% endstyle %}
+
+<div class="hero-banner-image-marquee">
+  <div class="hero-banner-image-marquee__container">
+    <div class="hero-banner-image-marquee__content">
+      <h1 class="hero-banner-image-marquee__title">{{ section.settings.title }}</h1>
+      
+      <div class="hero-banner-image-marquee__description">{{ section.settings.description }}</div>
+      
+             <div class="hero-banner-image-marquee__actions">
+        <form action="{{ routes.search_url }}" method="get" class="hero-banner-image-marquee__search-form">
+          <div class="hero-banner-image-marquee__search-container">
+            <input 
+              type="text" 
+              name="q" 
+              placeholder="Search for products..." 
+              class="hero-banner-image-marquee__search-input"
+              required
+            >
+            <button type="submit" class="hero-banner-image-marquee__search-button">
+              <svg class="hero-banner-image-marquee__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+        
+        <span class="hero-banner-image-marquee__or-text">{{ section.settings.or_text | default: 'or' }}</span>
+        
+        <a href="{{ section.settings.primary_button_link }}" class="hero-banner-image-marquee__shop-button">
+          {{ section.settings.primary_button_text }}
+        </a>
+      </div>
+    </div>
+    
+    <div class="hero-banner-image-marquee__images">
+      <div class="hero-banner-image-marquee__marquee-container">
+        <div class="hero-banner-image-marquee__marquee-track">
+          <!-- Left Group - Scrolls Down -->
+          <div class="hero-banner-image-marquee__image-group hero-banner-image-marquee__image-group--left">
+             {% for i in (1..8) %}
+               <div class="hero-banner-image-marquee__image-wrapper">
+                 {% assign current_image_key = 'image_' | append: i %}
+                 {% assign current_image = section.settings[current_image_key] %}
+                 {% if current_image %}
+                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                 {% else %}
+                   <div class="hero-banner-image-marquee__image-placeholder">
+                     Add Image {{ i }}
+                   </div>
+                 {% endif %}
+                 <div class="hero-banner-image-marquee__image-numbered-image">
+                   <span>{{ i }}</span>
+                 </div>
+               </div>
+             {% endfor %}
+             <!-- Duplicate for seamless loop -->
+             {% for i in (1..8) %}
+               <div class="hero-banner-image-marquee__image-wrapper">
+                 {% assign current_image_key = 'image_' | append: i %}
+                 {% assign current_image = section.settings[current_image_key] %}
+                 {% if current_image %}
+                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                 {% else %}
+                   <div class="hero-banner-image-marquee__image-placeholder">
+                     Add Image {{ i }}
+                   </div>
+                 {% endif %}
+                 <div class="hero-banner-image-marquee__image-numbered-image">
+                   <span>{{ i }}</span>
+                 </div>
+               </div>
+             {% endfor %}
+             <!-- Extra duplicate for tablet seamless loop -->
+             {% for i in (1..8) %}
+               <div class="hero-banner-image-marquee__image-wrapper">
+                 {% assign current_image_key = 'image_' | append: i %}
+                 {% assign current_image = section.settings[current_image_key] %}
+                 {% if current_image %}
+                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                 {% else %}
+                   <div class="hero-banner-image-marquee__image-placeholder">
+                     Add Image {{ i }}
+                   </div>
+                 {% endif %}
+                 <div class="hero-banner-image-marquee__image-numbered-image">
+                   <span>{{ i }}</span>
+                 </div>
+               </div>
+             {% endfor %}
+          </div>
+          
+                     <!-- Right Group - Scrolls Up -->
+           <div class="hero-banner-image-marquee__image-group hero-banner-image-marquee__image-group--right">
+             {% for i in (9..16) %}
+               <div class="hero-banner-image-marquee__image-wrapper">
+                 {% assign current_image_key = 'image_' | append: i %}
+                 {% assign current_image = section.settings[current_image_key] %}
+                 {% if current_image %}
+                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                 {% else %}
+                   <div class="hero-banner-image-marquee__image-placeholder">
+                     Add Image {{ i }}
+                   </div>
+                 {% endif %}
+                 <div class="hero-banner-image-marquee__image-numbered-image">
+                   <span>{{ i }}</span>
+                 </div>
+               </div>
+             {% endfor %}
+             <!-- Duplicate for seamless loop -->
+             {% for i in (9..16) %}
+               <div class="hero-banner-image-marquee__image-wrapper">
+                 {% assign current_image_key = 'image_' | append: i %}
+                 {% assign current_image = section.settings[current_image_key] %}
+                 {% if current_image %}
+                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                 {% else %}
+                   <div class="hero-banner-image-marquee__image-placeholder">
+                     Add Image {{ i }}
+                   </div>
+                 {% endif %}
+                 <div class="hero-banner-image-marquee__image-numbered-image">
+                   <span>{{ i }}</span>
+                 </div>
+               </div>
+             {% endfor %}
+             <!-- Extra duplicate for tablet seamless loop -->
+             {% for i in (9..16) %}
+               <div class="hero-banner-image-marquee__image-wrapper">
+                 {% assign current_image_key = 'image_' | append: i %}
+                 {% assign current_image = section.settings[current_image_key] %}
+                 {% if current_image %}
+                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                 {% else %}
+                   <div class="hero-banner-image-marquee__image-placeholder">
+                     Add Image {{ i }}
+                   </div>
+                 {% endif %}
+                 <div class="hero-banner-image-marquee__image-numbered-image">
+                   <span>{{ i }}</span>
+                 </div>
+               </div>
+             {% endfor %}
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('.hero-banner-image-marquee__search-input');
+    
+    if (searchInput) {
+      searchInput.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'scale(1.02)';
+      });
+      
+      searchInput.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'scale(1)';
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Hero Banner Image Marquee",
+  "tag": "section",
+  "class": "hero-banner-image-marquee-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Celebrate Your Unique Beauty"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Explore our curated collection of skin care and beauty products designed to enhance your natural beauty. Shop now and find the perfect products to elevate your routine.</p>"
+    },
+    {
+      "type": "text",
+      "id": "primary_button_text",
+      "label": "Primary Button Text",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_link",
+      "label": "Primary Button Link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "checkbox",
+      "id": "primary_button_open_new_tab",
+      "label": "Open Primary Button in New Tab",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "or_text",
+      "label": "OR Text",
+      "default": "or"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "image_gap",
+      "label": "Image Gap",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "label": "Animation Speed",
+      "min": 30,
+      "max": 120,
+      "step": 10,
+      "default": 60,
+      "unit": "s"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Image Border Radius",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "default": 32,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#352118"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button Background Color",
+      "default": "#ff6b9d"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "Image 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "Image 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_6",
+      "label": "Image 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_7",
+      "label": "Image 7"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_8",
+      "label": "Image 8"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_9",
+      "label": "Image 9"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_10",
+      "label": "Image 10"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_11",
+      "label": "Image 11"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_12",
+      "label": "Image 12"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_13",
+      "label": "Image 13"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_14",
+      "label": "Image 14"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_15",
+      "label": "Image 15"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_16",
+      "label": "Image 16"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner Image Marquee",
+      "category": "Hero"
+    }
+  ]
+}
+{% endschema %}
