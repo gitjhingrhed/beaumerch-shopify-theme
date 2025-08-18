@@ -5,8 +5,8 @@
 
 {% style %}
   .hero-banner-image-marquee {
-    height: 70vh;
-    min-height: 70vh;
+    height: {{ section.settings.hero_height_desktop | default: 600 }}px;
+    min-height: {{ section.settings.hero_height_desktop | default: 600 }}px;
     background-color: {{ section.settings.background_color | default: '#352118' }};
     position: relative;
     overflow: hidden;
@@ -33,7 +33,7 @@
   }
 
   .hero-banner-image-marquee__content {
-    width: 60%;
+    width: 50%;
     padding: 4rem 2rem 4rem 0;
     color: {{ section.settings.text_color | default: '#ffffff' }};
     z-index: 2;
@@ -41,20 +41,18 @@
   }
 
   .hero-banner-image-marquee__title {
-    font-family: 'Poppins', sans-serif;
-    font-size: 3.5rem;
-    font-weight: 700;
+    font-size: {{ section.settings.title_font_size | default: 4.5 }}rem;
+    font-weight: {{ section.settings.title_font_weight | default: 500 }};
     margin-bottom: 2rem;
-    line-height: 1.1;
-    color: {{ section.settings.text_color | default: '#ffffff' }};
+    line-height: {{ section.settings.title_line_height | default: 100 }}%;
+    color: #D4717B;
   }
 
   .hero-banner-image-marquee__description {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.2rem;
+    font-size: {{ section.settings.description_font_size | default: 1.2 }}rem;
     font-weight: 400;
     margin-bottom: 3rem;
-    line-height: 1.6;
+    line-height: {{ section.settings.description_line_height | default: 160 }}%;
     opacity: 0.9;
     color: {{ section.settings.text_color | default: '#ffffff' }};
   }
@@ -130,8 +128,9 @@
 
   .hero-banner-image-marquee__actions {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 1rem;
+    gap: 30px;
     margin-top: 2rem;
     width: 100%;
   }
@@ -159,7 +158,7 @@
   }
 
   .hero-banner-image-marquee__images {
-    width: 40%;
+    width: 50%;
     height: 100%;
     overflow: visible;
     position: relative;
@@ -206,7 +205,7 @@
   .hero-banner-image-marquee__image-wrapper {
     position: relative;
     width: 100%;
-    height: clamp(260px, 17.3vw, 404px);
+    height: calc(100% * 405 / 360);
     border-radius: {{ section.settings.image_radius | default: 32 }}px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -327,7 +326,7 @@
 
   @media (max-width: 768px) {
     .hero-banner-image-marquee {
-      min-height: auto;
+      min-height: {{ section.settings.hero_height_mobile | default: 500 }}px;
       padding: 0;
     }
 
@@ -435,7 +434,7 @@
     .hero-banner-image-marquee {
       padding: 4rem 0 clamp(8px, 1vw, 20px) 0 !important;
       position: relative !important;
-      min-height: 800px;
+      min-height: {{ section.settings.hero_height_tablet | default: 800 }}px;
     }
     .hero-banner-image-marquee__container {
       flex-direction: column !important;
@@ -677,6 +676,10 @@
       <div class="hero-banner-image-marquee__description">{{ section.settings.description }}</div>
       
              <div class="hero-banner-image-marquee__actions">
+        <a href="{{ section.settings.primary_button_link }}" class="hero-banner-image-marquee__shop-button">
+          {{ section.settings.primary_button_text }}
+        </a>
+        
         <form action="{{ routes.search_url }}" method="get" class="hero-banner-image-marquee__search-form">
           <div class="hero-banner-image-marquee__search-container">
             <input 
@@ -693,12 +696,6 @@
             </button>
           </div>
         </form>
-        
-        <span class="hero-banner-image-marquee__or-text">{{ section.settings.or_text | default: 'or' }}</span>
-        
-        <a href="{{ section.settings.primary_button_link }}" class="hero-banner-image-marquee__shop-button">
-          {{ section.settings.primary_button_text }}
-        </a>
       </div>
     </div>
     
@@ -712,7 +709,7 @@
                  {% assign current_image_key = 'image_' | append: i %}
                  {% assign current_image = section.settings[current_image_key] %}
                  {% if current_image %}
-                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                   <img src="{{ current_image | image_url: width: 360, height: 405 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="360" height="405">
                  {% else %}
                    <div class="hero-banner-image-marquee__image-placeholder">
                      Add Image {{ i }}
@@ -729,7 +726,7 @@
                  {% assign current_image_key = 'image_' | append: i %}
                  {% assign current_image = section.settings[current_image_key] %}
                  {% if current_image %}
-                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                   <img src="{{ current_image | image_url: width: 360, height: 405 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="360" height="405">
                  {% else %}
                    <div class="hero-banner-image-marquee__image-placeholder">
                      Add Image {{ i }}
@@ -746,7 +743,7 @@
                  {% assign current_image_key = 'image_' | append: i %}
                  {% assign current_image = section.settings[current_image_key] %}
                  {% if current_image %}
-                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                   <img src="{{ current_image | image_url: width: 360, height: 405 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="360" height="405">
                  {% else %}
                    <div class="hero-banner-image-marquee__image-placeholder">
                      Add Image {{ i }}
@@ -766,7 +763,7 @@
                  {% assign current_image_key = 'image_' | append: i %}
                  {% assign current_image = section.settings[current_image_key] %}
                  {% if current_image %}
-                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                   <img src="{{ current_image | image_url: width: 360, height: 405 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="360" height="405">
                  {% else %}
                    <div class="hero-banner-image-marquee__image-placeholder">
                      Add Image {{ i }}
@@ -783,7 +780,7 @@
                  {% assign current_image_key = 'image_' | append: i %}
                  {% assign current_image = section.settings[current_image_key] %}
                  {% if current_image %}
-                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                   <img src="{{ current_image | image_url: width: 360, height: 405 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="360" height="405">
                  {% else %}
                    <div class="hero-banner-image-marquee__image-placeholder">
                      Add Image {{ i }}
@@ -800,7 +797,7 @@
                  {% assign current_image_key = 'image_' | append: i %}
                  {% assign current_image = section.settings[current_image_key] %}
                  {% if current_image %}
-                   <img src="{{ current_image | image_url: width: 250, height: 360 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="250" height="360">
+                   <img src="{{ current_image | image_url: width: 360, height: 405 }}" alt="Beauty Product {{ i }}" class="hero-banner-image-marquee__image" width="360" height="405">
                  {% else %}
                    <div class="hero-banner-image-marquee__image-placeholder">
                      Add Image {{ i }}
@@ -856,7 +853,7 @@
       "type": "text",
       "id": "primary_button_text",
       "label": "Primary Button Text",
-      "default": "Shop"
+      "default": "Shop Now"
     },
     {
       "type": "url",
@@ -899,6 +896,116 @@
       "step": 10,
       "default": 60,
       "unit": "s"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Title Font Size",
+      "min": 2,
+      "max": 8,
+      "step": 0.1,
+      "default": 4.5,
+      "unit": "rem"
+    },
+    {
+      "type": "range",
+      "id": "title_line_height",
+      "label": "Title Line Height",
+      "min": 80,
+      "max": 150,
+      "step": 5,
+      "default": 100,
+      "unit": "%"
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Title Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Description Font Size",
+      "min": 0.8,
+      "max": 2,
+      "step": 0.1,
+      "default": 1.2,
+      "unit": "rem"
+    },
+    {
+      "type": "range",
+      "id": "description_line_height",
+      "label": "Description Line Height",
+      "min": 120,
+      "max": 200,
+      "step": 10,
+      "default": 160,
+      "unit": "%"
+    },
+    {
+      "type": "header",
+      "content": "Height"
+    },
+    {
+      "type": "range",
+      "id": "hero_height_desktop",
+      "label": "Desktop Hero Height",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "default": 600,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "hero_height_tablet",
+      "label": "Tablet Hero Height",
+      "min": 400,
+      "max": 1000,
+      "step": 50,
+      "default": 800,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "hero_height_mobile",
+      "label": "Mobile Hero Height",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "default": 500,
+      "unit": "px"
     },
     {
       "type": "range",
