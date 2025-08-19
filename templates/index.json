@@ -221,6 +221,7 @@
         "button_background_color": "#FF6B9D",
         "button_text_color": "#FFFFFF"
       }
+    },
     "product_carousel": {
       "type": "product-carousel",
       "name": "Product Carousel",
