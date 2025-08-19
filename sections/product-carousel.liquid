@@ -100,6 +100,142 @@
           slide_count: max_items,
           settings: section.settings
         %}
+        
+        <!-- Combined Navigation Container -->
+        <div class="slideshow-navigation-container" data-total-products="{{ max_items }}" data-products-per-view="4">
+          <!-- Dot Navigation - Left -->
+          <div class="slideshow-dots">
+            {% for i in (1..5) %}
+              <button 
+                class="slideshow-dot{% if forloop.first %} active{% endif %}" 
+                data-slide="{{ forloop.index0 }}"
+                aria-label="Go to slide {{ forloop.index }}"
+              ></button>
+            {% endfor %}
+          </div>
+          
+                  <!-- Arrow Navigation - Right (Previous and Next) -->
+        <div class="slideshow-arrows-container">
+          <div class="slideshow-controls">
+            <button 
+              class="slideshow-control slideshow-control--prev" 
+              aria-label="Previous slide" 
+              type="button"
+              style="opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.3s ease;"
+                onclick="
+                  console.log('Previous button clicked via inline onclick');
+                  const slideshow = document.querySelector('.section-resource-list slideshow-component');
+                  if (slideshow) {
+                    const current = slideshow.current || 0;
+                    const prev = current > 0 ? current - 1 : 4;
+                    console.log('Moving from', current, 'to', prev);
+                    slideshow.select(prev);
+                    
+                    // Update dots
+                    const dots = document.querySelectorAll('.section-resource-list .slideshow-dot');
+                    dots.forEach((dot, index) => {
+                      dot.classList.toggle('active', index === prev);
+                    });
+                    
+                    // Update arrow visibility directly
+                    setTimeout(() => {
+                      console.log('Updating arrow visibility for prev:', prev);
+                      const prevButton = document.querySelector('.section-resource-list .slideshow-control--prev');
+                      const nextButton = document.querySelector('.section-resource-list .slideshow-control--next');
+                      
+                      if (prevButton && nextButton) {
+                        // Show Previous button since we're moving to a non-first slide
+                        prevButton.style.opacity = '1';
+                        prevButton.style.pointerEvents = 'auto';
+                        prevButton.style.visibility = 'visible';
+                        console.log('Previous button made visible');
+                        
+                        // Check if we need to hide Next button
+                        const navContainer = document.querySelector('.section-resource-list .slideshow-navigation-container');
+                        const totalProducts = navContainer ? parseInt(navContainer.dataset.totalProducts) : 8;
+                        const productsPerView = navContainer ? parseInt(navContainer.dataset.productsPerView) : 4;
+                        const lastSlideIndex = Math.max(0, totalProducts - productsPerView);
+                        
+                        if (prev >= lastSlideIndex) {
+                          nextButton.style.opacity = '0';
+                          nextButton.style.pointerEvents = 'none';
+                          nextButton.style.visibility = 'hidden';
+                          console.log('Next button hidden (last slide)');
+                        } else {
+                          nextButton.style.opacity = '1';
+                          nextButton.style.pointerEvents = 'auto';
+                          nextButton.style.visibility = 'visible';
+                          console.log('Next button visible');
+                        }
+                      }
+                    }, 100);
+                  } else {
+                    console.error('Slideshow not found');
+                  }
+                "
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon icon-arrow">
+                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button 
+                class="slideshow-control slideshow-control--next" 
+                aria-label="Next slide" 
+                type="button"
+                onclick="
+                  console.log('Next button clicked via inline onclick');
+                  const slideshow = document.querySelector('.section-resource-list slideshow-component');
+                  if (slideshow) {
+                    const current = slideshow.current || 0;
+                    const next = current < 4 ? current + 1 : 0;
+                    console.log('Moving from', current, 'to', next);
+                    slideshow.select(next);
+                    
+                    // Update dots
+                    const dots = document.querySelectorAll('.section-resource-list .slideshow-dot');
+                    dots.forEach((dot, index) => {
+                      dot.classList.toggle('active', index === next);
+                    });
+                    
+                    // Update arrow visibility directly
+                    setTimeout(() => {
+                      console.log('Updating arrow visibility for next:', next);
+                      const prevButton = document.querySelector('.section-resource-list .slideshow-control--prev');
+                      const nextButton = document.querySelector('.section-resource-list .slideshow-control--next');
+                      
+                      if (prevButton && nextButton) {
+                        // Show Next button since we're moving to a non-last slide
+                        nextButton.style.opacity = '1';
+                        nextButton.style.pointerEvents = 'auto';
+                        nextButton.style.visibility = 'visible';
+                        console.log('Next button made visible');
+                        
+                        // Check if we need to hide Previous button
+                        if (next === 0) {
+                          prevButton.style.opacity = '0';
+                          prevButton.style.pointerEvents = 'none';
+                          prevButton.style.visibility = 'hidden';
+                          console.log('Previous button hidden (first slide)');
+                        } else {
+                          prevButton.style.opacity = '1';
+                          prevButton.style.pointerEvents = 'auto';
+                          prevButton.style.visibility = 'visible';
+                          console.log('Previous button visible');
+                        }
+                      }
+                    }, 100);
+                  } else {
+                    console.error('Slideshow not found');
+                  }
+                "
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon icon-arrow">
+                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
       {% when 'editorial' %}
         {% render 'editorial-product-grid', items: list_items_array %}
     {% endcase %}
@@ -167,6 +303,45 @@
     height: 100%;
   }
 
+  /* Fix product image height to use 3/3.5 aspect ratio */
+  .section-resource-list .card-gallery {
+    aspect-ratio: 3/3.5;
+  }
+
+  .section-resource-list .product-media-container {
+    aspect-ratio: 3/3.5;
+  }
+
+  /* Fix product title font size to inherit theme defaults */
+  .section-resource-list .product-title {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  /* Add default gap for header and product sections */
+  .section-resource-list__header {
+    margin-bottom: var(--spacing-section);
+  }
+
+  .section-resource-list .resource-list__carousel {
+    margin-top: var(--spacing-section);
+  }
+
+  /* Ensure customizer padding settings work */
+  .section-resource-list {
+    padding-block-start: var(--padding-block-start, 0) !important;
+    padding-block-end: var(--padding-block-end, 0) !important;
+    padding-inline-start: var(--padding-inline-start, 0) !important;
+    padding-inline-end: var(--padding-inline-end, 0) !important;
+  }
+
+  /* Override any conflicting padding rules */
+  .section.section-resource-list {
+    padding-top: var(--padding-block-start, 0) !important;
+    padding-bottom: var(--padding-block-end, 0) !important;
+  }
+
   /* Force 4 products to show initially on desktop */
   @media screen and (min-width: 750px) {
     .section-resource-list .resource-list__carousel slideshow-slides {
@@ -209,30 +384,212 @@
   }
 
   /* Navigation arrows - active by default, no background, relative positioning */
-  .section-resource-list .resource-list__carousel slideshow-arrows {
+  /* Combined Navigation Container */
+  .section-resource-list .resource-list__carousel .slideshow-navigation-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    width: 100%;
+    padding: 0px;
+  }
+
+  /* Dot navigation styling - Left side */
+  .section-resource-list .resource-list__carousel .slideshow-dots {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
     position: relative;
-    background: none;
-    border-radius: 0;
-    padding: 0;
-    box-shadow: none;
+    padding: 0px;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-dot:hover {
+    background-color: #b0b0b0;
+    transform: scale(1.1);
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-dot.active {
+    background-color: #000;
+    border-color: #000;
+    transform: scale(1.2);
+  }
+
+  /* Arrow navigation styling - Right side with fixed width */
+  .section-resource-list .resource-list__carousel .slideshow-arrows-container {
+    width: 100px;
     display: flex;
     justify-content: flex-end;
-    margin-top: 20px;
   }
 
-  /* Card gallery slideshow arrows - absolute positioning */
+  .section-resource-list .resource-list__carousel .slideshow-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  /* Ensure proper arrow positioning */
+  .section-resource-list .resource-list__carousel .slideshow-control--prev {
+    order: 1;
+    display: flex !important;
+    visibility: visible !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control--next {
+    order: 2;
+    display: flex !important;
+    visibility: visible !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    padding: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none !important;
+    position: relative !important;
+    z-index: 10 !important;
+    outline: none !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    transform: scale(1.1) !important;
+    box-shadow: none !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control:focus {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control:focus {
+    outline: 2px solid #007acc !important;
+    outline-offset: 2px !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control .icon {
+    width: 20px !important;
+    height: 20px !important;
+    color: #000000 !important;
+    stroke: currentColor !important;
+    fill: none !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control:hover .icon {
+    color: #333333 !important;
+  }
+
+  /* Ensure Previous button is properly styled and visible when needed */
+  .section-resource-list .resource-list__carousel .slideshow-control--prev {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+  }
+  
+  /* Ensure Next button is properly styled */
+  .section-resource-list .resource-list__carousel .slideshow-control--next {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control--prev.visible {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+  }
+
+  .section-resource-list .resource-list__carousel .slideshow-control--prev.hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Hide only the main carousel arrows, not product card slideshow arrows */
+  .section-resource-list .resource-list__carousel slideshow-arrows {
+    display: none !important;
+  }
+
+  /* Keep product card slideshow arrows visible and functional */
   .section-resource-list .card-gallery slideshow-arrows {
     position: absolute;
+    width: 100%;
   }
 
-  /* Card gallery slideshow controls - hidden */
   .section-resource-list .card-gallery slideshow-arrows .slideshow-control {
     opacity: 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
   }
 
-  /* Main slideshow controls - visible */
-  .section-resource-list slideshow-arrows .slideshow-control {
+  .section-resource-list .card-gallery:hover slideshow-arrows .slideshow-control {
     opacity: 1;
+  }
+
+  .section-resource-list .card-gallery slideshow-arrows .slideshow-control:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: scale(1.1);
+  }
+
+  /* Ensure product card slideshow is enabled */
+  .section-resource-list .card-gallery slideshow-component {
+    pointer-events: auto !important;
+  }
+
+  .section-resource-list .card-gallery slideshow-component[disabled="true"] {
+    pointer-events: auto !important;
+  }
+
+  /* Override any disabled state for product card slideshow */
+  .section-resource-list .card-gallery slideshow-component[disabled="true"] slideshow-slides {
+    pointer-events: auto !important;
+  }
+
+  .section-resource-list .card-gallery slideshow-component[disabled="true"] slideshow-arrows {
+    display: flex !important;
+    pointer-events: auto !important;
+  }
+
+  /* Ensure our custom navigation is visible and functional */
+  .section-resource-list .slideshow-navigation-container {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 100 !important;
   }
 
   /* Ensure carousel container has normal positioning */
@@ -306,6 +663,221 @@
         const currentIndex = this.current;
         this.select(currentIndex - 1, event, options);
       };
+
+      // Add dot navigation functionality with improved event handling
+      const dots = document.querySelectorAll('.section-resource-list .slideshow-dot');
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          console.log('Dot clicked:', index);
+          
+          // Remove active class from all dots
+          dots.forEach(d => d.classList.remove('active'));
+          // Add active class to clicked dot
+          this.classList.add('active');
+          
+          // Go to selected slide with multiple approaches
+          if (carousel) {
+            try {
+              // Method 1: Direct select
+              if (typeof carousel.select === 'function') {
+                carousel.select(index);
+                console.log('Carousel select called for index:', index);
+              }
+              
+              // Method 2: Set current and trigger change
+              setTimeout(() => {
+                if (carousel.current !== index) {
+                  carousel.current = index;
+                  console.log('Carousel current set to:', index);
+                  
+                  // Trigger a custom event to ensure carousel updates
+                  const changeEvent = new CustomEvent('carousel:change', {
+                    detail: { index: index }
+                  });
+                  carousel.dispatchEvent(changeEvent);
+                }
+              }, 50);
+              
+            } catch (error) {
+              console.error('Error navigating to slide:', error);
+            }
+          }
+        });
+      });
+
+      // Add arrow navigation functionality - completely rewritten
+      const prevButton = document.querySelector('.section-resource-list .slideshow-control--prev');
+      const nextButton = document.querySelector('.section-resource-list .slideshow-control--next');
+      
+      console.log('Found prev button:', prevButton);
+      console.log('Found next button:', nextButton);
+      console.log('Found carousel:', carousel);
+      
+      if (nextButton) {
+        console.log('Setting up Next button with new approach...');
+        
+        // Try multiple event binding approaches
+        nextButton.addEventListener('mousedown', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          console.log('Next button mousedown detected!');
+        });
+        
+        nextButton.addEventListener('click', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          console.log('Next button click detected!');
+          
+          // Try to find the carousel in multiple ways
+          let slideshowComponent = document.querySelector('.section-resource-list slideshow-component');
+          if (!slideshowComponent) {
+            slideshowComponent = document.querySelector('slideshow-component');
+          }
+          if (!slideshowComponent) {
+            slideshowComponent = document.querySelector('[ref="resourceListCarousel"]');
+          }
+          
+          console.log('Found slideshow component:', slideshowComponent);
+          
+          if (slideshowComponent) {
+            console.log('Slideshow component properties:', {
+              current: slideshowComponent.current,
+              slides: slideshowComponent.slides,
+              select: typeof slideshowComponent.select
+            });
+            
+            const currentIndex = slideshowComponent.current || 0;
+            const newIndex = currentIndex < 4 ? currentIndex + 1 : 0;
+            console.log('Attempting to move from slide', currentIndex, 'to slide', newIndex);
+            
+            // Try multiple methods to move the carousel
+            if (typeof slideshowComponent.select === 'function') {
+              slideshowComponent.select(newIndex);
+              console.log('Method 1: select() called');
+            } else if (typeof slideshowComponent.next === 'function') {
+              slideshowComponent.next();
+              console.log('Method 2: next() called');
+            } else if (slideshowComponent.slides && slideshowComponent.slides.length > 0) {
+              slideshowComponent.current = newIndex;
+              console.log('Method 3: current property set');
+            }
+            
+            // Update dot navigation
+            updateActiveDot(newIndex);
+          } else {
+            console.error('No slideshow component found');
+          }
+        });
+        
+        // Also try direct onclick
+        nextButton.onclick = function(event) {
+          console.log('Next button onclick triggered!');
+        };
+        
+        console.log('Next button event handlers set');
+      }
+
+      // Update active dot when carousel slides change - only for main carousel
+      carousel.addEventListener('slideshow:select', function(event) {
+        // Only update dots if this is the main carousel, not product card slideshow
+        if (event.target === carousel) {
+          const currentIndex = event.detail.index;
+          console.log('Main carousel slideshow:select event - index:', currentIndex);
+          updateActiveDot(currentIndex);
+        }
+      });
+
+      carousel.addEventListener('change', function(event) {
+        // Only update dots if this is the main carousel, not product card slideshow
+        if (event.target === carousel) {
+          const currentIndex = carousel.current || 0;
+          console.log('Main carousel change event - index:', currentIndex);
+          updateActiveDot(currentIndex);
+        }
+      });
+
+      // Listen for custom carousel change event - only for main carousel
+      carousel.addEventListener('carousel:change', function(event) {
+        // Only update dots if this is the main carousel, not product card slideshow
+        if (event.target === carousel) {
+          const currentIndex = event.detail.index;
+          console.log('Main carousel:change event - index:', currentIndex);
+          updateActiveDot(currentIndex);
+        }
+      });
+
+      // Function to update active dot
+      function updateActiveDot(index) {
+        dots.forEach((dot, dotIndex) => {
+          if (dotIndex === index) {
+            dot.classList.add('active');
+            console.log('Dot', dotIndex, 'set to active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      // Function to update arrow visibility based on current slide
+      function updateArrowVisibility(currentIndex) {
+        const prevButton = document.querySelector('.section-resource-list .slideshow-control--prev');
+        const nextButton = document.querySelector('.section-resource-list .slideshow-control--next');
+        
+        // Calculate the last slide index based on number of products
+        const navContainer = document.querySelector('.section-resource-list .slideshow-navigation-container');
+        const totalProducts = navContainer ? parseInt(navContainer.dataset.totalProducts) : 8;
+        const productsPerView = navContainer ? parseInt(navContainer.dataset.productsPerView) : 4;
+        const lastSlideIndex = Math.max(0, totalProducts - productsPerView);
+        
+        console.log('Updating arrow visibility for slide:', currentIndex, 'Last slide:', lastSlideIndex, 'Total products:', totalProducts);
+        
+        if (prevButton && nextButton) {
+          // Hide Previous button if on first slide (index 0)
+          if (currentIndex === 0) {
+            prevButton.style.opacity = '0';
+            prevButton.style.pointerEvents = 'none';
+            prevButton.style.visibility = 'hidden';
+            console.log('Previous button hidden (first slide)');
+          } else {
+            prevButton.style.opacity = '1';
+            prevButton.style.pointerEvents = 'auto';
+            prevButton.style.visibility = 'visible';
+            console.log('Previous button visible');
+          }
+          
+          // Hide Next button if on last slide
+          if (currentIndex >= lastSlideIndex) {
+            nextButton.style.opacity = '0';
+            nextButton.style.pointerEvents = 'none';
+            nextButton.style.visibility = 'hidden';
+            console.log('Next button hidden (last slide)');
+          } else {
+            nextButton.style.opacity = '1';
+            nextButton.style.pointerEvents = 'auto';
+            nextButton.style.visibility = 'visible';
+            console.log('Next button visible');
+          }
+        } else {
+          console.error('Arrow buttons not found:', { prevButton, nextButton });
+        }
+      }
+
+      // Initial dot state and arrow visibility
+      setTimeout(() => {
+        const initialIndex = carousel.current || 0;
+        console.log('Setting initial dot state to index:', initialIndex);
+        updateActiveDot(initialIndex);
+        
+        // Debug: Check if Previous button exists
+        const prevButton = document.querySelector('.section-resource-list .slideshow-control--prev');
+        const nextButton = document.querySelector('.section-resource-list .slideshow-control--next');
+        console.log('Found Previous button:', prevButton);
+        console.log('Found Next button:', nextButton);
+        
+        updateArrowVisibility(initialIndex);
+      }, 100);
     }
   });
 {% endjavascript %}
