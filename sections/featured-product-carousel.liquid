@@ -120,22 +120,63 @@
     border-radius: {{ section.settings.image_border_radius | default: 15 }}px;
   }
 
-  .featured-product-carousel__product-image img {
-    width: 100%;
+  .featured-product-carousel__product-image .slideshow {
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
   }
 
-  .featured-product-carousel__product-card:hover .featured-product-carousel__product-image img {
-    transform: scale(1.05);
+  .featured-product-carousel__product-image .slideshow__slide {
+    height: 100%;
   }
+
+  .featured-product-carousel__product-image .product-media-container {
+    height: 100%;
+  }
+
+  .featured-product-carousel__product-image .slideshow__arrow {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .featured-product-carousel__product-card:hover .featured-product-carousel__product-image .slideshow__arrow {
+    opacity: 1;
+  }
+
+
+
+
 
   .featured-product-carousel__product-content {
     padding: 20px 0;
     flex-grow: 1;
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .featured-product-carousel__product-info {
+    flex: 0.65;
+    display: flex;
     flex-direction: column;
+    gap: 4px;
+  }
+
+  .featured-product-carousel__product-pricing {
+    flex: 0.35;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .featured-product-carousel__product-actions {
+    width: 100%;
+    margin-top: 12px;
   }
 
   .featured-product-carousel__product-title {
@@ -144,20 +185,38 @@
     line-height: {{ section.settings.product_title_line_height | default: 140 }}%;
     color: {{ section.settings.product_title_color | default: '#000000' }};
     margin: 0 0 0.5rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .featured-product-carousel__product-volume {
     font-size: {{ section.settings.product_volume_font_size | default: 14 }}px;
     font-weight: {{ section.settings.product_volume_font_weight | default: 400 }};
     color: {{ section.settings.product_volume_color | default: '#6B7280' }};
-    margin: 0 0 0.5rem 0;
+    margin: 0;
   }
 
-  .featured-product-carousel__product-price {
+  .featured-product-carousel__product-category {
+    font-size: {{ section.settings.product_volume_font_size | default: 14 }}px;
+    font-weight: {{ section.settings.product_volume_font_weight | default: 400 }};
+    color: {{ section.settings.product_volume_color | default: '#6B7280' }};
+    margin: 0;
+    text-transform: capitalize;
+  }
+
+  .featured-product-carousel__product-price,
+  .featured-product-carousel__product-price--sale,
+  .featured-product-carousel__product-price--compare {
     font-size: {{ section.settings.product_price_font_size | default: 14 }}px;
     font-weight: {{ section.settings.product_price_font_weight | default: 500 }};
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .featured-product-carousel__product-price,
+  .featured-product-carousel__product-price--sale {
     color: {{ section.settings.product_price_color | default: '#000000' }};
-    margin: 0 0 1rem 0;
   }
 
   .featured-product-carousel__product-price--sale {
@@ -166,8 +225,8 @@
 
   .featured-product-carousel__product-price--compare {
     text-decoration: line-through;
-    opacity: 0.6;
-    margin-left: 0.5rem;
+    opacity: 0.3;
+    color: {{ section.settings.product_price_color | default: '#000000' }};
   }
 
   .featured-product-carousel__add-to-cart-button {
@@ -251,6 +310,88 @@
     height: 100%;
   }
 
+  /* Override product card styles for carousel */
+  .featured-product-carousel .product-card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .featured-product-carousel .product-card__content {
+    padding: 0;
+  }
+
+  .featured-product-carousel .card-gallery {
+    border-radius: {{ section.settings.image_border_radius | default: 15 }}px;
+    overflow: hidden;
+  }
+
+  /* Remove hover effects from product cards */
+  .featured-product-carousel .featured-product-carousel__product-card {
+    transition: none;
+    transform: none;
+  }
+
+  .featured-product-carousel .featured-product-carousel__product-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .featured-product-carousel .featured-product-carousel__product-card:hover .featured-product-carousel__product-image {
+    transform: none;
+  }
+
+  /* Product Badges */
+  .featured-product-carousel__product-image {
+    position: relative;
+  }
+
+  .featured-product-carousel__badges {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 2;
+  }
+
+         .featured-product-carousel__badge {
+         padding: 8px 16px;
+         border-radius: 20px;
+         font-size: 12px;
+         font-weight: 500;
+         text-transform: none;
+         letter-spacing: 0.2px;
+         white-space: nowrap;
+         background-color: #f5f5f5;
+         color: #333333;
+         border: 1px solid #e0e0e0;
+         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+       }
+       
+               .featured-product-carousel__badge--sold-out {
+          background-color: #f5f5f5;
+          color: rgba(0, 0, 0, 0.81);
+          border: 0px;
+          box-shadow: none;
+          padding: 4px 10px 2px;
+          font-size: 13px;
+          font-weight: 400;
+        }
+       
+       .featured-product-carousel__badge--sale {
+         background-color: #f5f5f5;
+         color: #333333;
+         border-color: #d0d0d0;
+       }
+       
+       .featured-product-carousel__badge--new {
+         background-color: #f5f5f5;
+         color: #333333;
+         border-color: #d0d0d0;
+       }
+
   /* Responsive Design */
   @media (max-width: 1024px) {
     .featured-product-carousel__slide {
@@ -327,37 +468,75 @@
                 <a href="{{ product.url }}" class="featured-product-carousel__product-link">
                   <div class="featured-product-carousel__product-card">
                     <div class="featured-product-carousel__product-image">
-                      {% if product.featured_image %}
-                        <img 
-                          src="{{ product.featured_image | image_url: width: 400, height: 400 }}" 
-                          alt="{{ product.title | escape }}"
-                          loading="lazy"
-                          width="400"
-                          height="400"
-                        >
+                      {% if product.media.size > 0 %}
+                        {% capture slides %}
+                          {% for media in product.media limit: 4 %}
+                            {% assign loading = 'lazy' %}
+                            {% if forloop.first %}
+                              {% assign loading = 'eager' %}
+                            {% endif %}
+                            {% capture slideshow_children %}
+                              {%- render 'product-media', media: media, sizes: '400px', loading: loading, preview_image_only: true -%}
+                            {% endcapture %}
+                            {% capture class %}
+                              product-media-container media-fit product-media-container--{{ media.media_type }}
+                            {% endcapture %}
+                            {% render 'slideshow-slide', slide_id: media.id, index: forloop.index, children: slideshow_children, class: class %}
+                          {% endfor %}
+                        {% endcapture %}
+                        {% render 'slideshow',
+                          ref: 'slideshow',
+                          initial_slide: 0,
+                          slides: slides,
+                          slide_count: product.media.size,
+                          show_arrows: product.media.size > 1,
+                          attributes: 'data-product-card-slideshow="true"'
+                        %}
                       {% else %}
-                        <div style="background-color: #F3F4F6; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                          No Image
-                        </div>
+                        <div style="background-color: #F3F4F6; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">No Image</div>
                       {% endif %}
-                    </div>
-                    <div class="featured-product-carousel__product-content">
-                      <h3 class="featured-product-carousel__product-title">{{ product.title }}</h3>
-                      {% if product.variants.first.option1 != blank and product.variants.first.option1 != 'Default Title' %}
-                        <p class="featured-product-carousel__product-volume">{{ product.variants.first.option1 }}</p>
-                      {% endif %}
-                      <p class="featured-product-carousel__product-price">
-                        {% if product.compare_at_price > product.price %}
-                          <span class="featured-product-carousel__product-price--sale">{{ product.price | money }}</span>
-                          <span class="featured-product-carousel__product-price--compare">{{ product.compare_at_price | money }}</span>
-                        {% else %}
-                          {{ product.price | money }}
+                      
+                      <!-- Product Badges -->
+                      <div class="featured-product-carousel__badges">
+                        {% if product.available == false %}
+                          <span class="featured-product-carousel__badge featured-product-carousel__badge--sold-out">
+                            {{ 'products.product.sold_out' | t }}
+                          </span>
+                        {% elsif product.compare_at_price > product.price %}
+                          <span class="featured-product-carousel__badge featured-product-carousel__badge--sale">
+                            Sale
+                          </span>
+                        {% elsif product.tags contains 'new' %}
+                          <span class="featured-product-carousel__badge featured-product-carousel__badge--new">
+                            New
+                          </span>
                         {% endif %}
-                      </p>
-                      <button class="featured-product-carousel__add-to-cart-button" data-product-id="{{ product.id }}">
-                        {{ block.settings.add_to_cart_text | default: 'Add to cart' }}
-                      </button>
+                      </div>
                     </div>
+                                            <div class="featured-product-carousel__product-content">
+                          <div class="featured-product-carousel__product-info">
+                            <h3 class="featured-product-carousel__product-title">{{ product.title }}</h3>
+                            {% if product.variants.first.option1 != blank and product.variants.first.option1 != 'Default Title' %}
+                              <p class="featured-product-carousel__product-volume">{{ product.variants.first.option1 }}</p>
+                            {% endif %}
+                            {% if product.type != blank %}
+                              <p class="featured-product-carousel__product-category">{{ product.type }}</p>
+                            {% endif %}
+                          </div>
+                          <div class="featured-product-carousel__product-pricing">
+                            {% if product.compare_at_price > product.price %}
+                              <div class="featured-product-carousel__product-price--sale">{{ product.price | money }}</div>
+                              <div class="featured-product-carousel__product-price--compare">{{ product.compare_at_price | money }}</div>
+                            {% else %}
+                              <div class="featured-product-carousel__product-price">{{ product.price | money }}</div>
+                            {% endif %}
+                          </div>
+                        </div>
+                        <div class="featured-product-carousel__product-actions">
+                          <button class="featured-product-carousel__add-to-cart-button" data-product-id="{{ product.id }}">
+                            {{ block.settings.add_to_cart_text | default: 'Add to cart' }}
+                          </button>
+                        </div>
                   </div>
                 </a>
               </div>
@@ -371,39 +550,77 @@
               <a href="{{ product.url }}" class="featured-product-carousel__product-link">
                 <div class="featured-product-carousel__product-card">
                   <div class="featured-product-carousel__product-image">
-                    {% if product.featured_image %}
-                      <img 
-                        src="{{ product.featured_image | image_url: width: 400, height: 400 }}" 
-                        alt="{{ product.title | escape }}"
-                        loading="lazy"
-                        width="400"
-                        height="400"
-                      >
+                    {% if product.media.size > 0 %}
+                      {% capture slides %}
+                        {% for media in product.media limit: 4 %}
+                          {% assign loading = 'lazy' %}
+                          {% if forloop.first %}
+                            {% assign loading = 'eager' %}
+                          {% endif %}
+                          {% capture slideshow_children %}
+                            {%- render 'product-media', media: media, sizes: '400px', loading: loading, preview_image_only: true -%}
+                          {% endcapture %}
+                          {% capture class %}
+                            product-media-container media-fit product-media-container--{{ media.media_type }}
+                          {% endcapture %}
+                          {% render 'slideshow-slide', slide_id: media.id, index: forloop.index, children: slideshow_children, class: class %}
+                        {% endfor %}
+                      {% endcapture %}
+                      {% render 'slideshow',
+                        ref: 'slideshow',
+                        initial_slide: 0,
+                        slides: slides,
+                        slide_count: product.media.size,
+                        show_arrows: product.media.size > 1,
+                        attributes: 'data-product-card-slideshow="true"'
+                      %}
                     {% else %}
-                      <div style="background-color: #F3F4F6; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                        No Image
-                      </div>
+                      <div style="background-color: #F3F4F6; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">No Image</div>
                     {% endif %}
+                    
+                    <!-- Product Badges -->
+                    <div class="featured-product-carousel__badges">
+                      {% if product.available == false %}
+                        <span class="featured-product-carousel__badge featured-product-carousel__badge--sold-out">
+                          {{ 'products.product.sold_out' | t }}
+                        </span>
+                      {% elsif product.compare_at_price > product.price %}
+                        <span class="featured-product-carousel__badge featured-product-carousel__badge--sale">
+                          Sale
+                        </span>
+                      {% elsif product.tags contains 'new' %}
+                        <span class="featured-product-carousel__badge featured-product-carousel__badge--new">
+                          New
+                        </span>
+                      {% endif %}
+                    </div>
                   </div>
                   <div class="featured-product-carousel__product-content">
-                    <h3 class="featured-product-carousel__product-title">{{ product.title }}</h3>
-                    {% if product.variants.first.option1 != blank and product.variants.first.option1 != 'Default Title' %}
-                      <p class="featured-product-carousel__product-volume">{{ product.variants.first.option1 }}</p>
-                    {% endif %}
-                    <p class="featured-product-carousel__product-price">
-                      {% if product.compare_at_price > product.price %}
-                        <span class="featured-product-carousel__product-price--sale">{{ product.price | money }}</span>
-                        <span class="featured-product-carousel__product-price--compare">{{ product.compare_at_price | money }}</span>
-                      {% else %}
-                        {{ product.price | money }}
+                    <div class="featured-product-carousel__product-info">
+                      <h3 class="featured-product-carousel__product-title">{{ product.title }}</h3>
+                      {% if product.variants.first.option1 != blank and product.variants.first.option1 != 'Default Title' %}
+                        <p class="featured-product-carousel__product-volume">{{ product.variants.first.option1 }}</p>
                       {% endif %}
-                    </p>
+                      {% if product.type != blank %}
+                        <p class="featured-product-carousel__product-category">{{ product.type }}</p>
+                      {% endif %}
+                    </div>
+                    <div class="featured-product-carousel__product-pricing">
+                      {% if product.compare_at_price > product.price %}
+                        <div class="featured-product-carousel__product-price--sale">{{ product.price | money }}</div>
+                        <div class="featured-product-carousel__product-price--compare">{{ product.compare_at_price | money }}</div>
+                      {% else %}
+                        <div class="featured-product-carousel__product-price">{{ product.price | money }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="featured-product-carousel__product-actions">
                     <button class="featured-product-carousel__add-to-cart-button" data-product-id="{{ product.id }}">
                       {{ section.settings.default_add_to_cart_text | default: 'Add to cart' }}
                     </button>
                   </div>
                 </div>
-              </a>
+                              </a>
             </div>
           {% endfor %}
           
@@ -523,6 +740,7 @@
       this.bindEvents();
       this.updateCarousel();
       this.startAutoPlay();
+      this.initializeProductSlideshows();
     }
 
     createPagination() {
@@ -701,6 +919,47 @@
         console.error('Error adding to cart:', error);
       });
     }
+
+    initializeProductSlideshows() {
+      // Initialize slideshows for product cards
+      const slideshows = this.container.querySelectorAll('[data-product-card-slideshow="true"]');
+      slideshows.forEach(slideshow => {
+        // Check if slideshow is already initialized
+        if (!slideshow.classList.contains('slideshow--initialized')) {
+          slideshow.classList.add('slideshow--initialized');
+          
+          // Find slideshow arrows within this slideshow
+          const arrows = slideshow.querySelectorAll('.slideshow__arrow');
+          arrows.forEach(arrow => {
+            arrow.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              const slideshowContainer = arrow.closest('.slideshow');
+              const slides = slideshowContainer.querySelectorAll('.slideshow__slide');
+              const currentSlide = slideshowContainer.querySelector('.slideshow__slide--current');
+              const currentIndex = Array.from(slides).indexOf(currentSlide);
+              
+              let nextIndex;
+              if (arrow.classList.contains('slideshow__arrow--prev')) {
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : slides.length - 1;
+              } else {
+                nextIndex = currentIndex < slides.length - 1 ? currentIndex + 1 : 0;
+              }
+              
+              // Hide current slide
+              currentSlide.classList.remove('slideshow__slide--current');
+              // Show next slide
+              slides[nextIndex].classList.add('slideshow__slide--current');
+            });
+          });
+        }
+      });
+    }
+
+
+
+
   }
 
   // Initialize carousel
