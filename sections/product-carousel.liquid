@@ -21,8 +21,8 @@
       assign classes = 'resource-list__carousel'
       capture styles
         echo '--resource-list-column-gap-desktop: ' | append: section.settings.columns_gap | append: 'px;'
-        echo '--column-count: 1;'
-        echo '--column-count-mobile: 1;'
+        echo '--column-count: 4;'
+        echo '--column-count-mobile: 2;'
         echo '--mobile-card-size: ' | append: section.settings.mobile_card_size | append: ';'
         echo '--slide-width: calc((100% - (var(--resource-list-column-gap) * 3)) / 4);'
         echo '--slide-width-mobile: calc((100% - (var(--resource-list-column-gap) * 1)) / 2);'
@@ -39,7 +39,6 @@
     section-resource-list
     spacing-style
     gap-style
-    product-carousel-section
   "
   style="
     --column-count-mobile: {{ section.settings.mobile_columns }};
@@ -63,7 +62,7 @@
       <div
         class="resource-list__item"
       >
-        {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: product %}
+        {%- content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: product -%}
       </div>
 
       {% unless forloop.last %}
@@ -81,9 +80,6 @@
   <div
     class="
       resource-list
-      {% if section.settings.layout_type == 'carousel' %}
-        force-full-width
-      {% endif %}
       {% if section.settings.carousel_on_mobile and section.settings.layout_type != 'carousel' %}
         hidden--mobile
       {% endif %}
@@ -143,40 +139,176 @@
 </div>
 
 {% stylesheet %}
-  .product-carousel-section {
-    width: 100%;
-    max-width: var(--page-width);
-    margin: 0 auto;
-    padding: 0 var(--util-page-margin-offset);
-  }
-
-  .product-carousel-section .resource-list__carousel {
+  .section-resource-list .resource-list__carousel {
     --slide-width: calc((100% - (var(--resource-list-column-gap) * 3)) / 4);
     --slide-width-mobile: calc((100% - (var(--resource-list-column-gap) * 1)) / 2);
   }
 
   @media screen and (max-width: 749px) {
-    .product-carousel-section .resource-list__carousel {
+    .section-resource-list .resource-list__carousel {
       --slide-width: calc((100% - (var(--resource-list-column-gap) * 1)) / 2);
     }
   }
 
-  .product-carousel-section .resource-list__slide {
+  .section-resource-list .resource-list__slide {
     width: var(--slide-width);
     flex: 0 0 auto;
     scroll-snap-align: start;
   }
 
-  .product-carousel-section .card-gallery {
+  /* Ensure product cards are properly sized */
+  .section-resource-list .product-card {
     width: 100%;
     height: 100%;
   }
 
-  .product-carousel-section .card-gallery slideshow-component {
+  .section-resource-list .card-gallery {
     width: 100%;
     height: 100%;
   }
+
+  /* Force 4 products to show initially on desktop */
+  @media screen and (min-width: 750px) {
+    .section-resource-list .resource-list__carousel slideshow-slides {
+      display: flex;
+      gap: var(--resource-list-column-gap);
+    }
+    
+    .section-resource-list .resource-list__slide {
+      min-width: calc((100% - (var(--resource-list-column-gap) * 3)) / 4);
+      max-width: calc((100% - (var(--resource-list-column-gap) * 3)) / 4);
+    }
+  }
+
+  /* Override any theme defaults for slide width */
+  .section-resource-list .resource-list__carousel .resource-list__slide {
+    width: calc((100% - (var(--resource-list-column-gap) * 3)) / 4) !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .section-resource-list .resource-list__carousel .resource-list__slide {
+      width: calc((100% - (var(--resource-list-column-gap) * 1)) / 2) !important;
+    }
+  }
+
+  /* Force single slide movement by overriding scroll behavior */
+  .section-resource-list .resource-list__carousel slideshow-slides {
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+  }
+
+  /* Ensure each slide moves exactly one position */
+  .section-resource-list .resource-list__carousel .resource-list__slide {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Custom JavaScript to force single slide movement */
+  .section-resource-list .resource-list__carousel {
+    --single-slide-movement: true;
+  }
+
+  /* Navigation arrows - active by default, no background, relative positioning */
+  .section-resource-list .resource-list__carousel slideshow-arrows {
+    position: relative;
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  /* Card gallery slideshow arrows - absolute positioning */
+  .section-resource-list .card-gallery slideshow-arrows {
+    position: absolute;
+  }
+
+  /* Card gallery slideshow controls - hidden */
+  .section-resource-list .card-gallery slideshow-arrows .slideshow-control {
+    opacity: 0;
+  }
+
+  /* Main slideshow controls - visible */
+  .section-resource-list slideshow-arrows .slideshow-control {
+    opacity: 1;
+  }
+
+  /* Ensure carousel container has normal positioning */
+  .section-resource-list .resource-list__carousel {
+    position: static;
+    margin-bottom: 0;
+  }
+
+  /* Reverse content section in slideshow container */
+  .section-resource-list .resource-list__carousel slideshow-container {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  /* Remove ALL left and right spacing from wrapper and carousel */
+  .section-resource-list {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove left and right spacing from carousel */
+  .section-resource-list .resource-list__carousel {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Remove gutter spacing from carousel slides */
+  .section-resource-list .resource-list__carousel slideshow-slides {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove theme's default gutter spacing */
+  .section-resource-list .resource-list__carousel {
+    --gutter-slide-width: 0px;
+  }
+
+  /* Remove any inherited padding from theme */
+  .section-resource-list .resource-list__carousel slideshow-component {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Override any theme defaults */
+  .section-resource-list .resource-list__carousel {
+    --util-page-margin-offset: 0px;
+  }
 {% endstylesheet %}
+
+{% javascript %}
+  // Override carousel behavior to move one slide at a time
+  document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.section-resource-list .resource-list__carousel slideshow-component');
+    if (carousel) {
+      // Override the next and previous methods to move only one slide
+      const originalNext = carousel.next;
+      const originalPrevious = carousel.previous;
+      
+      carousel.next = function(event, options) {
+        // Move only one slide instead of the default behavior
+        const currentIndex = this.current;
+        this.select(currentIndex + 1, event, options);
+      };
+      
+      carousel.previous = function(event, options) {
+        // Move only one slide instead of the default behavior
+        const currentIndex = this.current;
+        this.select(currentIndex - 1, event, options);
+      };
+    }
+  });
+{% endjavascript %}
 
 {% schema %}
 {
@@ -191,6 +323,12 @@
     },
     {
       "type": "_divider"
+    },
+    {
+      "type": "_product-list-content"
+    },
+    {
+      "type": "_product-card"
     }
   ],
   "disabled_on": {
