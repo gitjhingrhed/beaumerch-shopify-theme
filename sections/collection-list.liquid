@@ -99,8 +99,7 @@
     {% case section.settings.layout_type %}
       {% when 'grid' %}
         {{ list_items }}
-      {% when 'bento' %}
-        {{ list_items }}
+
       {% when 'carousel' %}
         {% render 'resource-list-carousel',
           ref: 'collectionListCarousel',
