@@ -14,12 +14,7 @@
         echo '--resource-list-columns-mobile: repeat(' | append: section.settings.mobile_columns | append: ', 1fr);'
         echo '--column-count-mobile: ' | append: section.settings.mobile_columns | append: ';'
       endcapture
-    when 'bento'
-      assign classes = 'resource-list--bento'
-      capture styles
-        echo '--resource-list-column-gap-desktop: ' | append: section.settings.bento_gap | append: 'px;'
-        echo '--bento-gap: var(--resource-list-column-gap);'
-      endcapture
+
     when 'carousel'
       assign classes = 'resource-list__carousel'
       capture styles
@@ -95,7 +90,7 @@
       {% when 'grid' %}
         {{ list_items }}
       {% when 'bento' %}
-        {% render 'bento-grid', items: list_items_array %}
+        {{ list_items }}
       {% when 'carousel' %}
         {% render 'resource-list-carousel',
           ref: 'collectionListCarousel',
@@ -112,9 +107,7 @@
   {% if section.settings.layout_type != 'carousel' and section.settings.carousel_on_mobile %}
     {% liquid
       assign mobile_carousel_gap = section.settings.columns_gap
-      if section.settings.layout_type == 'bento'
-        assign mobile_carousel_gap = section.settings.bento_gap
-      endif
+
     %}
     <div
       class="
@@ -197,10 +190,7 @@
           "value": "carousel",
           "label": "t:options.carousel"
         },
-        {
-          "value": "bento",
-          "label": "t:options.bento"
-        },
+
         {
           "value": "editorial",
           "label": "t:options.editorial"
@@ -253,17 +243,7 @@
       "default": 8,
       "visible_if": "{{ section.settings.layout_type == 'grid' or section.settings.layout_type == 'carousel' }}"
     },
-    {
-      "type": "range",
-      "id": "bento_gap",
-      "label": "t:settings.gap",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 8,
-      "visible_if": "{{ section.settings.layout_type == 'bento' }}"
-    },
+
     {
       "type": "range",
       "id": "rows_gap",

@@ -32,7 +32,7 @@
     collection-card
     border-style
     {% if block_settings.placement == 'on_image' %}collection-card--image-bg{% endif %}
-    {% if section.settings.layout_type == 'bento' %}collection-card--image-height-fixed{% endif %}
+    
     {% if section.settings.layout_type == 'editorial' %}collection-card--flexible-aspect-ratio{% endif %}
     {% if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }}{% endif %}
   "
@@ -135,7 +135,7 @@
     padding: var(--padding-lg);
   }
 
-  /* Bento layout rules */
+
   .collection-card--image-height-fixed .collection-card__image {
     height: var(--fixed-card-height);
     width: 100%;
