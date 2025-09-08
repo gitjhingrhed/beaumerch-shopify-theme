@@ -1692,6 +1692,170 @@
       },
       {
         "type": "header",
+        "content": "Button Spacing"
+      },
+      {
+        "type": "range",
+        "id": "primary_button_padding_top",
+        "min": 8,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Padding Top",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "primary_button_padding_bottom",
+        "min": 8,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Padding Bottom",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "primary_button_padding_left",
+        "min": 16,
+        "max": 48,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Padding Left",
+        "default": 32
+      },
+      {
+        "type": "range",
+        "id": "primary_button_padding_right",
+        "min": 16,
+        "max": 48,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Padding Right",
+        "default": 32
+      },
+      {
+        "type": "range",
+        "id": "primary_button_margin_top",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Margin Top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "primary_button_margin_bottom",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Margin Bottom",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "primary_button_margin_left",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Margin Left",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "primary_button_margin_right",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Primary Button Margin Right",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_padding_top",
+        "min": 8,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Padding Top",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_padding_bottom",
+        "min": 8,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Padding Bottom",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_padding_left",
+        "min": 16,
+        "max": 48,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Padding Left",
+        "default": 32
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_padding_right",
+        "min": 16,
+        "max": 48,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Padding Right",
+        "default": 32
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_margin_top",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Margin Top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_margin_bottom",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Margin Bottom",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_margin_left",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Margin Left",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_margin_right",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Secondary Button Margin Right",
+        "default": 0
+      },
+      {
+        "type": "header",
         "content": "t:names.pills"
       },
       {
@@ -1993,6 +2157,90 @@
           }
         ],
         "default": "paragraph"
+      },
+      {
+        "type": "header",
+        "content": "Input Field Spacing"
+      },
+      {
+        "type": "range",
+        "id": "input_padding_top",
+        "min": 8,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Padding Top",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "input_padding_bottom",
+        "min": 8,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Padding Bottom",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "input_padding_left",
+        "min": 12,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Padding Left",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "input_padding_right",
+        "min": 12,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Padding Right",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "input_margin_top",
+        "min": 0,
+        "max": 16,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Margin Top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "input_margin_bottom",
+        "min": 0,
+        "max": 16,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Margin Bottom",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "input_margin_left",
+        "min": 0,
+        "max": 16,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Margin Left",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "input_margin_right",
+        "min": 0,
+        "max": 16,
+        "step": 2,
+        "unit": "px",
+        "label": "Input Field Margin Right",
+        "default": 0
       }
     ]
   },

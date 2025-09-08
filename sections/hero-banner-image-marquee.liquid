@@ -5,8 +5,8 @@
 
 {% style %}
   .hero-banner-image-marquee {
-    height: 70vh;
-    min-height: 70vh;
+    height: {{ section.settings.hero_height_desktop | default: 600 }}px;
+    min-height: {{ section.settings.hero_height_desktop | default: 600 }}px;
     background-color: {{ section.settings.background_color | default: '#352118' }};
     position: relative;
     overflow: hidden;
@@ -40,15 +40,6 @@
     box-sizing: border-box;
   }
 
-  .hero-banner-image-marquee__actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 30px;
-    margin-top: 2rem;
-    width: 100%;
-  }
-
   .hero-banner-image-marquee__title {
     font-size: {{ section.settings.title_font_size | default: 4.5 }}rem;
     font-weight: {{ section.settings.title_font_weight | default: 500 }};
@@ -68,7 +59,7 @@
 
   .hero-banner-image-marquee__search-form {
     flex: 1;
-    max-width: 600px;
+    max-width: 450px;
   }
 
   .hero-banner-image-marquee__search-container {
@@ -78,7 +69,14 @@
 
   .hero-banner-image-marquee__search-input {
     width: 100%;
-    padding: 16px 20px;
+    padding-top: {{ section.settings.search_input_padding_top | default: 16 }}px;
+    padding-bottom: {{ section.settings.search_input_padding_bottom | default: 16 }}px;
+    padding-left: {{ section.settings.search_input_padding_left | default: 20 }}px;
+    padding-right: {{ section.settings.search_input_padding_right | default: 20 }}px;
+    margin-top: {{ section.settings.search_input_margin_top | default: 0 }}px;
+    margin-bottom: {{ section.settings.search_input_margin_bottom | default: 0 }}px;
+    margin-left: {{ section.settings.search_input_margin_left | default: 0 }}px;
+    margin-right: {{ section.settings.search_input_margin_right | default: 0 }}px;
     border: 2px solid transparent;
     border-radius: 12px;
     font-size: 1rem;
@@ -93,6 +91,10 @@
     border-color: {{ section.settings.button_background_color | default: '#ff6b9d' }};
     background: rgba(255, 255, 255, 0.25);
     transform: scale(1.02);
+    padding-top: {{ section.settings.search_input_padding_top | default: 16 }}px;
+    padding-bottom: {{ section.settings.search_input_padding_bottom | default: 16 }}px;
+    padding-left: {{ section.settings.search_input_padding_left | default: 20 }}px;
+    padding-right: {{ section.settings.search_input_padding_right | default: 20 }}px;
   }
 
   .hero-banner-image-marquee__search-input::placeholder {
@@ -101,21 +103,101 @@
   }
 
   .hero-banner-image-marquee__search-button {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: {{ section.settings.text_color | default: '#ffffff' }};
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
+    /* Reset inherited button styles */
+    all: unset;
+    box-sizing: border-box;
+    
+    /* Positioning */
+    position: absolute !important;
+    right: 5px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    
+    /* Visual styling */
+    background: none !important;
+    border: none !important;
+    color: {{ section.settings.text_color | default: '#ffffff' }} !important;
+    cursor: pointer !important;
+    border-radius: 10px !important;
+    transition: background-color 0.3s ease !important;
+    
+    /* Custom spacing - override any inherited styles */
+    padding-top: {{ section.settings.search_button_padding_top | default: 8 }}px !important;
+    padding-bottom: {{ section.settings.search_button_padding_bottom | default: 8 }}px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    margin-top: {{ section.settings.search_button_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ section.settings.search_button_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ section.settings.search_button_margin_left | default: 0 }}px !important;
+    margin-right: {{ section.settings.search_button_margin_right | default: 0 }}px !important;
+    
+    /* Typography settings - override all inherited styles */
+    font-family: {{ section.settings.button_font_family | default: 'inherit' }} !important;
+    font-size: {{ section.settings.button_font_size | default: 16 }}px !important;
+    font-weight: {{ section.settings.button_font_weight | default: 600 }} !important;
+    font-style: normal !important;
+    text-transform: {{ section.settings.button_text_transform | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.button_letter_spacing | default: 0 }}px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    
+    /* Ensure proper display */
+    display: inline-block !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+    outline: none !important;
   }
 
   .hero-banner-image-marquee__search-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    padding-top: {{ section.settings.search_button_padding_top | default: 8 }}px !important;
+    padding-bottom: {{ section.settings.search_button_padding_bottom | default: 8 }}px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  /* Additional specificity for button typography override */
+  .hero-banner-image-marquee .hero-banner-image-marquee__search-button {
+    font-family: {{ section.settings.button_font_family | default: 'inherit' }} !important;
+    font-size: {{ section.settings.button_font_size | default: 16 }}px !important;
+    font-weight: {{ section.settings.button_font_weight | default: 600 }} !important;
+    font-style: normal !important;
+    text-transform: {{ section.settings.button_text_transform | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.button_letter_spacing | default: 0 }}px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+  }
+
+  /* Maximum specificity override for any inherited button styles */
+  .hero-banner-image-marquee .hero-banner-image-marquee__search-button.button,
+  .hero-banner-image-marquee .hero-banner-image-marquee__search-button[class*="button"] {
+    font-family: {{ section.settings.button_font_family | default: 'inherit' }} !important;
+    font-size: {{ section.settings.button_font_size | default: 16 }}px !important;
+    font-weight: {{ section.settings.button_font_weight | default: 600 }} !important;
+    font-style: normal !important;
+    text-transform: {{ section.settings.button_text_transform | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.button_letter_spacing | default: 0 }}px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+  }
+
+  /* Override any button element default styles */
+  .hero-banner-image-marquee button.hero-banner-image-marquee__search-button {
+    font-family: {{ section.settings.button_font_family | default: 'inherit' }} !important;
+    font-size: {{ section.settings.button_font_size | default: 16 }}px !important;
+    font-weight: {{ section.settings.button_font_weight | default: 600 }} !important;
+    font-style: normal !important;
+    text-transform: {{ section.settings.button_text_transform | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.button_letter_spacing | default: 0 }}px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+    /* Reset any browser default button styles */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
   }
 
   .hero-banner-image-marquee__search-icon {
@@ -142,18 +224,26 @@
     gap: 30px;
     margin-top: 2rem;
     width: 100%;
-    max-width: 600px;
   }
 
   .hero-banner-image-marquee__shop-button {
     background: {{ section.settings.button_background_color | default: '#ff6b9d' }};
     color: {{ section.settings.button_text_color | default: '#ffffff' }};
     border: none;
-    padding: 16px 32px;
+    padding-top: {{ section.settings.button_padding_top | default: 16 }}px;
+    padding-bottom: {{ section.settings.button_padding_bottom | default: 16 }}px;
+    padding-left: {{ section.settings.button_padding_left | default: 32 }}px;
+    padding-right: {{ section.settings.button_padding_right | default: 32 }}px;
+    margin-top: {{ section.settings.button_margin_top | default: 0 }}px;
+    margin-bottom: {{ section.settings.button_margin_bottom | default: 0 }}px;
+    margin-left: {{ section.settings.button_margin_left | default: 0 }}px;
+    margin-right: {{ section.settings.button_margin_right | default: 0 }}px;
     border-radius: 12px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-family: {{ section.settings.button_font_family | default: 'Poppins, sans-serif' }} !important;
+    font-size: {{ section.settings.button_font_size | default: 18 }}px !important;
+    font-weight: {{ section.settings.button_font_weight | default: 600 }} !important;
+    text-transform: {{ section.settings.button_text_transform | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.button_letter_spacing | default: 0 }}px !important;
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
@@ -261,22 +351,6 @@
     padding: 1rem;
   }
 
-  .hero-banner-image-marquee__image-numbered-image {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    font-size: 12px;
-    font-family: 'Poppins', sans-serif;
-  }
 
   .hero-banner-image-marquee__image-group--left {
     animation: marqueeLeft {{ section.settings.animation_speed | default: 78 }}s linear infinite;
@@ -419,8 +493,15 @@
     }
 
     .hero-banner-image-marquee__shop-button {
-      padding: 14px 28px;
-      font-size: 1rem;
+      padding-top: {{ section.settings.button_padding_top | default: 16 | divided_by: 1.2 }}px;
+      padding-bottom: {{ section.settings.button_padding_bottom | default: 16 | divided_by: 1.2 }}px;
+      padding-left: {{ section.settings.button_padding_left | default: 32 | divided_by: 1.2 }}px;
+      padding-right: {{ section.settings.button_padding_right | default: 32 | divided_by: 1.2 }}px;
+      font-size: {{ section.settings.button_font_size | default: 18 | divided_by: 1.1 }}px !important;
+      font-family: {{ section.settings.button_font_family | default: 'Poppins, sans-serif' }} !important;
+      font-weight: {{ section.settings.button_font_weight | default: 600 }} !important;
+      text-transform: {{ section.settings.button_text_transform | default: 'none' }} !important;
+      letter-spacing: {{ section.settings.button_letter_spacing | default: 0 }}px !important;
     }
 
     .hero-banner-image-marquee__actions {
@@ -725,9 +806,6 @@
                      Add Image {{ i }}
                    </div>
                  {% endif %}
-                 <div class="hero-banner-image-marquee__image-numbered-image">
-                   <span>{{ i }}</span>
-                 </div>
                </div>
              {% endfor %}
              <!-- Duplicate for seamless loop -->
@@ -742,9 +820,6 @@
                      Add Image {{ i }}
                    </div>
                  {% endif %}
-                 <div class="hero-banner-image-marquee__image-numbered-image">
-                   <span>{{ i }}</span>
-                 </div>
                </div>
              {% endfor %}
              <!-- Extra duplicate for tablet seamless loop -->
@@ -759,9 +834,6 @@
                      Add Image {{ i }}
                    </div>
                  {% endif %}
-                 <div class="hero-banner-image-marquee__image-numbered-image">
-                   <span>{{ i }}</span>
-                 </div>
                </div>
              {% endfor %}
           </div>
@@ -779,9 +851,6 @@
                      Add Image {{ i }}
                    </div>
                  {% endif %}
-                 <div class="hero-banner-image-marquee__image-numbered-image">
-                   <span>{{ i }}</span>
-                 </div>
                </div>
              {% endfor %}
              <!-- Duplicate for seamless loop -->
@@ -796,9 +865,6 @@
                      Add Image {{ i }}
                    </div>
                  {% endif %}
-                 <div class="hero-banner-image-marquee__image-numbered-image">
-                   <span>{{ i }}</span>
-                 </div>
                </div>
              {% endfor %}
              <!-- Extra duplicate for tablet seamless loop -->
@@ -813,9 +879,6 @@
                      Add Image {{ i }}
                    </div>
                  {% endif %}
-                 <div class="hero-banner-image-marquee__image-numbered-image">
-                   <span>{{ i }}</span>
-                 </div>
                </div>
              {% endfor %}
            </div>
@@ -1021,10 +1084,10 @@
       "type": "range",
       "id": "image_radius",
       "label": "Image Border Radius",
-      "min": 0,
+      "min": 16,
       "max": 48,
-      "step": 1,
-      "default": 15,
+      "step": 4,
+      "default": 32,
       "unit": "px"
     },
     {
@@ -1054,6 +1117,386 @@
       "id": "button_text_color",
       "label": "Button Text Color",
       "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Button Spacing"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_top",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Padding Top",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_padding_bottom",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Padding Bottom",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_padding_left",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Padding Left",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "button_padding_right",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Padding Right",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Margin Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_margin_bottom",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Margin Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_margin_left",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Margin Left",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_margin_right",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Margin Right",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Search Input Spacing"
+    },
+    {
+      "type": "range",
+      "id": "search_input_padding_top",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Padding Top",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "search_input_padding_bottom",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Padding Bottom",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "search_input_padding_left",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Padding Left",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "search_input_padding_right",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Padding Right",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "search_input_margin_top",
+      "min": 0,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Margin Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "search_input_margin_bottom",
+      "min": 0,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Margin Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "search_input_margin_left",
+      "min": 0,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Margin Left",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "search_input_margin_right",
+      "min": 0,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Input Margin Right",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Search Button Spacing"
+    },
+    {
+      "type": "range",
+      "id": "search_button_padding_top",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Button Padding Top",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "search_button_padding_bottom",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Button Padding Bottom",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "search_button_padding_left",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Button Padding Left",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "search_button_padding_right",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Search Button Padding Right",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "search_button_margin_top",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Search Button Margin Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "search_button_margin_bottom",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Search Button Margin Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "search_button_margin_left",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Search Button Margin Left",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "search_button_margin_right",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Search Button Margin Right",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Button Typography"
+    },
+    {
+      "type": "select",
+      "id": "button_font_family",
+      "label": "Button Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit from theme"
+        },
+        {
+          "value": "Arial, sans-serif",
+          "label": "Arial"
+        },
+        {
+          "value": "Helvetica, sans-serif",
+          "label": "Helvetica"
+        },
+        {
+          "value": "Georgia, serif",
+          "label": "Georgia"
+        },
+        {
+          "value": "Times New Roman, serif",
+          "label": "Times New Roman"
+        },
+        {
+          "value": "Poppins, sans-serif",
+          "label": "Poppins"
+        },
+        {
+          "value": "Open Sans, sans-serif",
+          "label": "Open Sans"
+        },
+        {
+          "value": "Roboto, sans-serif",
+          "label": "Roboto"
+        },
+        {
+          "value": "Montserrat, sans-serif",
+          "label": "Montserrat"
+        },
+        {
+          "value": "Lato, sans-serif",
+          "label": "Lato"
+        }
+      ],
+      "default": "Poppins, sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Font Size",
+      "default": 18
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Button Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "button_text_transform",
+      "label": "Button Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "button_letter_spacing",
+      "min": -1,
+      "max": 3,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Button Letter Spacing",
+      "default": 0
     },
     {
       "type": "header",

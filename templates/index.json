@@ -215,7 +215,7 @@
         "section_height": 80,
         "image_gap": 12,
         "animation_speed": 60,
-        "image_radius": 15,
+        "image_radius": 16,
         "background_color": "#352118",
         "text_color": "#FFFFFF",
         "button_background_color": "#FF6B9D",
