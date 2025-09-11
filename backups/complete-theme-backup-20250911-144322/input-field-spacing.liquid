@@ -1,0 +1,137 @@
+{% comment %}
+  Input Field Spacing Snippet
+  Applies custom padding and margin settings from theme settings to input fields
+{% endcomment %}
+
+{% style %}
+  /* Input Field Spacing */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  textarea,
+  select,
+  .field__input,
+  .input,
+  .form-input,
+  .search-input,
+  .hero-banner-image-marquee__search-input,
+  [class*="input"],
+  [class*="field"] input,
+  [class*="form"] input,
+  [class*="search"] input {
+    padding-top: {{ settings.input_padding_top | default: 12 }}px !important;
+    padding-bottom: {{ settings.input_padding_bottom | default: 12 }}px !important;
+    padding-left: {{ settings.input_padding_left | default: 16 }}px !important;
+    padding-right: {{ settings.input_padding_right | default: 16 }}px !important;
+    margin-top: {{ settings.input_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.input_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.input_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.input_margin_right | default: 0 }}px !important;
+  }
+
+  /* Specific input field classes */
+  .field__input,
+  .input-field,
+  .form-field input,
+  .search-field input,
+  .contact-form input,
+  .newsletter-form input,
+  .product-form input,
+  .cart-form input {
+    padding-top: {{ settings.input_padding_top | default: 12 }}px !important;
+    padding-bottom: {{ settings.input_padding_bottom | default: 12 }}px !important;
+    padding-left: {{ settings.input_padding_left | default: 16 }}px !important;
+    padding-right: {{ settings.input_padding_right | default: 16 }}px !important;
+    margin-top: {{ settings.input_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.input_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.input_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.input_margin_right | default: 0 }}px !important;
+  }
+
+  /* Textarea specific spacing */
+  textarea,
+  .textarea,
+  .field__textarea,
+  [class*="textarea"] {
+    padding-top: {{ settings.input_padding_top | default: 12 }}px !important;
+    padding-bottom: {{ settings.input_padding_bottom | default: 12 }}px !important;
+    padding-left: {{ settings.input_padding_left | default: 16 }}px !important;
+    padding-right: {{ settings.input_padding_right | default: 16 }}px !important;
+    margin-top: {{ settings.input_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.input_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.input_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.input_margin_right | default: 0 }}px !important;
+  }
+
+  /* Select dropdown spacing */
+  select,
+  .select,
+  .field__select,
+  [class*="select"] {
+    padding-top: {{ settings.input_padding_top | default: 12 }}px !important;
+    padding-bottom: {{ settings.input_padding_bottom | default: 12 }}px !important;
+    padding-left: {{ settings.input_padding_left | default: 16 }}px !important;
+    padding-right: {{ settings.input_padding_right | default: 16 }}px !important;
+    margin-top: {{ settings.input_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.input_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.input_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.input_margin_right | default: 0 }}px !important;
+  }
+
+  /* Responsive adjustments for mobile */
+  @media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="search"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    input[type="month"],
+    input[type="week"],
+    textarea,
+    select,
+    .field__input,
+    .input,
+    .form-input,
+    .search-input,
+    .hero-banner-image-marquee__search-input,
+    [class*="input"],
+    [class*="field"] input,
+    [class*="form"] input,
+    [class*="search"] input {
+      padding-top: {{ settings.input_padding_top | default: 12 | divided_by: 1.1 }}px !important;
+      padding-bottom: {{ settings.input_padding_bottom | default: 12 | divided_by: 1.1 }}px !important;
+      padding-left: {{ settings.input_padding_left | default: 16 | divided_by: 1.1 }}px !important;
+      padding-right: {{ settings.input_padding_right | default: 16 | divided_by: 1.1 }}px !important;
+    }
+  }
+
+  /* Focus state adjustments */
+  input:focus,
+  textarea:focus,
+  select:focus,
+  .field__input:focus,
+  .input:focus,
+  .form-input:focus,
+  .search-input:focus,
+  .hero-banner-image-marquee__search-input:focus {
+    /* Maintain the same padding on focus */
+    padding-top: {{ settings.input_padding_top | default: 12 }}px !important;
+    padding-bottom: {{ settings.input_padding_bottom | default: 12 }}px !important;
+    padding-left: {{ settings.input_padding_left | default: 16 }}px !important;
+    padding-right: {{ settings.input_padding_right | default: 16 }}px !important;
+  }
+{% endstyle %}
