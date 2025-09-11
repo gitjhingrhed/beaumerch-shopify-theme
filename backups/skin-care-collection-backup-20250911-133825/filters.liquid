@@ -1,0 +1,2871 @@
+
+{%- doc -%}
+  Renders the facet filtering component
+
+  @param {object} results - The search results object
+  @param {number} results_size - The number of products in the search results
+  @param {object} [filters] - The filters object
+{%- enddoc -%}
+
+<script
+  src="{{ 'facets.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{%- liquid
+  assign block_settings = block.settings
+  assign products_count = results_size
+  assign sort_by = results.sort_by | default: results.default_sort_by
+  assign filters = filters | default: results.filters
+  assign total_active_values = 0
+
+  # Calculate facets margin style
+  capture facets_margin_style
+    echo '--facets-margin: 0px '
+    if block_settings.filter_style == 'vertical'
+      echo block_settings.facets_margin_right | append: 'px' | append: ' 0px'
+    else
+      echo ' 0px ' | append: block_settings.facets_margin_bottom | append: 'px'
+    endif
+    echo ' 0px;'
+  endcapture
+
+  for filter in filters
+    case filter.type
+      when 'price_range'
+        if filter.min_value.value != null or filter.max_value.value != null
+          assign total_active_values = total_active_values | plus: 1
+        endif
+      when 'boolean'
+        if filter.active_values[0].value
+          assign total_active_values = total_active_values | plus: 1
+        endif
+      else
+        assign active_value_count = filter.active_values | size
+        assign total_active_values = total_active_values | plus: active_value_count
+    endcase
+  endfor
+
+  if results.url
+    assign results_url = results.url
+  else
+    assign terms = results.terms | escape
+    assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+  endif
+
+  assign is_active = false
+  assign should_show_pane = true
+  if block_settings.filter_style == 'vertical'
+    assign should_show_pane = block_settings.enable_filtering
+  endif
+
+  assign should_use_select_on_mobile = true
+  if block_settings.enable_filtering == false and block_settings.enable_sorting
+    assign should_use_select_on_mobile = false
+  endif
+
+  assign should_show_vertical_clear_all = true
+  if block_settings.filter_style == 'vertical'
+    assign should_show_vertical_clear_all = false
+  endif
+-%}
+
+{% if block_settings.enable_filtering or block_settings.enable_sorting or block_settings.enable_grid_density %}
+  {% if block_settings.filter_style == 'vertical' %}
+    {% # These elements are always rendered in the horizontal bar that's why we apply the .facets--horizontal class %}
+    <div
+      class="facets facets--horizontal facets-controls-wrapper spacing-style"
+      style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %}{% if block_settings.show_facets_top_border %} --facets-top-border: {{ block_settings.facets_top_border_width | default: 1 }}px {{ block_settings.facets_top_border_style | default: 'solid' }} {{ block_settings.facets_top_border_color | default: '#000000' }}; border-top: {{ block_settings.facets_top_border_width | default: 1 }}px {{ block_settings.facets_top_border_style | default: 'solid' }} {{ block_settings.facets_top_border_color | default: '#000000' }} !important;{% endif %}{% if block_settings.show_facets_bottom_border %} --facets-bottom-border: {{ block_settings.facets_bottom_border_width | default: 1 }}px {{ block_settings.facets_bottom_border_style | default: 'solid' }} {{ block_settings.facets_bottom_border_color | default: '#000000' }}; border-bottom: {{ block_settings.facets_bottom_border_width | default: 1 }}px {{ block_settings.facets_bottom_border_style | default: 'solid' }} {{ block_settings.facets_bottom_border_color | default: '#000000' }} !important;{% endif %}"
+      data-debug="top:{{ block_settings.show_facets_top_border }},bottom:{{ block_settings.show_facets_bottom_border }},top-color:{{ block_settings.facets_top_border_color }},bottom-color:{{ block_settings.facets_bottom_border_color }},top-width:{{ block_settings.facets_top_border_width | default: 1 }},bottom-width:{{ block_settings.facets_bottom_border_width | default: 1 }},top-style:{{ block_settings.facets_top_border_style | default: 'solid' }},bottom-style:{{ block_settings.facets_bottom_border_style | default: 'solid' }}"
+    >
+      {% if block_settings.enable_filtering %}
+        <h4 class="facets--filters-title">{{ 'content.filters' | t }}</h4>
+      {% endif %}
+
+      <div class="products-count-wrapper">
+        <span title="{{ 'content.product_count' | t }}">
+          {{- 'content.item_count' | t: count: products_count -}}
+        </span>
+      </div>
+
+      {% if block_settings.enable_sorting %}
+        {% render 'sorting',
+          results: results,
+          sort_by: sort_by,
+          filter_style: block_settings.filter_style,
+          suffix: 'desktop',
+          sort_position: 'desktop',
+          should_use_select_on_mobile: false,
+          section_id: section.id,
+          popover_color_scheme: block_settings.popover_color_scheme,
+          floating_panel_button_background_color: block_settings.floating_panel_button_background_color,
+          floating_panel_button_text_color: block_settings.floating_panel_button_text_color,
+          floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top,
+          floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom,
+          floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left,
+          floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right,
+          floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top,
+          floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom,
+          floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left,
+          floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right,
+          floating_panel_button_font_family: block_settings.floating_panel_button_font_family,
+          floating_panel_button_font_size: block_settings.floating_panel_button_font_size,
+          floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight,
+          floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform,
+          floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing,
+          floating_panel_button_hover_background_color: block_settings.floating_panel_button_hover_background_color,
+          floating_panel_button_hover_text_color: block_settings.floating_panel_button_hover_text_color,
+          floating_panel_button_hover_text_decoration: block_settings.floating_panel_button_hover_text_decoration
+        %}
+      {% endif %}
+
+      {% if block_settings.enable_grid_density %}
+        {% render 'grid-density-controls', viewport: 'desktop' %}
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div
+    class="
+      {% if should_show_pane == false %}
+        hidden
+      {% endif %}
+      facets-block-wrapper
+      facets-block-wrapper--{{ block_settings.filter_style }}
+      {%- if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }}{% endif %}
+      {%- if block_settings.filter_width == 'full-width' %} facets-block-wrapper--full-width{% endif %}
+    "
+    style="
+      --grid-column--desktop:
+        {%- if block_settings.filter_style == 'horizontal' -%}
+          var(--{{ block_settings.filter_width }})
+        {%- else -%}
+          2 / var(--facets-vertical-col-width)
+        {%- endif -%};
+      {{ facets_margin_style }}
+      --facets-inner-padding-block: {{ block_settings.padding-block-start }}px {{ block_settings.padding-block-end }}px;
+      --facets-inner-padding-inline: var(--padding-lg);
+    "
+    {{ block.shopify_attributes }}
+  >
+    <div
+      class="facets facets--{{ block_settings.filter_style }} spacing-style"
+      style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %}{% if block_settings.show_facets_top_border %} --facets-top-border: {{ block_settings.facets_top_border_width | default: 1 }}px {{ block_settings.facets_top_border_style | default: 'solid' }} {{ block_settings.facets_top_border_color | default: '#000000' }}; border-top: {{ block_settings.facets_top_border_width | default: 1 }}px {{ block_settings.facets_top_border_style | default: 'solid' }} {{ block_settings.facets_top_border_color | default: '#000000' }} !important;{% endif %}{% if block_settings.show_facets_bottom_border %} --facets-bottom-border: {{ block_settings.facets_bottom_border_width | default: 1 }}px {{ block_settings.facets_bottom_border_style | default: 'solid' }} {{ block_settings.facets_bottom_border_color | default: '#000000' }}; border-bottom: {{ block_settings.facets_bottom_border_width | default: 1 }}px {{ block_settings.facets_bottom_border_style | default: 'solid' }} {{ block_settings.facets_bottom_border_color | default: '#000000' }} !important;{% endif %}"
+      aria-label="{{ 'accessibility.filters' | t }}"
+      data-debug="top:{{ block_settings.show_facets_top_border }},bottom:{{ block_settings.show_facets_bottom_border }},top-color:{{ block_settings.facets_top_border_color }},bottom-color:{{ block_settings.facets_bottom_border_color }},top-width:{{ block_settings.facets_top_border_width | default: 1 }},bottom-width:{{ block_settings.facets_bottom_border_width | default: 1 }},top-style:{{ block_settings.facets_top_border_style | default: 'solid' }},bottom-style:{{ block_settings.facets_bottom_border_style | default: 'solid' }}"
+    >
+      <facets-form-component
+        class="facets__form-wrapper"
+        section-id="{{ section.id }}"
+        form-style="{{ block_settings.filter_style }}"
+      >
+        <form
+          action="{{ results_url }}"
+          id="FacetFiltersForm--{{ section.id }}-desktop"
+          class="facets__form"
+          ref="facetsForm"
+        >
+          {% if should_show_pane %}
+            {% render 'filter-remove-buttons',
+              filters: filters,
+              results_url: results_url,
+              show_filter_label: block_settings.show_filter_label,
+              should_show_clear_all: true
+            %}
+
+            {% if block_settings.enable_filtering %}
+              {% assign total_active_values = 0 %}
+
+              {% capture rendered_filters %}
+                {%- for filter in filters -%}
+                  {% case filter.type %}
+                    {% when 'price_range' %}
+                      {%- liquid
+                        if filter.min_value.value != null or filter.max_value.value != null
+                          assign total_active_values = total_active_values | plus: 1
+                          assign is_active = true
+                        endif
+
+                        if block_settings.filter_style != 'vertical'
+                          assign should_render_clear = true
+                        else
+                          assign should_render_clear = false
+                        endif
+
+                        render 'price-filter', filter: filter, filter_style: block_settings.filter_style, should_render_clear: should_render_clear, popover_color_scheme: block_settings.popover_color_scheme, floating_panel_button_background_color: block_settings.floating_panel_button_background_color, floating_panel_button_text_color: block_settings.floating_panel_button_text_color, floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top, floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom, floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left, floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right, floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top, floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom, floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left, floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right, floating_panel_button_font_family: block_settings.floating_panel_button_font_family, floating_panel_button_font_size: block_settings.floating_panel_button_font_size, floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight, floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform, floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing, floating_panel_button_hover_background_color: block_settings.floating_panel_button_hover_background_color, floating_panel_button_hover_text_color: block_settings.floating_panel_button_hover_text_color, floating_panel_button_hover_text_decoration: block_settings.floating_panel_button_hover_text_decoration
+                      -%}
+                    {% else %}
+                      {% liquid
+                        if filter.active_values.size > 0
+                          assign is_active = true
+                        endif
+
+                        assign active_value_count = filter.active_values | size
+                        assign total_active_values = total_active_values | plus: active_value_count
+                        if block_settings.filter_style != 'vertical'
+                          assign should_render_clear = true
+                        else
+                          assign should_render_clear = false
+                        endif
+                        render 'list-filter', filter: filter, filter_style: block_settings.filter_style, active_value_count: active_value_count, should_render_clear: should_render_clear, show_swatch_label: block_settings.show_swatch_label, sectionId: section.id, popover_color_scheme: block_settings.popover_color_scheme, floating_panel_button_background_color: block_settings.floating_panel_button_background_color, floating_panel_button_text_color: block_settings.floating_panel_button_text_color, floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top, floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom, floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left, floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right, floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top, floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom, floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left, floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right, floating_panel_button_font_family: block_settings.floating_panel_button_font_family, floating_panel_button_font_size: block_settings.floating_panel_button_font_size, floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight, floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform, floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing, floating_panel_button_hover_background_color: block_settings.floating_panel_button_hover_background_color, floating_panel_button_hover_text_color: block_settings.floating_panel_button_hover_text_color, floating_panel_button_hover_text_decoration: block_settings.floating_panel_button_hover_text_decoration
+                      %}
+                  {% endcase %}
+                {%- endfor -%}
+              {% endcapture %}
+
+              <div class="facets__filters-wrapper">
+                {% if block_settings.filter_style == 'horizontal' %}
+                  {% liquid
+                    assign more_attributes = 'on:click="#filters-drawer/showDialog"'
+                    if block_settings.text_label_case == 'uppercase'
+                      assign more_attributes = more_attributes | append: ' style="--text-transform: uppercase;"'
+                    endif
+                  %}
+                  {% render 'overflow-list',
+                    class: 'facets__overflow-list',
+                    children: rendered_filters,
+                    more-attributes: more_attributes,
+                    minimum-items: 2
+                  %}
+                {% else %}
+                  {{ rendered_filters }}
+                {% endif %}
+              </div>
+
+              {% render 'facets-actions',
+                results_url: results_url,
+                is_active: is_active,
+                products_count: products_count,
+                should_show_clear_all: should_show_vertical_clear_all,
+                clear_all_button_background_color: block_settings.clear_all_button_background_color,
+                clear_all_button_text_color: block_settings.clear_all_button_text_color,
+                clear_all_button_border_color: block_settings.clear_all_button_border_color,
+                clear_all_button_padding_top: block_settings.clear_all_button_padding_top,
+                clear_all_button_padding_bottom: block_settings.clear_all_button_padding_bottom,
+                clear_all_button_padding_left: block_settings.clear_all_button_padding_left,
+                clear_all_button_padding_right: block_settings.clear_all_button_padding_right,
+                clear_all_button_margin_top: block_settings.clear_all_button_margin_top,
+                clear_all_button_margin_bottom: block_settings.clear_all_button_margin_bottom,
+                clear_all_button_margin_left: block_settings.clear_all_button_margin_left,
+                clear_all_button_margin_right: block_settings.clear_all_button_margin_right,
+                clear_all_button_font_family: block_settings.clear_all_button_font_family,
+                clear_all_button_font_size: block_settings.clear_all_button_font_size,
+                clear_all_button_font_weight: block_settings.clear_all_button_font_weight,
+                clear_all_button_text_transform: block_settings.clear_all_button_text_transform,
+                clear_all_button_letter_spacing: block_settings.clear_all_button_letter_spacing,
+                clear_all_button_border_radius: block_settings.clear_all_button_border_radius,
+                clear_all_button_width: block_settings.clear_all_button_width,
+                clear_all_button_height: block_settings.clear_all_button_height,
+                clear_all_button_hover_background_color: block_settings.clear_all_button_hover_background_color,
+                clear_all_button_hover_text_color: block_settings.clear_all_button_hover_text_color,
+                clear_all_button_hover_border_color: block_settings.clear_all_button_hover_border_color,
+                clear_all_button_hover_text_decoration: block_settings.clear_all_button_hover_text_decoration
+              %}
+            {% endif %}
+            {% if block_settings.filter_style == 'horizontal' %}
+              <div class="products-count-wrapper">
+                <span title="{{ 'content.product_count' | t }}">
+                  {{- 'content.item_count' | t: count: products_count -}}
+                </span>
+              </div>
+
+              {% if block_settings.enable_sorting %}
+                {% render 'sorting',
+                  results: results,
+                  sort_by: sort_by,
+                  filter_style: block_settings.filter_style,
+                  suffix: 'desktop',
+                  sort_position: 'desktop',
+                  should_use_select_on_mobile: false,
+                  section_id: section.id,
+                  popover_color_scheme: block_settings.popover_color_scheme,
+                  floating_panel_button_background_color: block_settings.floating_panel_button_background_color,
+                  floating_panel_button_text_color: block_settings.floating_panel_button_text_color,
+                  floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top,
+                  floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom,
+                  floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left,
+                  floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right,
+                  floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top,
+                  floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom,
+                  floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left,
+                  floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right,
+                  floating_panel_button_font_family: block_settings.floating_panel_button_font_family,
+                  floating_panel_button_font_size: block_settings.floating_panel_button_font_size,
+                  floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight,
+                  floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform,
+                  floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing
+                %}
+              {% endif %}
+
+              {% if block_settings.enable_grid_density %}
+                {% render 'grid-density-controls', viewport: 'desktop' %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        </form>
+      </facets-form-component>
+    </div>
+  </div>
+
+  <div
+    class="facets-toggle{% if block_settings.enable_filtering == false %} facets-toggle--no-filters{% endif %}{% if block_settings.filter_style == 'horizontal' and block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }}{% endif %}"
+    style="
+      --facets-inner-padding-block: {{ block_settings.padding-block-start }}px {{ block_settings.padding-block-end }}px; --facets-inner-padding-inline: var(--padding-lg);
+      {{ facets_margin_style }}
+    "
+  >
+    {% if block_settings.enable_filtering %}
+      <div class="facets-toggle__wrapper">
+        <button
+          class="button facets-toggle__button button-unstyled button-unstyled--with-icon"
+          on:click="#filters-drawer/showDialog"
+          type="button"
+        >
+          <span class="svg-wrapper">
+            {{ 'icon-filter.svg' | inline_asset_content }}
+          </span>
+
+          {{ 'actions.show_filters' | t }}
+
+          {% if total_active_values > 0 %}
+            <div
+              id="filter-count-bubble-toggle"
+              class="filter-count-bubble"
+              aria-label="{{ 'accessibility.filter_count' | t: count: total_active_values }}"
+            >
+              <span class="filter-count-bubble__background"></span>
+
+              <span
+                ref="cartBubbleText"
+                class="filter-count-bubble__text"
+                aria-hidden="true"
+              >
+                {{ total_active_values }}
+              </span>
+            </div>
+          {% endif %}
+        </button>
+      </div>
+    {% endif %}
+
+    <div class="facets-mobile-wrapper facets-controls-wrapper" style="{% if block_settings.show_facets_top_border %} border-top: {{ block_settings.facets_top_border_width | default: 1 }}px {{ block_settings.facets_top_border_style | default: 'solid' }} {{ block_settings.facets_top_border_color | default: '#000000' }} !important;{% endif %}{% if block_settings.show_facets_bottom_border %} border-bottom: {{ block_settings.facets_bottom_border_width | default: 1 }}px {{ block_settings.facets_bottom_border_style | default: 'solid' }} {{ block_settings.facets_bottom_border_color | default: '#000000' }} !important;{% endif %}">
+      {% if block_settings.enable_filtering == false and block_settings.enable_sorting %}
+        <facets-form-component
+          section-id="{{ section.id }}"
+          id="FacetFiltersForm--{{ section.id }}-mobile-sorting-only"
+        >
+          <form
+            action="{{ results_url }}"
+            id="FacetFiltersForm--{{ section.id }}-mobile-sorting-only"
+            ref="facetsForm"
+          >
+            {% render 'sorting',
+              results: results,
+              sort_by: sort_by,
+              filter_style: block_settings.filter_style,
+              sort_position: 'mobile',
+              should_use_select_on_mobile: should_use_select_on_mobile,
+              section_id: section.id,
+              popover_color_scheme: block_settings.popover_color_scheme,
+              floating_panel_button_background_color: block_settings.floating_panel_button_background_color,
+              floating_panel_button_text_color: block_settings.floating_panel_button_text_color,
+              floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top,
+              floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom,
+              floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left,
+              floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right,
+              floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top,
+              floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom,
+              floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left,
+              floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right,
+              floating_panel_button_font_family: block_settings.floating_panel_button_font_family,
+              floating_panel_button_font_size: block_settings.floating_panel_button_font_size,
+              floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight,
+              floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform,
+              floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing,
+              floating_panel_button_hover_background_color: block_settings.floating_panel_button_hover_background_color,
+              floating_panel_button_hover_text_color: block_settings.floating_panel_button_hover_text_color,
+              floating_panel_button_hover_text_decoration: block_settings.floating_panel_button_hover_text_decoration
+            %}
+          </form>
+        </facets-form-component>
+      {% endif %}
+      {% if block_settings.enable_grid_density %}
+        {% render 'grid-density-controls', viewport: 'mobile' %}
+      {% endif %}
+    </div>
+  </div>
+{% else %}
+  <div></div>
+{% endif %}
+
+{% if block_settings.enable_filtering %}
+  <dialog-component
+    id="filters-drawer"
+    class="facets-block-wrapper facets-block-wrapper--vertical facets-block-wrapper--drawer color-scheme-5"
+  >
+    <dialog
+      ref="dialog"
+      class="facets facets--drawer dialog-modal drawer dialog-drawer dialog-drawer--right spacing-style"
+      style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.show_facets_top_border %} border-top: {{ block_settings.facets_top_border_width | default: 1 }}px {{ block_settings.facets_top_border_style | default: 'solid' }} {{ block_settings.facets_top_border_color | default: '#000000' }} !important;{% endif %}{% if block_settings.show_facets_bottom_border %} border-bottom: {{ block_settings.facets_bottom_border_width | default: 1 }}px {{ block_settings.facets_bottom_border_style | default: 'solid' }} {{ block_settings.facets_bottom_border_color | default: '#000000' }} !important;{% endif %}"
+      scroll-lock
+    >
+      {% assign form_component = 'FacetFiltersFormComponent--' | append: section.id | append: '-overflow' %}
+
+      <facets-form-component
+        class="facets__form-wrapper"
+        section-id="{{ section.id }}"
+        id="{{ form_component }}"
+      >
+        <form
+          action="{{ results_url }}"
+          id="FacetFiltersForm--{{ section.id }}-overflow"
+          class="facets__form"
+          ref="facetsForm"
+        >
+          <div
+            class="facets__title-wrapper"
+            style="--color-shadow: rgb(var(--color-foreground-rgb) / var(--opacity-10-25));"
+          >
+            <h2 class="facets-drawer__title h3">
+              {{ 'blocks.filter' | t }}
+
+              {% if total_active_values > 0 %}
+                <span
+                  class="bubble facets__bubble"
+                  aria-hidden="true"
+                >
+                  {{ total_active_values }}
+                </span>
+                <span class="visually-hidden">
+                  {{ 'accessibility.filter_count' | t: count: total_active_values }}
+                </span>
+              {% endif %}
+            </h2>
+            <button
+              class="button facets-drawer__close button-unstyled close-button"
+              on:click="dialog-component/closeDialog"
+              type="button"
+            >
+              <span
+                class="svg-wrapper svg-wrapper--small"
+                title="{{ 'actions.close' | t }}"
+              >
+                {{ 'icon-close.svg' | inline_asset_content }}
+              </span>
+            </button>
+          </div>
+
+          {% if block_settings.enable_filtering %}
+            {% render 'filter-remove-buttons',
+              filters: filters,
+              results_url: results_url,
+              show_filter_label: block_settings.show_filter_label,
+              should_show_clear_all: false
+            %}
+
+            <div class="facets__filters-wrapper">
+              {% assign total_active_values = 0 %}
+              {% assign is_active = false %}
+
+              {%- for filter in filters -%}
+                {%- liquid
+                  assign should_autofocus = false
+                  if forloop.first and total_active_values == 0
+                    assign should_autofocus = true
+                  endif
+                %}
+                {% case filter.type %}
+                  {% when 'price_range' %}
+                    {%- liquid
+                      if filter.min_value.value != null or filter.max_value.value != null
+                        assign total_active_values = total_active_values | plus: 1
+                        assign is_active = true
+                      endif
+
+                      render 'price-filter', filter: filter, filter_style: 'vertical', should_render_clear: false, autofocus: should_autofocus, popover_color_scheme: block_settings.popover_color_scheme, floating_panel_button_background_color: block_settings.floating_panel_button_background_color, floating_panel_button_text_color: block_settings.floating_panel_button_text_color, floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top, floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom, floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left, floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right, floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top, floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom, floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left, floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right, floating_panel_button_font_family: block_settings.floating_panel_button_font_family, floating_panel_button_font_size: block_settings.floating_panel_button_font_size, floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight, floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform, floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing, floating_panel_button_hover_background_color: block_settings.floating_panel_button_hover_background_color, floating_panel_button_hover_text_color: block_settings.floating_panel_button_hover_text_color, floating_panel_button_hover_text_decoration: block_settings.floating_panel_button_hover_text_decoration
+                    -%}
+                  {% else %}
+                    {% liquid
+                      if filter.active_values.size > 0
+                        assign is_active = true
+                      endif
+
+                      assign active_value_count = filter.active_values | size
+                      assign total_active_values = total_active_values | plus: active_value_count
+                      render 'list-filter', filter: filter, filter_style: 'vertical', active_value_count: active_value_count, should_render_clear: false, autofocus: should_autofocus, in_drawer: true, sectionId: section.id, popover_color_scheme: block_settings.popover_color_scheme, floating_panel_button_background_color: block_settings.floating_panel_button_background_color, floating_panel_button_text_color: block_settings.floating_panel_button_text_color, floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top, floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom, floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left, floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right, floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top, floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom, floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left, floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right, floating_panel_button_font_family: block_settings.floating_panel_button_font_family, floating_panel_button_font_size: block_settings.floating_panel_button_font_size, floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight, floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform, floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing, floating_panel_button_hover_background_color: block_settings.floating_panel_button_hover_background_color, floating_panel_button_hover_text_color: block_settings.floating_panel_button_hover_text_color, floating_panel_button_hover_text_decoration: block_settings.floating_panel_button_hover_text_decoration
+                    %}
+                {% endcase %}
+              {%- endfor -%}
+            </div>
+          {% endif %}
+
+          {% if block_settings.enable_sorting %}
+            {% render 'sorting',
+              results: results,
+              sort_by: sort_by,
+              filter_style: block_settings.filter_style,
+              suffix: 'overflow',
+              should_use_select_on_mobile: should_use_select_on_mobile,
+              section_id: section.id,
+              popover_color_scheme: block_settings.popover_color_scheme,
+              floating_panel_button_background_color: block_settings.floating_panel_button_background_color,
+              floating_panel_button_text_color: block_settings.floating_panel_button_text_color,
+              floating_panel_button_padding_top: block_settings.floating_panel_button_padding_top,
+              floating_panel_button_padding_bottom: block_settings.floating_panel_button_padding_bottom,
+              floating_panel_button_padding_left: block_settings.floating_panel_button_padding_left,
+              floating_panel_button_padding_right: block_settings.floating_panel_button_padding_right,
+              floating_panel_button_margin_top: block_settings.floating_panel_button_margin_top,
+              floating_panel_button_margin_bottom: block_settings.floating_panel_button_margin_bottom,
+              floating_panel_button_margin_left: block_settings.floating_panel_button_margin_left,
+              floating_panel_button_margin_right: block_settings.floating_panel_button_margin_right,
+              floating_panel_button_font_family: block_settings.floating_panel_button_font_family,
+              floating_panel_button_font_size: block_settings.floating_panel_button_font_size,
+              floating_panel_button_font_weight: block_settings.floating_panel_button_font_weight,
+              floating_panel_button_text_transform: block_settings.floating_panel_button_text_transform,
+              floating_panel_button_letter_spacing: block_settings.floating_panel_button_letter_spacing,
+              floating_panel_button_hover_background_color: block_settings.floating_panel_button_hover_background_color,
+              floating_panel_button_hover_text_color: block_settings.floating_panel_button_hover_text_color,
+              floating_panel_button_hover_text_decoration: block_settings.floating_panel_button_hover_text_decoration
+            %}
+          {% endif %}
+        </form>
+      </facets-form-component>
+
+      {% render 'facets-actions',
+        results_url: results_url,
+        is_active: is_active,
+        products_count: products_count,
+        form_component: form_component,
+        should_show_clear_all: true,
+        clear_all_button_background_color: block_settings.clear_all_button_background_color,
+        clear_all_button_text_color: block_settings.clear_all_button_text_color,
+        clear_all_button_border_color: block_settings.clear_all_button_border_color,
+        clear_all_button_padding_top: block_settings.clear_all_button_padding_top,
+        clear_all_button_padding_bottom: block_settings.clear_all_button_padding_bottom,
+        clear_all_button_padding_left: block_settings.clear_all_button_padding_left,
+        clear_all_button_padding_right: block_settings.clear_all_button_padding_right,
+        clear_all_button_margin_top: block_settings.clear_all_button_margin_top,
+        clear_all_button_margin_bottom: block_settings.clear_all_button_margin_bottom,
+        clear_all_button_margin_left: block_settings.clear_all_button_margin_left,
+        clear_all_button_margin_right: block_settings.clear_all_button_margin_right,
+        clear_all_button_font_family: block_settings.clear_all_button_font_family,
+        clear_all_button_font_size: block_settings.clear_all_button_font_size,
+        clear_all_button_font_weight: block_settings.clear_all_button_font_weight,
+        clear_all_button_text_transform: block_settings.clear_all_button_text_transform,
+        clear_all_button_letter_spacing: block_settings.clear_all_button_letter_spacing,
+        clear_all_button_border_radius: block_settings.clear_all_button_border_radius,
+        clear_all_button_width: block_settings.clear_all_button_width,
+        clear_all_button_height: block_settings.clear_all_button_height,
+        clear_all_button_hover_background_color: block_settings.clear_all_button_hover_background_color,
+        clear_all_button_hover_text_color: block_settings.clear_all_button_hover_text_color,
+        clear_all_button_hover_border_color: block_settings.clear_all_button_hover_border_color,
+        clear_all_button_hover_text_decoration: block_settings.clear_all_button_hover_text_decoration
+      %}
+    </dialog>
+  </dialog-component>
+{% endif %}
+
+{% stylesheet %}
+  .collection-wrapper {
+    @media screen and (min-width: 750px) {
+      --facets-vertical-col-width: 6;
+    }
+
+    @media screen and (min-width: 990px) {
+      --facets-vertical-col-width: 5;
+    }
+  }
+
+  .facets-block-wrapper {
+    @media screen and (min-width: 750px) {
+      margin: var(--facets-margin);
+      grid-column: var(--grid-column--desktop);
+    }
+  }
+
+  .facets-block-wrapper--vertical {
+    @media screen and (min-width: 750px) {
+      grid-column: var(--grid-column--desktop);
+    }
+  }
+
+  .facets-block-wrapper--vertical + .facets-toggle {
+    @media screen and (max-width: 749px) {
+      margin: 0;
+    }
+  }
+
+  .facets-mobile-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    justify-content: flex-end;
+  }
+
+  .facets-mobile-wrapper:has(> :nth-child(2)) {
+    justify-content: space-between;
+  }
+
+  dialog-component.facets-block-wrapper:not(:has(.facets--drawer[open])) {
+    @media screen and (min-width: 750px) {
+      display: none;
+    }
+  }
+
+  .variant-option__swatch-wrapper {
+    position: relative;
+    overflow: visible;
+    border-radius: var(--options-border-radius);
+  }
+
+  .variant-option--swatches-disabled .variant-option__swatch-wrapper {
+    overflow: hidden;
+  }
+
+  .facets {
+    --facets-form-horizontal-gap: 20px;
+    --facets-horizontal-max-input-wrapper-height: 230px;
+    --facets-upper-z-index: var(--layer-raised);
+    --facets-open-z-index: var(--layer-heightened);
+    --facets-sticky-z-index: var(--layer-sticky);
+    --facets-panel-min-width: 120px;
+    --facets-panel-height: 300px;
+    --facets-grid-panel-width: 300px;
+    --facets-clear-padding: var(--padding-md);
+    --facets-clear-shadow: 0 -4px 14px 0 rgb(var(--color-foreground-rgb) / var(--facets-low-opacity));
+    --facets-input-label-color: rgb(var(--color-input-text-rgb) / var(--opacity-60));
+    --facets-clear-all-min-width: 120px;
+    --facets-see-results-min-width: 55%;
+    --facets-mobile-gap: 22px;
+    --facets-low-opacity: 10%;
+    --facets-hover-opacity: 75%;
+
+    top: auto;
+    bottom: 0;
+    height: var(--drawer-height);
+    max-height: var(--drawer-height);
+    width: var(--drawer-width);
+    max-width: var(--drawer-max-width);
+    box-shadow: none;
+    padding-block: 0;
+
+    &:not(.facets--drawer) {
+      @media screen and (min-width: 750px) {
+        padding-inline: var(--padding-inline-start) var(--padding-inline-end);
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+  }
+
+  #facet-inputs-filter-v-availability .facets__inputs-wrapper,
+  #facet-inputs-filter-v-availability .facets__inputs-wrapper ul,
+  #facet-inputs-filter-v-availability .facets__inputs-wrapper ul li {
+    padding: 2px !important;
+  }
+
+
+  .facets--horizontal {
+    display: none;
+
+    @media screen and (min-width: 750px) {
+      padding-block: var(--padding-block-start) var(--padding-block-end);
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: var(--facets-upper-z-index);
+      border: none;
+      height: auto;
+      top: initial;
+      bottom: initial;
+      max-height: none;
+      width: auto;
+      overflow: visible;
+    }
+  }
+
+  .facets--vertical {
+    display: none;
+
+    @media screen and (min-width: 750px) {
+      padding-block: 0 var(--padding-block-end);
+      display: block;
+      position: static;
+      top: auto;
+      bottom: auto;
+      height: auto;
+      max-height: none;
+      width: auto;
+      overflow: visible;
+    }
+  }
+
+  .collection-wrapper:has(.collection-wrapper--full-width) .facets--vertical:not(.facets--drawer) {
+    @media screen and (min-width: 750px) {
+      padding-inline-start: max(var(--padding-sm), var(--padding-inline-start));
+    }
+  }
+
+  .facets--drawer {
+    border-radius: 0;
+    border-right: var(--style-border-drawer);
+    box-shadow: var(--shadow-drawer);
+    padding-inline: 0;
+  }
+
+  .facets--drawer[open] {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .facets.facets-controls-wrapper {
+    @media screen and (min-width: 750px) {
+      grid-column: column-1 / column-12;
+      color: rgb(var(--color-foreground-rgb) / var(--opacity-70));
+      gap: 0 var(--facets-form-horizontal-gap);
+      padding-bottom: var(--padding-xs);
+    }
+  }
+
+  .collection-wrapper:has(.product-grid-mobile--large) .facets-mobile-wrapper.facets-controls-wrapper {
+    @media screen and (max-width: 749px) {
+      display: none;
+    }
+  }
+
+  .facets__inputs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--padding-lg);
+    width: 100%;
+  }
+
+  :is(.facets--drawer, .facets--vertical) .facets__inputs:not(:has(.show-more)) {
+    padding-block-end: var(--padding-sm);
+  }
+
+  /* Facets - Form */
+  .facets__form-wrapper {
+    display: flex;
+    flex-direction: column;
+    color: var(--color-foreground-muted);
+    width: 100%;
+  }
+
+  .facets--horizontal .facets__form-wrapper {
+    @media screen and (min-width: 750px) {
+      flex-direction: row;
+      height: auto;
+    }
+  }
+
+  .facets__form {
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+    height: 100%;
+  }
+
+  .facets--horizontal .facets__form {
+    @media screen and (min-width: 750px) {
+      flex-flow: row nowrap;
+      height: auto;
+    }
+  }
+
+  .facets:not(.facets--drawer) .facets__filters-wrapper {
+    @media screen and (min-width: 750px) {
+      margin-inline-end: var(--margin-md);
+    }
+  }
+
+  .facets--horizontal .facets__filters-wrapper {
+    @media screen and (min-width: 750px) {
+      max-width: 60%;
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: var(--gap-xl);
+      margin-inline-end: 0;
+    }
+  }
+
+  /* Facets - Summary */
+  .facets__summary {
+    --variant-picker-swatch-width: 32px;
+    --variant-picker-swatch-height: 32px;
+    --icon-opacity: 0.5;
+
+    @media screen and (min-width: 750px) {
+      --variant-picker-swatch-width: 26px;
+      --variant-picker-swatch-height: 26px;
+    }
+
+    font-size: var(--font-h4--size);
+    display: flex;
+    justify-content: space-between;
+
+    &:hover {
+      --icon-opacity: 1;
+    }
+  }
+
+  .facets__filters-wrapper:hover .facets__summary,
+  .facets__filters-wrapper:has(.facets__panel[open]) .facets__summary {
+    opacity: var(--facets-hover-opacity);
+  }
+
+  .facets__filters-wrapper .facets__summary:hover,
+  .facets__filters-wrapper .facets__panel[open] .facets__summary {
+    opacity: 1;
+  }
+
+  .facets--horizontal .facets__summary {
+    @media screen and (min-width: 750px) {
+      font-size: var(--font-paragraph--size);
+      justify-content: flex-start;
+      height: var(--minimum-touch-target);
+    }
+  }
+
+  .facets__summary .icon-caret {
+    height: var(--icon-size-xs);
+    width: var(--icon-size-xs);
+    color: rgb(var(--color-foreground-rgb) / var(--icon-opacity));
+    margin-block: var(--margin-2xs);
+    transition: color var(--animation-speed) var(--animation-easing);
+  }
+
+  .facets--drawer .facets__summary .icon-caret {
+    margin-inline-start: var(--margin-2xs);
+  }
+
+  /* Facets - Bubble */
+  .facets__bubble {
+    display: inline-flex;
+    font-family: var(--font-paragraph--family);
+    font-weight: var(--font-paragraph--weight);
+    aspect-ratio: 1 / 1;
+  }
+
+  /* Facets - Inputs */
+  .facets__inputs-wrapper {
+    margin-block: var(--padding-xs) var(--padding-xs);
+  }
+
+  .facets__inputs .show-more {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xl);
+    margin-block-end: var(--padding-xl);
+  }
+
+  .facets:not(.facets--drawer) .facets__inputs-wrapper {
+    @media screen and (min-width: 750px) {
+      gap: var(--gap-sm);
+    }
+  }
+
+  .facets--horizontal .facets__inputs .show-more {
+    @media screen and (min-width: 750px) {
+      display: contents;
+    }
+  }
+
+  .facets--horizontal .facets__inputs-wrapper {
+    @media screen and (min-width: 750px) {
+      max-height: var(--facets-horizontal-max-input-wrapper-height);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      overflow-x: auto;
+      padding: var(--padding-md);
+      margin-block: 0;
+    }
+  }
+
+  .facets--vertical .facets__inputs:has(.show-more) .facets__inputs-wrapper {
+    padding-block: var(--padding-sm);
+    padding-inline: var(--padding-sm);
+    margin-block: calc(var(--padding-sm) * -1);
+    margin-inline: calc(var(--padding-sm) * -1);
+  }
+
+  @media screen and (max-width: 749px) {
+    .facets__inputs:has(.show-more) .facets__inputs-wrapper {
+      padding-block: var(--padding-sm);
+      padding-inline: var(--padding-sm);
+      margin-block: calc(var(--padding-sm) * -1);
+      margin-inline: calc(var(--padding-sm) * -1);
+    }
+  }
+
+  .facets__inputs-wrapper:not(:has(.facets__inputs-list)),
+  .facets__inputs-wrapper .facets__inputs-list {
+    display: flex;
+    gap: var(--facets-mobile-gap);
+    flex-direction: column;
+
+    @media screen and (min-width: 750px) {
+      gap: var(--gap-sm);
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .facets--vertical .facets__inputs-wrapper .facets__inputs-list--swatches {
+      gap: var(--gap-sm);
+    }
+
+    .facets--horizontal
+      .facets__inputs-wrapper
+      .facets__inputs-list--swatches:not(.facets__inputs-list--swatches-grid) {
+      display: grid;
+      grid-template-columns: repeat(var(--swatch-columns, 4), 1fr);
+    }
+  }
+
+  .facets__inputs-wrapper .facets__inputs-list--swatches {
+    --facets-mobile-gap: var(--gap-sm);
+  }
+
+  .facets__inputs-wrapper .facets__inputs-list--grid {
+    --min-column-width: 20%;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--min-column-width), 1fr));
+    gap: var(--gap-sm);
+
+    @media screen and (min-width: 750px) {
+      --min-column-width: 50px;
+    }
+  }
+
+  .facets-block-wrapper:not(.facets-block-wrapper--vertical) .facets__inputs-list--grid {
+    @media screen and (min-width: 750px) {
+      width: var(--facets-grid-panel-width);
+    }
+  }
+
+  .facets__inputs-wrapper--row:not(:has(.facets__inputs-list)),
+  .facets__inputs-wrapper--row .facets__inputs-list {
+    flex-wrap: wrap;
+    flex-direction: row;
+  }
+
+  .facets__inputs .show-more__button {
+    --show-more-icon-size: 22px;
+    --show-more-gap: 8px;
+
+    gap: var(--show-more-gap);
+
+    @media screen and (min-width: 750px) {
+      --show-more-icon-size: 16px;
+      --show-more-gap: 6px;
+    }
+  }
+
+  .facets__inputs .show-more__button .icon-plus {
+    width: var(--show-more-icon-size);
+    height: var(--show-more-icon-size);
+
+    svg {
+      width: var(--icon-size-xs);
+      height: var(--icon-size-xs);
+    }
+  }
+
+  /* Facets - Panel */
+  .facets__panel {
+    padding: 0 var(--drawer-padding);
+  }
+
+  .facets:not(.facets--drawer) .facets__panel,
+  .facets-controls-wrapper .facets__panel {
+    @media screen and (min-width: 750px) {
+      padding: 0;
+    }
+  }
+
+  .facets--horizontal .facets__panel {
+    @media screen and (min-width: 750px) {
+      position: relative;
+    }
+  }
+
+  .facets-mobile-wrapper .facets__panel-content {
+    border-radius: var(--style-border-radius-popover);
+  }
+
+  .facets-mobile-wrapper {
+    --facets-upper-z-index: var(--layer-raised);
+    --facets-panel-min-width: 120px;
+    --facets-panel-height: 300px;
+  }
+
+  .facets--horizontal .facets__panel-content,
+  .sorting-filter__options {
+    @media screen and (min-width: 750px) {
+      border-radius: var(--style-border-radius-popover);
+      position: absolute;
+      top: 100%;
+      width: max-content;
+      min-width: var(--facets-panel-min-width);
+      max-width: var(--facets-panel-width);
+      max-height: var(--facets-panel-height);
+      z-index: var(--facets-upper-z-index);
+      box-shadow: var(--shadow-popover);
+      border: var(--style-border-popover);
+      background-color: var(--color-background);
+      overflow-y: hidden;
+      gap: 0;
+    }
+  }
+
+  :is(.facets--drawer, .facets--vertical) :is(.facets__item, .sorting-filter)::before {
+    content: '';
+    display: block;
+    height: 0;
+    width: calc(100% - var(--drawer-padding) * 2);
+    border-top: var(--style-border-width) solid var(--color-border);
+    margin: 0 auto;
+  }
+
+  @media screen and (min-width: 750px) {
+    .facets:not(.facets--drawer) :is(.facets__item, .sorting-filter)::before {
+      width: 100%;
+    }
+
+    .facets--horizontal .facets__item:not(:first-of-type)::before,
+    .facets--horizontal .sorting-filter::before {
+      content: none;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .facets--vertical .facets__item:not(:first-of-type)::before,
+    .facets--vertical .sorting-filter::before {
+      content: '';
+    }
+  }
+
+  /* Facets - Text */
+  .facets__label,
+  .facets__clear-all,
+  .clear-filter {
+    text-decoration-color: transparent;
+    text-decoration-thickness: 0.075em;
+    text-underline-offset: 0.125em;
+    transition: text-decoration-color var(--animation-speed) var(--animation-easing);
+  }
+
+  .facets__label,
+  .products-count-wrapper {
+    text-transform: var(--facet-label-transform);
+  }
+
+  .clear-filter {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  /* Facets - Label */
+  .facets__label {
+    color: var(--color-foreground);
+    cursor: pointer;
+
+    @media screen and (min-width: 750px) {
+      margin-inline-end: var(--margin-2xs);
+    }
+  }
+
+  /* Products count */
+  .products-count-wrapper {
+    display: none;
+  }
+
+  .facets--horizontal .products-count-wrapper {
+    @media screen and (min-width: 750px) {
+      display: flex;
+      margin-left: auto;
+      flex-shrink: 0;
+      align-items: center;
+      height: var(--minimum-touch-target);
+    }
+  }
+
+  /* Mobile specific components */
+  .facets__title-wrapper {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-block: var(--padding-xs);
+    padding-inline-start: var(--drawer-padding);
+    padding-inline-end: var(--padding-2xs);
+    z-index: var(--facets-sticky-z-index);
+  }
+
+  :is(.facets--horizontal, .facets--vertical) .facets__title-wrapper {
+    @media screen and (min-width: 750px) {
+      display: none;
+    }
+  }
+
+  .facets-drawer__title {
+    --variant-picker-swatch-width: 32px;
+    --variant-picker-swatch-height: 32px;
+
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+
+    @media screen and (min-width: 750px) {
+      --variant-picker-swatch-width: 26px;
+      --variant-picker-swatch-height: 26px;
+    }
+  }
+
+  .facets-drawer__close {
+    position: relative;
+    top: 0;
+    right: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  /* Status */
+  .facets__status:not(:empty) {
+    width: max-content;
+    display: flex;
+    margin-inline-start: auto;
+    font-weight: 500;
+    color: var(--color-foreground);
+  }
+
+  .facets__panel[open] .facets__status {
+    display: none;
+  }
+
+  .facets--filters-title {
+    margin-block-end: 0;
+    color: var(--color-foreground);
+    height: fit-content;
+
+    @media screen and (max-width: 749px) {
+      display: none;
+    }
+  }
+
+  .facets--horizontal .facets__panel .facets__status:has(:not(:empty)) {
+    @media screen and (min-width: 750px) {
+      display: flex;
+      margin-inline-start: var(--margin-xs);
+      margin-inline-end: var(--margin-xs);
+    }
+  }
+
+  /* Horizontal filter style */
+  .facets--horizontal .facets__form {
+    @media screen and (min-width: 750px) {
+      gap: 0 var(--facets-form-horizontal-gap);
+    }
+  }
+
+  .collection-wrapper:has(> .facets--horizontal) .facets__panel[open] {
+    @media screen and (min-width: 750px) {
+      z-index: var(--facets-open-z-index);
+    }
+  }
+
+  /* Price Filter Clear Button Override */
+  #facet-inputs-filter-v-price .clear-filter {
+    padding: 0px !important;
+  }
+
+  /* Price Filter Active Clear Button */
+  #facet-inputs-filter-v-price .facets__clear--active {
+    padding: 10px !important;
+    justify-content: center;
+  }
+
+  /* Availability Filter Styles */
+  #facet-inputs-filter-v-availability { 
+    padding: 0px !important; 
+  }
+  #facet-inputs-filter-v-availability .facets__inputs-wrapper ul {
+    padding: 10px !important;
+  }
+  #facet-inputs-filter-v-availability .facets__clear { 
+    padding: 0px !important; 
+  }
+  #facet-inputs-filter-v-availability .clear-filter { 
+    border-radius: 0px !important;
+    width: 100%;
+  }
+
+  /* Facets Status Styling */
+  .facets__item .facets__status:has(:not(:empty)) {
+    padding: 3px 10px;
+    background: #f5d4d4;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #c42d46;
+  }
+  .facets__item .facets__status:has(:not(:empty)) span {
+    color: #c42d46;
+  }
+
+  /* Filter Button Styles - Applied via inline styles in snippets */
+  
+  /* Clear All Button Color Scheme Override */
+  .facets__clear-all.color-scheme-1,
+  .facets__clear-all.color-scheme-2,
+  .facets__clear-all.color-scheme-3,
+  .facets__clear-all.color-scheme-4,
+  .facets__clear-all.color-scheme-5,
+  .facets__clear-all.color-scheme-6,
+  .facets__clear-all.color-scheme-7,
+  .facets__clear-all.color-scheme-8 {
+    background-color: rgb(var(--color-scheme-1-background)) !important;
+    background: rgb(var(--color-scheme-1-background)) !important;
+    color: rgb(var(--color-scheme-1-foreground)) !important;
+    border-color: rgb(var(--color-scheme-1-background)) !important;
+  }
+  
+  .facets__clear-all.color-scheme-2 {
+    background-color: rgb(var(--color-scheme-2-background)) !important;
+    background: rgb(var(--color-scheme-2-background)) !important;
+    color: rgb(var(--color-scheme-2-foreground)) !important;
+    border-color: rgb(var(--color-scheme-2-background)) !important;
+  }
+  
+  .facets__clear-all.color-scheme-3 {
+    background-color: rgb(var(--color-scheme-3-background)) !important;
+    background: rgb(var(--color-scheme-3-background)) !important;
+    color: rgb(var(--color-scheme-3-foreground)) !important;
+    border-color: rgb(var(--color-scheme-3-background)) !important;
+  }
+  
+  .facets__clear-all.color-scheme-4 {
+    background-color: rgb(var(--color-scheme-4-background)) !important;
+    background: rgb(var(--color-scheme-4-background)) !important;
+    color: rgb(var(--color-scheme-4-foreground)) !important;
+    border-color: rgb(var(--color-scheme-4-background)) !important;
+  }
+  
+  .facets__clear-all.color-scheme-5 {
+    background-color: rgb(var(--color-scheme-5-background)) !important;
+    background: rgb(var(--color-scheme-5-background)) !important;
+    color: rgb(var(--color-scheme-5-foreground)) !important;
+    border-color: rgb(var(--color-scheme-5-background)) !important;
+  }
+  
+  .facets__clear-all.color-scheme-6 {
+    background-color: rgb(var(--color-scheme-6-background)) !important;
+    background: rgb(var(--color-scheme-6-background)) !important;
+    color: rgb(var(--color-scheme-6-foreground)) !important;
+    border-color: rgb(var(--color-scheme-6-background)) !important;
+  }
+  
+  .facets__clear-all.color-scheme-7 {
+    background-color: rgb(var(--color-scheme-7-background)) !important;
+    background: rgb(var(--color-scheme-7-background)) !important;
+    color: rgb(var(--color-scheme-7-foreground)) !important;
+    border-color: rgb(var(--color-scheme-7-background)) !important;
+  }
+  
+  .facets__clear-all.color-scheme-8 {
+    background-color: rgb(var(--color-scheme-8-background)) !important;
+    background: rgb(var(--color-scheme-8-background)) !important;
+    color: rgb(var(--color-scheme-8-foreground)) !important;
+    border-color: rgb(var(--color-scheme-8-background)) !important;
+  }
+
+  /* Clear All Button Hover Styles */
+  .facets__clear-all:hover {
+    background-color: var(--clear-all-button-hover-bg) !important;
+    background: var(--clear-all-button-hover-bg) !important;
+    color: var(--clear-all-button-hover-text) !important;
+    border-color: var(--clear-all-button-hover-border) !important;
+    text-decoration: var(--clear-all-button-hover-decoration) !important;
+  }
+
+  /* More specific hover rule to override any conflicting styles */
+  button.facets__clear-all:hover,
+  .button.facets__clear-all:hover {
+    background-color: var(--clear-all-button-hover-bg) !important;
+    background: var(--clear-all-button-hover-bg) !important;
+    color: var(--clear-all-button-hover-text) !important;
+    border-color: var(--clear-all-button-hover-border) !important;
+    text-decoration: var(--clear-all-button-hover-decoration) !important;
+  }
+
+  /* Facets Border Styles - Ultra High Priority */
+  .facets.facets--horizontal,
+  .facets.facets--drawer,
+  .facets-mobile-wrapper,
+  .facets-controls-wrapper.facets,
+  .facets-controls-wrapper.facets-mobile-wrapper,
+  .facets.facets--horizontal.spacing-style,
+  .facets.spacing-style {
+    border-top: var(--facets-top-border, none) !important;
+    border-bottom: var(--facets-bottom-border, none) !important;
+  }
+  
+  /* Force borders with maximum specificity - Direct approach */
+  .facets.facets--horizontal.spacing-style[style*="--facets-top-border"] {
+    border-top: 1px solid #DFDFDF !important;
+    border-bottom: 1px solid #4E4E4E !important;
+  }
+  
+  /* Dynamic borders based on settings */
+  .facets.facets--horizontal.spacing-style[data-debug*="top:true"] {
+    border-top: 1px solid #DFDFDF !important;
+  }
+  
+  .facets.facets--horizontal.spacing-style[data-debug*="bottom:true"] {
+    border-bottom: 1px solid #4E4E4E !important;
+  }
+  
+  /* JavaScript fallback for borders */
+  .facets.facets--horizontal.spacing-style.force-borders {
+    border-top: 1px solid #DFDFDF !important;
+    border-bottom: 1px solid #4E4E4E !important;
+  }
+  
+  /* Sorting filter option active state */
+  .sorting-filter__input:checked + .sorting-filter__checkmark + .sorting-filter__label,
+  .sorting-filter__option[aria-selected="true"] .sorting-filter__label,
+  .sorting-filter__option[aria-selected="true"] {
+    color: #c42d46 !important;
+  }
+  
+  /* Price facet panel width */
+  .facets--horizontal .facets__panel-content:has(.price-facet) {
+    width: 240px !important;
+    min-width: 240px !important;
+  }
+  
+  /* Product grid container mobile display */
+  @media screen and (max-width: 749px) {
+    .product-grid-container {
+      display: grid !important;
+    }
+    
+    .facets-toggle {
+      border-bottom: solid 1px #E4D3CB !important;
+      padding: 6px;
+    }
+    
+    .facets-toggle__button {
+      padding: 0px !important;
+    }
+    
+    #filters-drawer .facets__inputs-list {
+      gap: 10px;
+    }
+    
+    #filters-drawer .facets__summary {
+      font-size: 22px;
+    }
+    
+    #filters-drawer
+      :is(.facets--drawer, #filters-drawer .facets--vertical)
+      :is(.facets__item, #filters-drawer .sorting-filter)::before {
+      border-color: #ffffff14;
+      margin: 18px auto;
+    }
+    
+    #filters-drawer .price-facet__inputs-wrapper {
+      padding: 0px !important;
+    }
+    
+    #filters-drawer .field__input {
+      box-shadow: none;
+    }
+    
+    #filters-drawer .facets__label {
+      color: #ca8181;
+    }
+    
+    /* Filter Drawer Clear All Button Styles - Maximum Specificity */
+    #filters-drawer .facets__clear-all,
+    #filters-drawer .facets__clear-all.button,
+    #filters-drawer .facets__clear-all[class*="button"],
+    #filters-drawer .facets__clear-all[class*="btn"],
+    #filters-drawer button.facets__clear-all,
+    #filters-drawer a.facets__clear-all,
+    #filters-drawer .facets__clear-all[style*="background"],
+    #filters-drawer .facets__clear-all[style*="color"] {
+      background-color: {{ block_settings.filters_drawer_clear_all_background_color | default: '#C42D46' }} !important;
+      background: {{ block_settings.filters_drawer_clear_all_background_color | default: '#C42D46' }} !important;
+      background-image: none !important;
+      color: {{ block_settings.filters_drawer_clear_all_text_color | default: '#ffffff' }} !important;
+      border-color: {{ block_settings.filters_drawer_clear_all_border_color | default: '#C42D46' }} !important;
+      border: 1px solid {{ block_settings.filters_drawer_clear_all_border_color | default: '#C42D46' }} !important;
+      padding-top: {{ block_settings.filters_drawer_clear_all_padding_top | default: 12 }}px !important;
+      padding-bottom: {{ block_settings.filters_drawer_clear_all_padding_bottom | default: 12 }}px !important;
+      padding-left: {{ block_settings.filters_drawer_clear_all_padding_left | default: 20 }}px !important;
+      padding-right: {{ block_settings.filters_drawer_clear_all_padding_right | default: 20 }}px !important;
+      margin-top: {{ block_settings.filters_drawer_clear_all_margin_top | default: 0 }}px !important;
+      margin-bottom: {{ block_settings.filters_drawer_clear_all_margin_bottom | default: 0 }}px !important;
+      margin-left: {{ block_settings.filters_drawer_clear_all_margin_left | default: 0 }}px !important;
+      margin-right: {{ block_settings.filters_drawer_clear_all_margin_right | default: 0 }}px !important;
+      font-family: {% if block_settings.filters_drawer_clear_all_font_family == 'heading' %}var(--font-heading-family){% else %}var(--font-body-family){% endif %} !important;
+      font-size: {{ block_settings.filters_drawer_clear_all_font_size | default: 14 }}px !important;
+      font-weight: {{ block_settings.filters_drawer_clear_all_font_weight | default: '500' }} !important;
+      text-transform: {{ block_settings.filters_drawer_clear_all_text_transform | default: 'uppercase' }} !important;
+      letter-spacing: {{ block_settings.filters_drawer_clear_all_letter_spacing | default: 0.5 }}px !important;
+      border-radius: {{ block_settings.filters_drawer_clear_all_border_radius | default: 6 }}px !important;
+      width: {{ block_settings.filters_drawer_clear_all_width | default: '100%' }} !important;
+      height: {{ block_settings.filters_drawer_clear_all_height | default: 'auto' }} !important;
+      display: inline-block !important;
+      text-align: center !important;
+      text-decoration: none !important;
+      cursor: pointer !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+    
+    #filters-drawer .facets__clear-all:hover,
+    #filters-drawer .facets__clear-all.button:hover,
+    #filters-drawer .facets__clear-all[class*="button"]:hover,
+    #filters-drawer .facets__clear-all[class*="btn"]:hover,
+    #filters-drawer button.facets__clear-all:hover,
+    #filters-drawer a.facets__clear-all:hover {
+      background-color: {{ block_settings.filters_drawer_clear_all_hover_background_color | default: '#A0253A' }} !important;
+      background: {{ block_settings.filters_drawer_clear_all_hover_background_color | default: '#A0253A' }} !important;
+      background-image: none !important;
+      color: {{ block_settings.filters_drawer_clear_all_hover_text_color | default: '#ffffff' }} !important;
+      border-color: {{ block_settings.filters_drawer_clear_all_hover_border_color | default: '#A0253A' }} !important;
+      border: 1px solid {{ block_settings.filters_drawer_clear_all_hover_border_color | default: '#A0253A' }} !important;
+      text-decoration: {{ block_settings.filters_drawer_clear_all_hover_text_decoration | default: 'none' }} !important;
+    }
+    
+    /* Force override any inline styles */
+    #filters-drawer .facets__clear-all[style] {
+      background-color: {{ block_settings.filters_drawer_clear_all_background_color | default: '#C42D46' }} !important;
+      background: {{ block_settings.filters_drawer_clear_all_background_color | default: '#C42D46' }} !important;
+      color: {{ block_settings.filters_drawer_clear_all_text_color | default: '#ffffff' }} !important;
+    }
+  }
+  
+  
+  
+
+{% endstylesheet %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Apply borders with a small delay to ensure all CSS is loaded
+  setTimeout(function() {
+    const facetsElements = document.querySelectorAll('.facets.facets--horizontal.spacing-style');
+    
+    facetsElements.forEach(function(element) {
+      // Get values from data-debug attribute
+      const debugData = element.getAttribute('data-debug');
+      
+      if (debugData) {
+        const parts = debugData.split(',');
+        let topBorder = null;
+        let bottomBorder = null;
+        
+        // Parse debug data
+        const topColor = parts.find(p => p.includes('top-color:'))?.split(':')[1];
+        const bottomColor = parts.find(p => p.includes('bottom-color:'))?.split(':')[1];
+        const topWidth = parts.find(p => p.includes('top-width:'))?.split(':')[1] || '1';
+        const bottomWidth = parts.find(p => p.includes('bottom-width:'))?.split(':')[1] || '1';
+        const topStyle = parts.find(p => p.includes('top-style:'))?.split(':')[1] || 'solid';
+        const bottomStyle = parts.find(p => p.includes('bottom-style:'))?.split(':')[1] || 'solid';
+        
+        if (parts.some(p => p.includes('top:true')) && topColor) {
+          topBorder = `${topWidth}px ${topStyle} ${topColor}`;
+        }
+        if (parts.some(p => p.includes('bottom:true')) && bottomColor) {
+          bottomBorder = `${bottomWidth}px ${bottomStyle} ${bottomColor}`;
+        }
+        
+        // Apply borders if found
+        if (topBorder) {
+          element.style.setProperty('border-top', topBorder, 'important');
+        }
+        if (bottomBorder) {
+          element.style.setProperty('border-bottom', bottomBorder, 'important');
+        }
+      } else {
+        // Fallback to hardcoded values
+        element.style.setProperty('border-top', '1px solid #DFDFDF', 'important');
+        element.style.setProperty('border-bottom', '2px solid #C42D46', 'important');
+      }
+    });
+  }, 100); // Small delay to ensure all CSS is loaded
+  
+  // Force apply Clear All button styles in filter drawer
+  function applyClearAllButtonStyles() {
+    const clearAllButtons = document.querySelectorAll('#filters-drawer .facets__clear-all');
+    clearAllButtons.forEach(button => {
+      if (button) {
+        // Force apply styles directly to element
+        button.style.setProperty('background-color', '{{ block_settings.filters_drawer_clear_all_background_color | default: "#C42D46" }}', 'important');
+        button.style.setProperty('background', '{{ block_settings.filters_drawer_clear_all_background_color | default: "#C42D46" }}', 'important');
+        button.style.setProperty('color', '{{ block_settings.filters_drawer_clear_all_text_color | default: "#ffffff" }}', 'important');
+        button.style.setProperty('border-color', '{{ block_settings.filters_drawer_clear_all_border_color | default: "#C42D46" }}', 'important');
+        button.style.setProperty('border', '1px solid {{ block_settings.filters_drawer_clear_all_border_color | default: "#C42D46" }}', 'important');
+        button.style.setProperty('padding-top', '{{ block_settings.filters_drawer_clear_all_padding_top | default: 12 }}px', 'important');
+        button.style.setProperty('padding-bottom', '{{ block_settings.filters_drawer_clear_all_padding_bottom | default: 12 }}px', 'important');
+        button.style.setProperty('padding-left', '{{ block_settings.filters_drawer_clear_all_padding_left | default: 20 }}px', 'important');
+        button.style.setProperty('padding-right', '{{ block_settings.filters_drawer_clear_all_padding_right | default: 20 }}px', 'important');
+        button.style.setProperty('font-size', '{{ block_settings.filters_drawer_clear_all_font_size | default: 14 }}px', 'important');
+        button.style.setProperty('font-weight', '{{ block_settings.filters_drawer_clear_all_font_weight | default: "500" }}', 'important');
+        button.style.setProperty('text-transform', '{{ block_settings.filters_drawer_clear_all_text_transform | default: "uppercase" }}', 'important');
+        button.style.setProperty('border-radius', '{{ block_settings.filters_drawer_clear_all_border_radius | default: 6 }}px', 'important');
+        button.style.setProperty('width', '{{ block_settings.filters_drawer_clear_all_width | default: "100%" }}', 'important');
+      }
+    });
+  }
+  
+  // Apply styles immediately and on any changes
+  applyClearAllButtonStyles();
+  
+  // Reapply styles when drawer opens
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'open') {
+        setTimeout(applyClearAllButtonStyles, 100);
+      }
+    });
+  });
+  
+  const drawer = document.querySelector('#filters-drawer');
+  if (drawer) {
+    observer.observe(drawer, { attributes: true });
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "t:names.filters",
+  "tag": null,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "t:settings.enable_filtering",
+      "info": "t:info.enable_filtering_info",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "filter_style",
+      "label": "t:settings.direction",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:options.horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "t:options.vertical"
+        }
+      ],
+      "default": "horizontal",
+      "visible_if": "{{ block.settings.enable_filtering == true }}"
+    },
+    {
+      "type": "select",
+      "id": "filter_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "centered",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "centered",
+      "visible_if": "{{ block.settings.enable_filtering == true and block.settings.filter_style == 'horizontal' }}"
+    },
+    {
+      "type": "select",
+      "id": "text_label_case",
+      "label": "t:settings.text_label_case",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ block.settings.enable_filtering == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_swatch_label",
+      "label": "t:settings.show_swatch_label",
+      "default": false,
+      "visible_if": "{{ block.settings.enable_filtering == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter_label",
+      "label": "t:settings.show_filter_label",
+      "default": false,
+      "visible_if": "{{ block.settings.enable_filtering == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "t:settings.enable_sorting",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_grid_density",
+      "label": "t:settings.enable_grid_density",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "t:settings.inherit_color_scheme",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+    },
+    {
+      "type": "header",
+      "content": "Floating Panel"
+    },
+    {
+      "type": "color_scheme",
+      "id": "popover_color_scheme",
+      "label": "Floating Panel Color Scheme",
+      "default": "scheme-1",
+      "info": "Color scheme for floating panel components in filters and sorting"
+    },
+    {
+      "type": "header",
+      "content": "Floating Panel Buttons"
+    },
+    {
+      "type": "color",
+      "id": "floating_panel_button_background_color",
+      "label": "Button Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "floating_panel_button_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_padding_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Top Padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_padding_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Bottom Padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_padding_left",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Left Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_padding_right",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Right Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_margin_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_margin_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_margin_left",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Left Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_margin_right",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Right Margin",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "floating_panel_button_font_family",
+      "label": "Button Font Family",
+      "options": [
+        {
+          "value": "body",
+          "label": "t:options.body"
+        },
+        {
+          "value": "subheading",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "heading",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "accent",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_font_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Font Size",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "floating_panel_button_font_weight",
+      "label": "Button Font Weight",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "100",
+          "label": "100 (Thin)"
+        },
+        {
+          "value": "200",
+          "label": "200 (Extra Light)"
+        },
+        {
+          "value": "300",
+          "label": "300 (Light)"
+        },
+        {
+          "value": "400",
+          "label": "400 (Normal)"
+        },
+        {
+          "value": "500",
+          "label": "500 (Medium)"
+        },
+        {
+          "value": "600",
+          "label": "600 (Semi Bold)"
+        },
+        {
+          "value": "700",
+          "label": "700 (Bold)"
+        },
+        {
+          "value": "800",
+          "label": "800 (Extra Bold)"
+        },
+        {
+          "value": "900",
+          "label": "900 (Black)"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "floating_panel_button_text_transform",
+      "label": "Button Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "t:options.lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "t:options.capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "floating_panel_button_letter_spacing",
+      "min": -2,
+      "max": 4,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Button Letter Spacing",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Clear All Button"
+    },
+    {
+      "type": "color",
+      "id": "clear_all_button_background_color",
+      "label": "Clear All Button Background Color",
+      "default": "#C42D46"
+    },
+    {
+      "type": "color",
+      "id": "clear_all_button_text_color",
+      "label": "Clear All Button Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "clear_all_button_border_color",
+      "label": "Clear All Button Border Color",
+      "default": "#C42D46"
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_padding_top",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Top Padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_padding_bottom",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Bottom Padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_padding_left",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Left Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_padding_right",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Right Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_margin_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_margin_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_margin_left",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Left Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_margin_right",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Right Margin",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "clear_all_button_font_family",
+      "label": "Clear All Button Font Family",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body Font"
+        },
+        {
+          "value": "heading",
+          "label": "Heading Font"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_font_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Font Size",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "clear_all_button_font_weight",
+      "label": "Clear All Button Font Weight",
+      "options": [
+        {
+          "value": "100",
+          "label": "100 (Thin)"
+        },
+        {
+          "value": "200",
+          "label": "200 (Extra Light)"
+        },
+        {
+          "value": "300",
+          "label": "300 (Light)"
+        },
+        {
+          "value": "400",
+          "label": "400 (Normal)"
+        },
+        {
+          "value": "500",
+          "label": "500 (Medium)"
+        },
+        {
+          "value": "600",
+          "label": "600 (Semi Bold)"
+        },
+        {
+          "value": "700",
+          "label": "700 (Bold)"
+        },
+        {
+          "value": "800",
+          "label": "800 (Extra Bold)"
+        },
+        {
+          "value": "900",
+          "label": "900 (Black)"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "clear_all_button_text_transform",
+      "label": "Clear All Button Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_letter_spacing",
+      "min": -2,
+      "max": 4,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Clear All Button Letter Spacing",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "clear_all_button_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Border Radius",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "clear_all_button_width",
+      "label": "Clear All Button Width",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "100%",
+          "label": "100%"
+        },
+        {
+          "value": "fit-content",
+          "label": "Fit Content"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "select",
+      "id": "clear_all_button_height",
+      "label": "Clear All Button Height",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "100%",
+          "label": "100%"
+        },
+        {
+          "value": "fit-content",
+          "label": "Fit Content"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "header",
+      "content": "Clear All Button Hover"
+    },
+    {
+      "type": "color",
+      "id": "clear_all_button_hover_background_color",
+      "label": "Clear All Button Hover Background Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "clear_all_button_hover_text_color",
+      "label": "Clear All Button Hover Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "clear_all_button_hover_border_color",
+      "label": "Clear All Button Hover Border Color",
+      "default": "#333333"
+    },
+    {
+      "type": "select",
+      "id": "clear_all_button_hover_text_decoration",
+      "label": "Clear All Button Hover Text Decoration",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "underline",
+          "label": "Underline"
+        },
+        {
+          "value": "overline",
+          "label": "Overline"
+        },
+        {
+          "value": "line-through",
+          "label": "Line Through"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Filter Drawer Clear All Button Settings"
+    },
+    {
+      "type": "color",
+      "id": "filters_drawer_clear_all_background_color",
+      "label": "Clear All Button Background Color",
+      "default": "#C42D46"
+    },
+    {
+      "type": "color",
+      "id": "filters_drawer_clear_all_text_color",
+      "label": "Clear All Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "filters_drawer_clear_all_border_color",
+      "label": "Clear All Button Border Color",
+      "default": "#C42D46"
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_padding_top",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Top Padding",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_padding_bottom",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Bottom Padding",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_padding_left",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Left Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_padding_right",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Right Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_margin_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_margin_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_margin_left",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Left Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_margin_right",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Right Margin",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "filters_drawer_clear_all_font_family",
+      "label": "Clear All Button Font Family",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body Font"
+        },
+        {
+          "value": "heading",
+          "label": "Heading Font"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Font Size",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "filters_drawer_clear_all_font_weight",
+      "label": "Clear All Button Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "300"
+        },
+        {
+          "value": "400",
+          "label": "400"
+        },
+        {
+          "value": "500",
+          "label": "500"
+        },
+        {
+          "value": "600",
+          "label": "600"
+        },
+        {
+          "value": "700",
+          "label": "700"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "filters_drawer_clear_all_text_transform",
+      "label": "Clear All Button Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_letter_spacing",
+      "min": -1,
+      "max": 3,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Clear All Button Letter Spacing",
+      "default": 0.5
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_clear_all_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Clear All Button Border Radius",
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "filters_drawer_clear_all_width",
+      "label": "Clear All Button Width",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "100%",
+          "label": "100%"
+        },
+        {
+          "value": "fit-content",
+          "label": "Fit Content"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "select",
+      "id": "filters_drawer_clear_all_height",
+      "label": "Clear All Button Height",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "40px",
+          "label": "40px"
+        },
+        {
+          "value": "44px",
+          "label": "44px"
+        },
+        {
+          "value": "48px",
+          "label": "48px"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "header",
+      "content": "Clear All Button Hover Settings"
+    },
+    {
+      "type": "color",
+      "id": "filters_drawer_clear_all_hover_background_color",
+      "label": "Clear All Button Hover Background Color",
+      "default": "#A0253A"
+    },
+    {
+      "type": "color",
+      "id": "filters_drawer_clear_all_hover_text_color",
+      "label": "Clear All Button Hover Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "filters_drawer_clear_all_hover_border_color",
+      "label": "Clear All Button Hover Border Color",
+      "default": "#A0253A"
+    },
+    {
+      "type": "select",
+      "id": "filters_drawer_clear_all_hover_text_decoration",
+      "label": "Clear All Button Hover Text Decoration",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "underline",
+          "label": "Underline"
+        },
+        {
+          "value": "overline",
+          "label": "Overline"
+        },
+        {
+          "value": "line-through",
+          "label": "Line Through"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Facets Border"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_facets_top_border",
+      "label": "Show Top Border",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "facets_top_border_color",
+      "label": "Top Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "facets_top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "facets_top_border_style",
+      "label": "Top Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        },
+        {
+          "value": "double",
+          "label": "Double"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_facets_bottom_border",
+      "label": "Show Bottom Border",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "facets_bottom_border_color",
+      "label": "Bottom Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "facets_bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "facets_bottom_border_style",
+      "label": "Bottom Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        },
+        {
+          "value": "double",
+          "label": "Double"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "header",
+      "content": "Filter Buttons"
+    },
+    {
+      "type": "color_scheme",
+      "id": "filter_button_color_scheme",
+      "label": "Button Color Scheme",
+      "default": "scheme-1",
+      "info": "Color scheme for filter buttons"
+    },
+    {
+      "type": "range",
+      "id": "filter_button_padding_top",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Top Padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "filter_button_padding_bottom",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Bottom Padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "filter_button_padding_left",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Left Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "filter_button_padding_right",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Right Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "filter_button_margin_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "filter_button_margin_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "filter_button_margin_left",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Left Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "filter_button_margin_right",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Right Margin",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "filter_button_font_family",
+      "label": "Button Font Family",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body Font"
+        },
+        {
+          "value": "heading",
+          "label": "Heading Font"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "filter_button_font_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Font Size",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "filter_button_font_weight",
+      "label": "Button Font Weight",
+      "options": [
+        {
+          "value": "100",
+          "label": "100 (Thin)"
+        },
+        {
+          "value": "200",
+          "label": "200 (Extra Light)"
+        },
+        {
+          "value": "300",
+          "label": "300 (Light)"
+        },
+        {
+          "value": "400",
+          "label": "400 (Normal)"
+        },
+        {
+          "value": "500",
+          "label": "500 (Medium)"
+        },
+        {
+          "value": "600",
+          "label": "600 (Semi Bold)"
+        },
+        {
+          "value": "700",
+          "label": "700 (Bold)"
+        },
+        {
+          "value": "800",
+          "label": "800 (Extra Bold)"
+        },
+        {
+          "value": "900",
+          "label": "900 (Black)"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "filter_button_text_transform",
+      "label": "Button Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "filter_button_letter_spacing",
+      "min": -2,
+      "max": 4,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Button Letter Spacing",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Floating Panel Button Hover"
+    },
+    {
+      "type": "color",
+      "id": "floating_panel_button_hover_background_color",
+      "label": "Button Hover Background Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "floating_panel_button_hover_text_color",
+      "label": "Button Hover Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "floating_panel_button_hover_text_decoration",
+      "label": "Button Hover Text Decoration",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "underline",
+          "label": "Underline"
+        },
+        {
+          "value": "overline",
+          "label": "Overline"
+        },
+        {
+          "value": "line-through",
+          "label": "Line Through"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.margin"
+    },
+    {
+      "type": "range",
+      "id": "facets_margin_bottom",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.filter_style == 'horizontal' }}"
+    },
+    {
+      "type": "range",
+      "id": "facets_margin_right",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ block.settings.filter_style == 'vertical' }}"
+    }
+  ]
+}
+{% endschema %}
