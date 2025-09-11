@@ -1,0 +1,110 @@
+{% style %}
+  /* Tertiary Button Styles - Direct Settings Application */
+  .button-tertiary,
+  .button.button-tertiary,
+  a.button-tertiary,
+  button.button-tertiary,
+  input[type="submit"].button-tertiary,
+  input[type="button"].button-tertiary {
+    background-color: {{ settings.tertiary_button_background | default: '#f8f9fa' }} !important;
+    color: {{ settings.tertiary_button_text | default: '#6c757d' }} !important;
+    border: {{ settings.tertiary_button_border_width | default: 1 }}px solid {{ settings.tertiary_button_border | default: '#dee2e6' }} !important;
+    border-radius: {{ settings.button_border_radius_tertiary | default: 8 }}px !important;
+    font-family: {{ settings.type_font_button_tertiary | default: 'var(--font-body--family)' }} !important;
+    font-weight: {{ settings.button_font_weight_tertiary | default: '500' }} !important;
+    text-transform: {{ settings.button_text_case_tertiary | default: 'none' }} !important;
+    padding-top: {{ settings.tertiary_button_padding_top | default: 12 }}px !important;
+    padding-bottom: {{ settings.tertiary_button_padding_bottom | default: 12 }}px !important;
+    padding-left: {{ settings.tertiary_button_padding_left | default: 24 }}px !important;
+    padding-right: {{ settings.tertiary_button_padding_right | default: 24 }}px !important;
+    margin-top: {{ settings.tertiary_button_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.tertiary_button_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.tertiary_button_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.tertiary_button_margin_right | default: 0 }}px !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-sizing: border-box !important;
+    min-height: var(--minimum-touch-target, 44px) !important;
+  }
+
+  /* Tertiary Button Hover States */
+  .button-tertiary:hover,
+  .button.button-tertiary:hover,
+  a.button-tertiary:hover,
+  button.button-tertiary:hover,
+  input[type="submit"].button-tertiary:hover,
+  input[type="button"].button-tertiary:hover {
+    background-color: {{ settings.tertiary_button_hover_background | default: '#e9ecef' }} !important;
+    color: {{ settings.tertiary_button_hover_text | default: '#495057' }} !important;
+    border-color: {{ settings.tertiary_button_hover_border | default: '#adb5bd' }} !important;
+    text-decoration: none !important;
+  }
+
+  /* Tertiary Button Focus States */
+  .button-tertiary:focus,
+  .button.button-tertiary:focus,
+  a.button-tertiary:focus,
+  button.button-tertiary:focus,
+  input[type="submit"].button-tertiary:focus,
+  input[type="button"].button-tertiary:focus {
+    outline: 2px solid {{ settings.tertiary_button_border | default: '#dee2e6' }} !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Tertiary Button Active States */
+  .button-tertiary:active,
+  .button.button-tertiary:active,
+  a.button-tertiary:active,
+  button.button-tertiary:active,
+  input[type="submit"].button-tertiary:active,
+  input[type="button"].button-tertiary:active {
+    background-color: {{ settings.tertiary_button_hover_background | default: '#e9ecef' }} !important;
+    color: {{ settings.tertiary_button_hover_text | default: '#495057' }} !important;
+    border-color: {{ settings.tertiary_button_hover_border | default: '#adb5bd' }} !important;
+    transform: translateY(1px) !important;
+  }
+
+  /* Tertiary Button Disabled States */
+  .button-tertiary:disabled,
+  .button.button-tertiary:disabled,
+  a.button-tertiary:disabled,
+  button.button-tertiary:disabled,
+  input[type="submit"].button-tertiary:disabled,
+  input[type="button"].button-tertiary:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+
+  /* Mobile Responsive Adjustments */
+  @media (max-width: 768px) {
+    .button-tertiary,
+    .button.button-tertiary,
+    a.button-tertiary,
+    button.button-tertiary,
+    input[type="submit"].button-tertiary,
+    input[type="button"].button-tertiary {
+      padding-top: {{ settings.tertiary_button_padding_top | default: 12 | times: 0.9 | round }}px !important;
+      padding-bottom: {{ settings.tertiary_button_padding_bottom | default: 12 | times: 0.9 | round }}px !important;
+      padding-left: {{ settings.tertiary_button_padding_left | default: 24 | times: 0.9 | round }}px !important;
+      padding-right: {{ settings.tertiary_button_padding_right | default: 24 | times: 0.9 | round }}px !important;
+    }
+  }
+
+  /* Small Screen Adjustments */
+  @media (max-width: 480px) {
+    .button-tertiary,
+    .button.button-tertiary,
+    a.button-tertiary,
+    button.button-tertiary,
+    input[type="submit"].button-tertiary,
+    input[type="button"].button-tertiary {
+      padding-top: {{ settings.tertiary_button_padding_top | default: 12 | times: 0.8 | round }}px !important;
+      padding-bottom: {{ settings.tertiary_button_padding_bottom | default: 12 | times: 0.8 | round }}px !important;
+      padding-left: {{ settings.tertiary_button_padding_left | default: 24 | times: 0.8 | round }}px !important;
+      padding-right: {{ settings.tertiary_button_padding_right | default: 24 | times: 0.8 | round }}px !important;
+    }
+  }
+{% endstyle %}
