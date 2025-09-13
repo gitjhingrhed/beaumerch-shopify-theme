@@ -1,0 +1,1838 @@
+
+
+{% liquid
+  # Use default theme layout
+  assign order = 'logo,menu,localization,search,actions'
+
+  assign rows = 'top,bottom' | split: ','
+  assign search_style = 'none'
+
+  if section.settings.show_search
+    assign search_style = 'modal'
+  endif
+
+  if section.settings.enable_transparent_header_home and template.name == 'index'
+    assign transparent = 'always'
+    assign transparent_color_scheme = section.settings.home_color_scheme
+  elsif section.settings.enable_transparent_header_product and template.name == 'product'
+    assign transparent = 'always'
+    assign transparent_color_scheme = section.settings.product_color_scheme
+  elsif section.settings.enable_transparent_header_collection and template.name == 'collection'
+    assign transparent = 'always'
+    assign transparent_color_scheme = section.settings.collection_color_scheme
+  endif
+
+  if section.settings.enable_sticky_header == 'always'
+    assign sticky = 'always'
+  elsif section.settings.enable_sticky_header == 'scroll-up'
+    assign sticky = 'scroll-up'
+  endif
+
+  if transparent and sticky
+    assign transparent = 'not-sticky'
+  endif
+
+  if transparent
+    if transparent_color_scheme == 'inverse'
+      assign transparent_color_scheme = 'color-' | append: section.settings.color_scheme_transparent
+    else
+      assign transparent_color_scheme = 'color-' | append: section.settings.color_scheme_top
+    endif
+  endif
+
+  capture logo
+    content_for 'block', type: '_header-logo', id: 'header-logo'
+  endcapture
+
+  capture menu
+    content_for 'block', type: '_header-menu', id: 'header-menu'
+  endcapture
+
+  capture mobile_menu
+    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'mobile'
+  endcapture
+
+  capture navigation_bar
+    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'navigation_bar', transparent: transparent
+  endcapture
+
+  capture actions
+    render 'header-actions'
+  endcapture
+
+  capture search
+    render 'search', style: search_style
+  endcapture
+
+
+  assign show_language = section.settings.show_language
+  if localization.available_languages.size <= 1
+    assign show_language = false
+  endif
+
+  assign show_country = section.settings.show_country
+  if localization.available_countries.size <= 1
+    assign show_country = false
+  endif
+
+  if show_country or show_language
+    capture localization_markup
+      render 'dropdown-localization', show_country: show_country, show_language: show_language, country_style: section.settings.country_selector_style, localization_position: section.settings.localization_position
+    endcapture
+  endif
+
+  assign bottom_row_blocks = ''
+
+  if section.settings.menu_row == 'bottom'
+    assign bottom_row_blocks = bottom_row_blocks | append: 'menu,'
+  endif
+
+  if section.settings.search_style != 'none'
+    if section.settings.search_row == 'bottom'
+      assign bottom_row_blocks = bottom_row_blocks | append: 'search,'
+    endif
+  endif
+
+  if section.settings.show_country or section.settings.show_language
+    if section.settings.localization_row == 'bottom'
+      assign bottom_row_blocks = bottom_row_blocks | append: 'localization,'
+    endif
+  endif
+
+  assign bottom_row_blocks = bottom_row_blocks | split: ',' | compact
+
+  if section.settings.section_height == 'compact'
+    assign header_height_class = ' header--compact'
+  endif
+
+  if bottom_row_blocks.size > 0 and section.settings.color_scheme_top.settings.background.rgb == section.settings.color_scheme_bottom.settings.background.rgb and section.settings.divider_width == 0
+    assign collapse_header_paddings_class = 'header--collapse-row-paddings'
+  endif
+
+  assign class = 'header'
+
+  if transparent_color_scheme
+    assign class = class | append: ' ' | append: transparent_color_scheme
+  endif
+
+  if section.settings.color_scheme_top.settings.background.alpha != 1
+    assign class = class | append: ' ' | append: 'header--inherit-color-scheme-on-menu-open'
+  endif
+
+  if header_height_class
+    assign class = class | append: ' ' | append: header_height_class
+  endif
+
+  if collapse_header_paddings_class
+    assign class = class | append: ' ' | append: collapse_header_paddings_class
+  endif
+%}
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    {% if settings.logo %}
+      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},
+    {% endif %}
+    "url": {{ request.origin | append: page.url | json }}
+  }
+</script>
+
+<header-component
+  id="header-component"
+  class="{{ class }}"
+  {% if transparent %}
+    transparent="{{ transparent }}"
+  {% endif %}
+  {% if sticky %}
+    sticky="{{ sticky }}"
+  {% endif %}
+  data-skip-node-update
+  data-scroll-direction="none"
+>
+  {% for row in rows %}
+    {% liquid
+      assign scheme = 'color_scheme_' | append: row
+      assign class = 'header__row header__row--[row] color-[row_scheme] section section--full-width-margin section--[section-width]' | replace: '[row]', row | replace: '[row_scheme]', section.settings[scheme] | replace: '[section-width]', section.settings.section_width
+
+      case row
+        when 'top'
+          assign first = mobile_menu
+
+          if bottom_row_blocks.size > 0 and section.settings.divider_size == 'page-width'
+            assign class = class | append: ' divider--page-width'
+          endif
+
+          if bottom_row_blocks.size > 0
+            assign border_bottom_setting_id = 'divider_width'
+          else
+            assign border_bottom_setting_id = 'border_width'
+          endif
+        when 'bottom'
+          assign first = ''
+          assign class = class | append: ' mobile:hidden'
+
+          assign border_bottom_setting_id = 'border_width'
+      endcase
+
+      assign style = '--border-bottom-width: [width]px; ' | replace: '[width]', section.settings[border_bottom_setting_id]
+
+      if row == 'top'
+        assign style = style | append: '--border-bottom-width-mobile: [width]px; ' | replace: '[width]', section.settings.border_width
+      endif
+    %}
+
+    {% capture content %}
+      {% render 'header-row',
+        row: row,
+        order: order,
+        settings: section.settings,
+        first: first,
+        logo: logo,
+        menu: menu,
+        actions: actions,
+        localization: localization_markup,
+        search: search,
+        mobile_search: mobile_search
+      %}
+    {% endcapture %}
+
+    {% assign content = content | strip %}
+    {% if content != blank %}
+      <div
+        class="{{ class | strip }}"
+        ref="headerRowTop"
+        {%- if style != blank -%}
+          style="{{ style | strip }}"
+        {%- endif -%}
+      >
+        <div class="header__columns spacing-style">
+          {{ content }}
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  {% if navigation_bar != blank %}
+    <div class="header__row header__row--mobile desktop:hidden color-{{ section.settings.color_scheme_bottom }}">
+      {{ navigation_bar }}
+    </div>
+  {% endif %}
+</header-component>
+
+<script
+  src="{{ 'header.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  body {
+    --header-height: 0px;
+    --header-group-height: var(--header-height);
+    --transparent-header-offset-boolean: 0; /* stylelint-disable-line declaration-property-value-disallowed-list */
+  }
+
+  body:has(> #header-group > header) {
+    --header-height: 60px;
+  }
+
+  body:has(> #header-group:empty) {
+    --header-group-height: 0px;
+  }
+
+  .header[transparent] {
+    --language-button-background-color: transparent;
+    --language-button-border-color: transparent;
+
+    /* used to apply transparency to .header__row, will only ever be transparent or unset */
+    --header-bg-color: transparent;
+
+    /* used to display the appropriate logo based on transparency state */
+    --header-logo-display: none;
+    --header-logo-inverse-display: block;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    /* transparent color scheme on .header should never apply its background color */
+    background-color: transparent;
+    z-index: var(--layer-overlay);
+
+    &[transparent='not-sticky'][data-sticky-state='active'],
+    /* Only show opaque background when hovering over menu items with children (mega menu)
+       Multiple selectors for performance: each simple :has() check is faster than one complex selector with multiple conditions */
+    &:has(.mega-menu__list:hover),
+    &:has(.menu-list__link[aria-haspopup]:is(:hover, [aria-expanded='true'], [data-animating])),
+    &:has(.menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'], [data-animating])) {
+      --header-logo-display: unset;
+      --header-logo-inverse-display: unset;
+      --header-bg-color: unset;
+      --color-foreground: inherit;
+      --color-foreground-rgb: inherit;
+      --color-background: inherit;
+      --color-background-rgb: inherit;
+      --color-border: inherit;
+      --color-border-rgb: inherit;
+
+      .header__row {
+        /* Faster transition for "in" animation */
+        transition: color var(--animation-values-fast), border-color var(--animation-values-fast),
+          background-color var(--animation-values-fast);
+      }
+    }
+
+    .header__row {
+      /* Slower transition for "out" animation */
+      transition: color var(--animation-values-slow), border-color var(--animation-values-slow),
+        background-color var(--animation-values-slow);
+    }
+  }
+
+  :is(.header[transparent]:not([data-sticky-state='active']), .header[transparent='always'][data-sticky-state='active'])
+    .header__row:not(
+      :has(
+          .mega-menu__list:hover,
+          .menu-list__link[aria-haspopup]:is(:hover, [aria-expanded='true'], [data-animating]),
+          .menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'], [data-animating])
+        )
+    ) {
+    /* while transparent, header-row ignores its color-scheme settings, pull from the header-component */
+    --color-foreground: inherit;
+    --color-foreground-rgb: inherit;
+    --color-border: inherit;
+    --color-border-rgb: inherit;
+    --color-primary-button-background: inherit;
+    --color-primary-button-text: inherit;
+  }
+
+  .header--inherit-color-scheme-on-menu-open:has(.mega-menu__list:hover) .header__row,
+  .header--inherit-color-scheme-on-menu-open:has(
+      .menu-list__link[aria-haspopup]:is(:hover, [aria-expanded='true'], [data-animating])
+    )
+    .header__row,
+  .header--inherit-color-scheme-on-menu-open:has(
+      .menu-list__list-item[slot='overflow'] .menu-list__link:is(:hover, [aria-expanded='true'], [data-animating])
+    )
+    .header__row {
+    --color-foreground: inherit;
+    --color-foreground-rgb: inherit;
+    --color-background: inherit;
+    --color-background-rgb: inherit;
+    --color-border: inherit;
+    --color-border-rgb: inherit;
+  }
+
+  .header-section {
+    position: relative;
+  }
+
+  #header-group:has(#header-component[sticky]) {
+    display: contents;
+  }
+
+  .header-section:has(> #header-component[sticky='always']),
+  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) {
+    position: sticky;
+
+    /* Use -1 instead of 0 so intersection observer can track sticky state */
+    top: -1px;
+    z-index: var(--layer-sticky);
+  }
+
+  .header[data-sticky-state] {
+    transition: opacity var(--animation-speed) var(--animation-easing);
+    opacity: 1;
+  }
+
+  .header[data-sticky-state='active'] {
+    view-transition-name: sticky-header;
+  }
+
+  .header[data-sticky-state='idle'],
+  .header[data-sticky-state='active'][data-animating] {
+    opacity: 0;
+  }
+
+  .header__row {
+    position: relative;
+
+    /* will default to bg from its color scheme unless --header-bg-color is transparent */
+    background-color: var(--header-bg-color, var(--color-background));
+  }
+
+  .header__row--top:not(.divider--page-width),
+  .header__row--top.divider--page-width .header__columns,
+  .header__row--bottom {
+    border-bottom: var(--border-bottom-width) solid var(--color-border);
+  }
+
+  @media screen and (max-width: 749px) {
+    .header__row--top:not(.divider--page-width),
+    .header__row--top.divider--page-width .header__columns {
+      border-bottom-width: var(--border-bottom-width-mobile);
+    }
+  }
+
+  .header__row.divider--page-width:not(.section--page-width) .header__columns {
+    @media screen and (min-width: 750px) {
+      padding-inline-start: 0;
+      padding-inline-end: 0;
+      margin-inline-start: var(--page-margin);
+      margin-inline-end: var(--page-margin);
+    }
+  }
+
+  .header__column {
+    display: flex;
+    align-items: center;
+
+    /* on mobile, header__column nodes are ignored to create a new grid-template-area based on all visible content */
+    @media screen and (max-width: 749px) {
+      display: contents;
+    }
+  }
+
+  .header__column--left,
+  .header__column--center {
+    gap: var(--gap-xl);
+    grid-area: left;
+  }
+
+  .header__column--center {
+    justify-content: center;
+    grid-area: center;
+
+    header-menu:only-child .overflow-menu::part(list) {
+      justify-content: center;
+    }
+  }
+
+  .header__column--right {
+    gap: var(--gap-xl);
+    justify-content: flex-end;
+    grid-area: right;
+
+    .overflow-menu::part(list) {
+      justify-content: flex-end;
+    }
+  }
+
+  /* Right Section Customization */
+  .header__column--right {
+    justify-content: {{ section.settings.right_section_alignment | default: 'flex-end' }};
+    gap: {{ section.settings.right_section_gap | default: 16 }}px;
+    padding: {{ section.settings.right_section_padding | default: 8 }}px;
+  }
+
+  /* Search Icon Customization */
+  .search-action,
+  .search-action .svg-wrapper,
+  .search-action .search-modal__button,
+  .search-action button {
+    width: {% case section.settings.search_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    height: {% case section.settings.search_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    color: {{ section.settings.search_icon_color | default: '#000000' }};
+    margin: {{ section.settings.search_icon_spacing | default: 8 }}px !important;
+    padding: {{ section.settings.search_icon_padding | default: 0 }}px !important;
+  }
+
+  /* Custom Search Icon */
+  {% if section.settings.search_icon_type == 'custom' and section.settings.search_icon_custom %}
+    .search-action .svg-wrapper img {
+      width: {{ section.settings.search_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.search_icon_height | default: 20 }}px !important;
+      display: block !important;
+      visibility: visible !important;
+    }
+  {% endif %}
+
+  /* ACCOUNT ICON VISIBILITY - FORCE SHOW */
+  <!-- DEBUG: account_icon_enabled = {{ section.settings.account_icon_enabled }} -->
+  {% comment %} FORCE ENABLE ACCOUNT ICON {% endcomment %}
+  {% assign force_account_enabled = true %}
+  {% if force_account_enabled %}
+    /* Force show account button with maximum specificity */
+    .header__column--right .header-actions .account-button,
+    header-actions .account-button,
+    .account-button {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      align-items: center;
+      justify-content: center;
+      width: auto !important;
+      height: auto !important;
+      min-width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+      min-height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+    }
+    
+    /* Show account popover only on desktop */
+    .account-popover {
+      display: block !important;
+      @media screen and (max-width: 749px) {
+        display: none !important;
+      }
+    }
+    
+    /* Hide the account button inside the popover component to prevent duplicates */
+    .account-popover .account-button {
+      display: none !important;
+    }
+    
+    /* Position the account popover correctly */
+    .account-popover__panel {
+      position: fixed !important;
+      top: calc(var(--header-height, 80px) + 10px) !important;
+      right: 20px !important;
+      left: auto !important;
+      transform: none !important;
+      z-index: 1000 !important;
+    }
+    
+    /* Show account drawer only on mobile */
+    .account-drawer {
+      @media screen and (max-width: 749px) {
+        display: block !important;
+      }
+      @media screen and (min-width: 750px) {
+        display: none !important;
+      }
+    }
+    
+    /* Ensure account button shows on mobile */
+    .account-button {
+      @media screen and (max-width: 749px) {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+    
+  {% else %}
+    /* Hide account icons when disabled - BUT FORCED ENABLED */
+    <!-- DEBUG: This should not show since force_account_enabled = true -->
+  {% endif %}
+
+  /* Account Icon Customization */
+  {% if section.settings.account_icon_enabled %}
+    .account-button,
+    .account-button button {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      padding: {{ section.settings.account_icon_padding | default: 0 }}px !important;
+      margin: {{ section.settings.account_icon_spacing | default: 8 }}px !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-button__icon {
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: {% case section.settings.account_icon_size %}
+        {% when 'small' %}16px
+        {% when 'medium' %}20px
+        {% when 'large' %}24px
+        {% else %}20px
+      {% endcase %};
+      height: {% case section.settings.account_icon_size %}
+        {% when 'small' %}16px
+        {% when 'medium' %}20px
+        {% when 'large' %}24px
+        {% else %}20px
+      {% endcase %};
+      color: {{ section.settings.account_icon_color | default: '#000000' }};
+      margin: {{ section.settings.account_icon_spacing | default: 8 }}px !important;
+      padding: {{ section.settings.account_icon_padding | default: 0 }}px !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-button__icon img {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      object-fit: contain;
+    }
+  {% endif %}
+
+  /* Custom Account Icon */
+  {% if section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom %}
+    .account-button__icon img {
+      width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      object-fit: contain !important;
+      border: none !important;
+      background: none !important;
+    }
+    
+    .account-button__icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+    }
+  {% endif %}
+
+  /* Force Show Account Icon */
+  {% if section.settings.force_show_account_icon %}
+    .account-popover,
+    .account-drawer,
+    .account-button,
+    .force-account-icon {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    .header-actions .account-button,
+    .header-actions .force-account-icon {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: var(--button-size) !important;
+      height: var(--button-size) !important;
+    }
+    .account-button__icon,
+    .force-account-icon .account-button__icon {
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    
+    /* Ensure custom icon images are visible when forced */
+    {% if section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom %}
+      .account-button__icon img {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+        height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+        object-fit: contain !important;
+      }
+    {% endif %}
+    
+  {% endif %}
+
+  /* Cart Icon Customization */
+  cart-icon,
+  cart-icon .svg-wrapper,
+  .header-actions__cart-icon,
+  .header-actions__action.action__cart,
+  .header-actions__action.action__cart a {
+    width: {% case section.settings.cart_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    height: {% case section.settings.cart_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    color: {{ section.settings.cart_icon_color | default: '#000000' }};
+    margin: {{ section.settings.cart_icon_spacing | default: 8 }}px !important;
+    padding: {{ section.settings.cart_icon_padding | default: 0 }}px !important;
+  }
+
+  /* Custom Cart Icon */
+  {% if section.settings.cart_icon_type == 'custom' and section.settings.cart_icon_custom %}
+    cart-icon .svg-wrapper img {
+      width: {{ section.settings.cart_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.cart_icon_height | default: 20 }}px !important;
+      display: block !important;
+      visibility: visible !important;
+    }
+  {% endif %}
+
+  /* Cart Bubble Customization */
+  .cart-bubble {
+    background-color: {{ section.settings.cart_bubble_color | default: '#ff0000' }};
+    color: {{ section.settings.cart_bubble_text_color | default: '#ffffff' }};
+  }
+
+  /* Hover Effects */
+  {% if section.settings.enable_hover_effects %}
+    .header-actions__action:hover,
+    .search-action .header-actions__action:hover {
+      background-color: {{ section.settings.hover_background_color | default: '#f5f5f5' }};
+      opacity: {{ section.settings.hover_opacity | default: 0.8 }};
+      transition: all 0.3s ease;
+    }
+  {% endif %}
+
+
+  /* Mobile Header Specific CSS */
+  @media screen and (max-width: 749px) {
+    .search-modal__button {
+      width: 50px;
+      padding: 0px !important;
+    }
+    .account-button .account-button__icon {
+      padding: 0px !important;
+      width: 20px;
+    }
+    .header-actions__action {
+      padding: 8px 6px;
+    }
+  }
+
+  .header__columns {
+    /* Three column layout */
+    --header-left: 1fr;
+    --header-center: auto;
+    --header-right: 1fr;
+    --header-template-columns: var(--header-left) var(--header-center) var(--header-right);
+
+    /* Mobile layout */
+    --header-mobile-bookend: 44px;
+
+    display: grid;
+    grid-template-areas: 'left center right';
+    grid-gap: var(--gap-xl);
+    grid-template-columns: var(--header-template-columns);
+
+    /* If menu is in center column */
+    &:has(.header__column--center header-menu) {
+      --header-center: auto;
+      --header-left: minmax(max-content, 1fr);
+      --header-right: minmax(max-content, 1fr);
+    }
+
+    /* If there is no center column, make the column the menu is in grow eagerly */
+    &:where(:not(:has(.header__column--center))) {
+      @media screen and (min-width: 750px) {
+        --header-template-columns: var(--header-left) var(--header-right);
+
+        grid-template-areas: 'left right';
+      }
+
+      /* If the header-menu is in the right column */
+      &:has(.header__column--right header-menu) {
+        --header-right: auto;
+        --header-left: minmax(max-content, 1fr);
+      }
+
+      /* If the header-menu is in the left column */
+      &:has(.header__column--left header-menu) {
+        --header-left: auto;
+        --header-right: minmax(max-content, 1fr);
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      --header-template-columns: var(--header-mobile-bookend) var(--header-mobile-bookend) 1fr
+        var(--header-mobile-bookend) var(--header-mobile-bookend);
+
+      grid-template-areas: 'leftA leftB center rightA rightB';
+      grid-column: span 3;
+      column-gap: 0;
+      align-items: center;
+      padding-block: 0;
+      padding-inline: 0 var(--padding-3xs);
+
+      .header-logo {
+        grid-area: center;
+      }
+
+      &:not(:has(header-actions)) .search-action {
+        grid-area: leftB;
+      }
+
+      &:not(:has(.account-actions)) .search-action {
+        grid-area: rightA;
+      }
+
+      .search-action {
+        grid-area: leftB;
+      }
+
+      header-actions {
+        grid-area: rightB;
+      }
+    }
+  }
+
+  /* Single column layout if there are no columns within */
+  .header__columns:not(:has(.header__column)) {
+    grid-template-columns: 1fr;
+  }
+
+  /* Check for hover support to avoid unnecessary expensive recalculations when tapping on mobile */
+  @media (hover: hover) {
+    /* Column-specific dimming effect when any interactive element is hovered
+      Multiple selectors for performance: each simple :has() check is faster than one complex selector with multiple conditions */
+    .header__column:has(header-menu:hover),
+    .header__column:has(.header-actions__action:hover),
+    .header__column:has(.dropdown-localization__button:hover),
+    .header__column:has(.header__icon--menu:hover) {
+      header-menu:not(:hover),
+      .header-actions__action:not(:hover),
+      .dropdown-localization__button:not(:hover),
+      .header__icon--menu:not(:hover) {
+        opacity: var(--opacity-subdued-text);
+        transition: opacity var(--animation-speed) var(--animation-easing);
+      }
+    }
+  }
+
+  /* Ensure smooth transitions for all interactive elements */
+  header-menu,
+  .header-actions__action,
+  .dropdown-localization__button,
+  .header__icon--menu {
+    transition: opacity var(--animation-speed) var(--animation-easing);
+  }
+
+  /* Extend hover area through padding to prevent flickering on actual menu items */
+  .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
+  .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
+  .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
+    margin-block: calc(-2 * var(--header-padding));
+    padding-block: calc(2 * var(--header-padding));
+    margin-inline: calc(-1 * var(--gap-xl) / 2);
+    padding-inline: calc(var(--gap-xl) / 2);
+  }
+
+  /* Set header paddings based on height setting */
+  .header {
+    --header-padding: var(--padding-sm);
+    --font-paragraph--line-height: 1;
+  }
+
+  .header.header--compact {
+    --header-padding: var(--padding-2xs);
+  }
+
+  .header__columns {
+    --padding-block-start: var(--header-padding);
+    --padding-block-end: var(--header-padding);
+  }
+
+  .header:not(.header--compact) .header__row--bottom {
+    --header-padding: var(--padding-xs);
+  }
+
+  .header--collapse-row-paddings {
+    .header__row--top .header__columns {
+      --padding-block-end: 0px;
+    }
+
+    .header__row--bottom .header__columns {
+      --padding-block-start: 0px;
+    }
+  }
+
+  /* When the header is transparent, add a margin to a potential header-section below it */
+  .header-section:has(.header[transparent]) + .shopify-section {
+    margin-top: var(--header-height);
+  }
+
+  /* When the header is transparent, and when there is no header-section below it, offset the first main-section with
+   * the height of the header
+   */
+
+  main > .shopify-section:first-child .section:not(.disable-section-top-offset) {
+    &.spacing-style,
+    .spacing-style {
+      --section-top-offset: calc(var(--header-height) * var(--transparent-header-offset-boolean));
+
+      /* Any nested sections should not be offset */
+      :is(.spacing-style, .inherit-spacing) {
+        --section-top-offset: 0px;
+      }
+    }
+
+    /* Make sticky content immediately stick to the top of the page */
+    .sticky-content {
+      margin-top: calc(var(--header-height) * var(--transparent-header-offset-boolean) * -1);
+    }
+  }
+
+  /* DESKTOP LAYOUT - Show desktop elements, hide mobile elements */
+  @media screen and (min-width: 750px) {
+    /* Completely hide mobile elements on desktop */
+    .mobile_search,
+    .first,
+    .header__column--left .mobile_search,
+    .header__column--left .first,
+    .header__column--center .mobile_search,
+    .header__column--center .first,
+    .header__column--right .mobile_search,
+    .header__column--right .first {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    /* Show desktop elements */
+    .menu,
+    .search {
+      display: block !important;
+      visibility: visible !important;
+    }
+
+    /* Ensure desktop layout works properly */
+    .header__column--left {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+    }
+    .header__column--center {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .header__column--right {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+    }
+
+    /* Desktop specific positioning */
+    .header__column--left .logo {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .header__column--center .menu {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .header__column--right .search,
+    .header__column--right .actions {
+      display: flex !important;
+      visibility: visible !important;
+    }
+  }
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.header",
+  "tag": "header",
+  "class": "header-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:content.logo"
+    },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "t:settings.position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "t:content.menu"
+    },
+    {
+      "type": "select",
+      "id": "menu_position",
+      "label": "t:settings.position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "menu_row",
+      "label": "t:settings.row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "header",
+      "content": "t:content.customer_account"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:content.manage_customer_accounts"
+    },
+    {
+      "type": "header",
+      "content": "t:content.search"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "t:settings.search_icon",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "search_position",
+      "label": "t:settings.search_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "right",
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "select",
+      "id": "search_row",
+      "label": "t:settings.search_row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top",
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "header",
+      "content": "Right Section Controls"
+    },
+    {
+      "type": "paragraph",
+      "content": "Customize the appearance and behavior of items in the header right section (Search, Account, Cart, etc.)"
+    },
+    {
+      "type": "header",
+      "content": "Search Icon Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "search_icon_enabled",
+      "label": "Enable Search Icon",
+      "default": true,
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "select",
+      "id": "search_icon_type",
+      "label": "Search Icon Type",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (Magnifying Glass)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Upload"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "search_icon_custom",
+      "label": "Custom Search Icon",
+      "info": "Upload a custom search icon (SVG recommended for best quality)",
+      "visible_if": "{{ section.settings.search_icon_type == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "search_icon_size",
+      "label": "Search Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (16px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (20px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (24px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "search_icon_color",
+      "label": "Search Icon Color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.search_icon_enabled and section.settings.search_icon_type == 'default' }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_spacing",
+      "label": "Search Icon Spacing",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_padding",
+      "label": "Search Icon Padding",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_width",
+      "label": "Custom Search Icon Width",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.search_icon_type == 'custom' and section.settings.search_icon_custom }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_height",
+      "label": "Custom Search Icon Height",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.search_icon_type == 'custom' and section.settings.search_icon_custom }}"
+    },
+    {
+      "type": "header",
+      "content": "Account Icon Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "account_icon_enabled",
+      "label": "Enable Account Icon",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "account_icon_type",
+      "label": "Account Icon Type",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (User Icon)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Upload"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "account_icon_custom",
+      "label": "Custom Account Icon",
+      "info": "Upload a custom account icon (SVG recommended for best quality)",
+      "visible_if": "{{ section.settings.account_icon_type == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "account_icon_size",
+      "label": "Account Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (16px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (20px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (24px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "account_icon_color",
+      "label": "Account Icon Color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.account_icon_enabled and section.settings.account_icon_type == 'default' }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_spacing",
+      "label": "Account Icon Spacing",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_padding",
+      "label": "Account Icon Padding",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_width",
+      "label": "Custom Account Icon Width",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_height",
+      "label": "Custom Account Icon Height",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "force_show_account_icon",
+      "label": "Always Show Account Icon",
+      "info": "Show account icon even when customer accounts are disabled",
+      "default": false,
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "header",
+      "content": "Cart Icon Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "cart_icon_enabled",
+      "label": "Enable Cart Icon",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "cart_icon_type",
+      "label": "Cart Icon Type",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (Shopping Bag)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Upload"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "cart_icon_custom",
+      "label": "Custom Cart Icon",
+      "info": "Upload a custom cart icon (SVG recommended for best quality)",
+      "visible_if": "{{ section.settings.cart_icon_type == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "cart_icon_size",
+      "label": "Cart Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (16px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (20px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (24px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "cart_icon_color",
+      "label": "Cart Icon Color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.cart_icon_enabled and section.settings.cart_icon_type == 'default' }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_spacing",
+      "label": "Cart Icon Spacing",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_padding",
+      "label": "Cart Icon Padding",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_width",
+      "label": "Custom Cart Icon Width",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.cart_icon_type == 'custom' and section.settings.cart_icon_custom }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_height",
+      "label": "Custom Cart Icon Height",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.cart_icon_type == 'custom' and section.settings.cart_icon_custom }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "cart_bubble_enabled",
+      "label": "Show Cart Item Count Bubble",
+      "default": true,
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "cart_bubble_color",
+      "label": "Cart Bubble Background Color",
+      "default": "#ff0000",
+      "visible_if": "{{ section.settings.cart_bubble_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "cart_bubble_text_color",
+      "label": "Cart Bubble Text Color",
+      "default": "#ffffff",
+      "visible_if": "{{ section.settings.cart_bubble_enabled }}"
+    },
+    {
+      "type": "header",
+      "content": "Right Section Layout"
+    },
+    {
+      "type": "select",
+      "id": "right_section_alignment",
+      "label": "Right Section Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "flex-end"
+    },
+    {
+      "type": "range",
+      "id": "right_section_gap",
+      "label": "Gap Between Icons",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "right_section_padding",
+      "label": "Right Section Padding",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Hover Effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_effects",
+      "label": "Enable Hover Effects",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "hover_background_color",
+      "label": "Hover Background Color",
+      "default": "#f5f5f5",
+      "visible_if": "{{ section.settings.enable_hover_effects }}"
+    },
+    {
+      "type": "range",
+      "id": "hover_opacity",
+      "label": "Hover Opacity",
+      "min": 0.1,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.8,
+      "visible_if": "{{ section.settings.enable_hover_effects }}"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_icons_enabled",
+      "label": "Show Icons on Mobile",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "mobile_icon_size",
+      "label": "Mobile Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (14px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (18px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (22px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.mobile_icons_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_icon_spacing",
+      "label": "Mobile Icon Spacing",
+      "min": 0,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ section.settings.mobile_icons_enabled }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.localization"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country",
+      "label": "t:settings.country_region",
+      "info": "t:info.manage_countries_regions",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "country_selector_style",
+      "label": "t:settings.flag",
+      "default": true,
+      "visible_if": "{{ section.settings.show_country }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_language",
+      "label": "t:settings.language_selector",
+      "info": "t:info.manage_languages",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "localization_font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "heading",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "subheading",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "body",
+          "label": "t:options.body"
+        },
+        {
+          "value": "accent",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "heading",
+      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "select",
+      "id": "localization_font_size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "0.625rem",
+          "label": "10px"
+        },
+        {
+          "value": "0.75rem",
+          "label": "12px"
+        },
+        {
+          "value": "0.875rem",
+          "label": "14px"
+        },
+        {
+          "value": "1rem",
+          "label": "16px"
+        },
+        {
+          "value": "1.125rem",
+          "label": "18px"
+        }
+      ],
+      "default": "1rem"
+    },
+    {
+      "type": "select",
+      "id": "localization_position",
+      "label": "t:settings.position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "right",
+      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "select",
+      "id": "localization_row",
+      "label": "t:settings.row",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "top",
+      "visible_if": "{{ section.settings.show_country or section.settings.show_language }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "section_height",
+      "label": "t:settings.height",
+      "options": [
+        {
+          "value": "compact",
+          "label": "t:options.compact"
+        },
+        {
+          "value": "standard",
+          "label": "t:options.standard"
+        }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "enable_sticky_header",
+      "label": "t:settings.sticky_header",
+      "options": [
+        {
+          "value": "always",
+          "label": "t:options.always"
+        },
+        {
+          "value": "scroll-up",
+          "label": "t:options.on_scroll_up"
+        },
+        {
+          "value": "never",
+          "label": "t:options.never"
+        }
+      ],
+      "default": "always"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "label": "t:settings.divider_thickness",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "select",
+      "id": "divider_size",
+      "label": "t:settings.divider_width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "visible_if": "{{ section.settings.divider_width > 0 and section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "t:settings.border_width",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_top",
+      "label": "t:settings.default",
+      "default": "primary"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_bottom",
+      "label": "t:settings.bottom_row",
+      "default": "primary",
+      "visible_if": "{{ section.settings.menu_row == 'bottom' or section.settings.localization_row == 'bottom' or section.settings.search_row == 'bottom' }}"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_transparent",
+      "label": "t:settings.inverse",
+      "default": "primary",
+      "visible_if": "{{ section.settings.enable_transparent_header_home or section.settings.enable_transparent_header_product or section.settings.enable_transparent_header_collection }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.home_page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header_home",
+      "label": "t:settings.transparent_background",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "home_color_scheme",
+      "label": "t:settings.color_scheme",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "inverse",
+          "label": "t:options.inverse"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.enable_transparent_header_home }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.product_page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header_product",
+      "label": "t:settings.transparent_background",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "product_color_scheme",
+      "label": "t:settings.color_scheme",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "inverse",
+          "label": "t:options.inverse"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.enable_transparent_header_product }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.collection_page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header_collection",
+      "label": "t:settings.transparent_background",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "collection_color_scheme",
+      "label": "t:settings.color_scheme",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "inverse",
+          "label": "t:options.inverse"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
+    }
+  ],
+  "presets": []
+}
+{% endschema %}

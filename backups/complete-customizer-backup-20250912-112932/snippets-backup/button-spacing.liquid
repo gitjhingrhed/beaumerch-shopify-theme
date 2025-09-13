@@ -1,0 +1,104 @@
+{% comment %}
+  Button Spacing Snippet
+  Applies custom padding and margin settings from theme settings to buttons
+{% endcomment %}
+
+{% style %}
+  /* Primary Button Spacing */
+  .button--primary,
+  .btn--primary,
+  .button-primary,
+  .primary-button,
+  [class*="button"][class*="primary"],
+  .hero-banner-image-marquee__shop-button {
+    padding-top: {{ settings.primary_button_padding_top | default: 16 }}px !important;
+    padding-bottom: {{ settings.primary_button_padding_bottom | default: 16 }}px !important;
+    padding-left: {{ settings.primary_button_padding_left | default: 32 }}px !important;
+    padding-right: {{ settings.primary_button_padding_right | default: 32 }}px !important;
+    margin-top: {{ settings.primary_button_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.primary_button_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.primary_button_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.primary_button_margin_right | default: 0 }}px !important;
+  }
+
+  /* Secondary Button Spacing */
+  .button--secondary,
+  .btn--secondary,
+  .button-secondary,
+  .secondary-button,
+  [class*="button"][class*="secondary"] {
+    padding-top: {{ settings.secondary_button_padding_top | default: 16 }}px !important;
+    padding-bottom: {{ settings.secondary_button_padding_bottom | default: 16 }}px !important;
+    padding-left: {{ settings.secondary_button_padding_left | default: 32 }}px !important;
+    padding-right: {{ settings.secondary_button_padding_right | default: 32 }}px !important;
+    margin-top: {{ settings.secondary_button_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.secondary_button_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.secondary_button_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.secondary_button_margin_right | default: 0 }}px !important;
+  }
+
+  /* Tertiary Button Spacing */
+  .button-tertiary,
+  .btn-tertiary,
+  .tertiary-button,
+  [class*="button"][class*="tertiary"] {
+    padding-top: {{ settings.tertiary_button_padding_top | default: 12 }}px !important;
+    padding-bottom: {{ settings.tertiary_button_padding_bottom | default: 12 }}px !important;
+    padding-left: {{ settings.tertiary_button_padding_left | default: 24 }}px !important;
+    padding-right: {{ settings.tertiary_button_padding_right | default: 24 }}px !important;
+    margin-top: {{ settings.tertiary_button_margin_top | default: 0 }}px !important;
+    margin-bottom: {{ settings.tertiary_button_margin_bottom | default: 0 }}px !important;
+    margin-left: {{ settings.tertiary_button_margin_left | default: 0 }}px !important;
+    margin-right: {{ settings.tertiary_button_margin_right | default: 0 }}px !important;
+  }
+
+  /* Generic Button Classes */
+  .button,
+  .btn,
+  [class*="button"]:not([class*="primary"]):not([class*="secondary"]):not([class*="tertiary"]) {
+    padding-top: {{ settings.primary_button_padding_top | default: 16 }}px;
+    padding-bottom: {{ settings.primary_button_padding_bottom | default: 16 }}px;
+    padding-left: {{ settings.primary_button_padding_left | default: 32 }}px;
+    padding-right: {{ settings.primary_button_padding_right | default: 32 }}px;
+    margin-top: {{ settings.primary_button_margin_top | default: 0 }}px;
+    margin-bottom: {{ settings.primary_button_margin_bottom | default: 0 }}px;
+    margin-left: {{ settings.primary_button_margin_left | default: 0 }}px;
+    margin-right: {{ settings.primary_button_margin_right | default: 0 }}px;
+  }
+
+  /* Responsive adjustments */
+  @media screen and (max-width: 768px) {
+    .button--primary,
+    .btn--primary,
+    .button-primary,
+    .primary-button,
+    [class*="button"][class*="primary"],
+    .hero-banner-image-marquee__shop-button {
+      padding-top: {{ settings.primary_button_padding_top | default: 16 | divided_by: 1.2 }}px !important;
+      padding-bottom: {{ settings.primary_button_padding_bottom | default: 16 | divided_by: 1.2 }}px !important;
+      padding-left: {{ settings.primary_button_padding_left | default: 32 | divided_by: 1.2 }}px !important;
+      padding-right: {{ settings.primary_button_padding_right | default: 32 | divided_by: 1.2 }}px !important;
+    }
+
+    .button--secondary,
+    .btn--secondary,
+    .button-secondary,
+    .secondary-button,
+    [class*="button"][class*="secondary"] {
+      padding-top: {{ settings.secondary_button_padding_top | default: 16 | divided_by: 1.2 }}px !important;
+      padding-bottom: {{ settings.secondary_button_padding_bottom | default: 16 | divided_by: 1.2 }}px !important;
+      padding-left: {{ settings.secondary_button_padding_left | default: 32 | divided_by: 1.2 }}px !important;
+      padding-right: {{ settings.secondary_button_padding_right | default: 32 | divided_by: 1.2 }}px !important;
+    }
+
+    .button-tertiary,
+    .btn-tertiary,
+    .tertiary-button,
+    [class*="button"][class*="tertiary"] {
+      padding-top: {{ settings.tertiary_button_padding_top | default: 12 | divided_by: 1.2 }}px !important;
+      padding-bottom: {{ settings.tertiary_button_padding_bottom | default: 12 | divided_by: 1.2 }}px !important;
+      padding-left: {{ settings.tertiary_button_padding_left | default: 24 | divided_by: 1.2 }}px !important;
+      padding-right: {{ settings.tertiary_button_padding_right | default: 24 | divided_by: 1.2 }}px !important;
+    }
+  }
+{% endstyle %}

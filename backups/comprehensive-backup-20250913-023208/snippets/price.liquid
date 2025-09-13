@@ -1,0 +1,159 @@
+{%- doc -%}
+  This snippet is used to render a product card.
+  It is used in the product block,featured product block, and the product card block.
+
+  @param {product} product_resource - The product to render
+  @param {boolean} [show_unit_price] - Whether to show the unit price
+  @param {boolean} [show_sale_price_first] - Whether to show the sale price first
+{%- enddoc -%}
+
+{%- liquid
+  assign show_unit_price = show_unit_price | default: false
+  assign show_sale_price_first = show_sale_price_first | default: false
+  assign selected_variant = product_resource.selected_or_first_available_variant
+  assign price = selected_variant.price
+  assign compare_at_price = selected_variant.compare_at_price
+  
+  # Price color settings
+  assign price_color = price_color | default: ''
+  assign sale_price_color = sale_price_color | default: ''
+  assign compare_price_color = compare_price_color | default: ''
+  
+  # Sale price typography settings
+  assign sale_price_font = sale_price_font | default: ''
+  assign sale_price_font_size = sale_price_font_size | default: ''
+  assign sale_price_font_weight = sale_price_font_weight | default: ''
+  assign sale_price_text_transform = sale_price_text_transform | default: ''
+  assign sale_price_letter_spacing = sale_price_letter_spacing | default: 0
+  assign sale_price_text_decoration = sale_price_text_decoration | default: ''
+  
+  # Compare price typography settings
+  assign compare_price_font = compare_price_font | default: ''
+  assign compare_price_font_size = compare_price_font_size | default: ''
+  assign compare_price_font_weight = compare_price_font_weight | default: ''
+  assign compare_price_text_transform = compare_price_text_transform | default: ''
+  assign compare_price_letter_spacing = compare_price_letter_spacing | default: 0
+  assign compare_price_text_decoration = compare_price_text_decoration | default: ''
+  
+  # Compare price background and border settings
+  assign compare_price_background_color = compare_price_background_color | default: ''
+  assign compare_price_border_color = compare_price_border_color | default: ''
+  assign compare_price_border_width = compare_price_border_width | default: 0
+  assign compare_price_border_radius = compare_price_border_radius | default: 0
+  assign compare_price_padding_top = compare_price_padding_top | default: 0
+  assign compare_price_padding_bottom = compare_price_padding_bottom | default: 0
+  assign compare_price_padding_left = compare_price_padding_left | default: 0
+  assign compare_price_padding_right = compare_price_padding_right | default: 0
+  
+  # Regular price typography settings
+  assign regular_price_font = regular_price_font | default: ''
+  assign regular_price_font_size = regular_price_font_size | default: ''
+  assign regular_price_font_weight = regular_price_font_weight | default: ''
+  assign regular_price_text_transform = regular_price_text_transform | default: ''
+  assign regular_price_letter_spacing = regular_price_letter_spacing | default: 0
+  assign regular_price_text_decoration = regular_price_text_decoration | default: ''
+
+  assign show_compare_price = false
+  if compare_at_price > price
+    assign show_compare_price = true
+  endif
+
+  if product_resource == blank
+    assign price = 1999
+  endif
+
+  # Checks if product handle matches the closest product's handle (i.e. product page)
+  # and if the currency code is enabled for product pages
+  if product.handle == closest.product.handle and settings.currency_code_enabled_product_pages
+    assign price = price | money_with_currency
+    assign compare_at_price = compare_at_price | money_with_currency
+
+    # Checks if product handle does not match the closest product's handle (i.e. product card)
+    # and if the currency code is enabled for product cards
+  elsif product.handle != closest.product.handle and settings.currency_code_enabled_product_cards
+    assign price = price | money_with_currency
+    assign compare_at_price = compare_at_price | money_with_currency
+
+  else
+    assign price = price | money
+    assign compare_at_price = compare_at_price | money
+  endif
+-%}
+
+<div ref="priceContainer">
+  <!-- Debug: price_color = "{{ price_color }}", sale_price_color = "{{ sale_price_color }}", compare_price_color = "{{ compare_price_color }}" -->
+  {% if show_sale_price_first == false and show_compare_price %}
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+      <span class="compare-at-price"{% if compare_price_color != '' or compare_price_font != '' or compare_price_font_size != '' or compare_price_font_weight != '' or compare_price_text_transform != '' or compare_price_letter_spacing != 0 or compare_price_text_decoration != '' or compare_price_background_color != '' or compare_price_border_width != 0 or compare_price_border_radius != 0 or compare_price_padding_top != 0 or compare_price_padding_bottom != 0 or compare_price_padding_left != 0 or compare_price_padding_right != 0 %} style="
+        {% if compare_price_color != '' %}color: {{ compare_price_color }} !important;{% else %}color: red !important;{% endif %}
+        {% if compare_price_font != '' %}font-family: {{ compare_price_font }};{% endif %}
+        {% if compare_price_font_size != '' %}font-size: {{ compare_price_font_size }};{% endif %}
+        {% if compare_price_font_weight != '' %}font-weight: {{ compare_price_font_weight }};{% endif %}
+        {% if compare_price_text_transform != '' %}text-transform: {{ compare_price_text_transform }};{% endif %}
+        {% if compare_price_letter_spacing != 0 %}letter-spacing: {{ compare_price_letter_spacing }}px;{% endif %}
+        {% if compare_price_text_decoration != '' %}text-decoration: {{ compare_price_text_decoration }};{% endif %}
+        {% if compare_price_background_color != '' %}background-color: {{ compare_price_background_color }};{% endif %}
+        {% if compare_price_border_width != 0 %}border: {{ compare_price_border_width }}px solid {{ compare_price_border_color }};{% endif %}
+        {% if compare_price_border_radius != 0 %}border-radius: {{ compare_price_border_radius }}px;{% endif %}
+        {% if compare_price_padding_top != 0 or compare_price_padding_bottom != 0 or compare_price_padding_left != 0 or compare_price_padding_right != 0 %}padding: {{ compare_price_padding_top }}px {{ compare_price_padding_right }}px {{ compare_price_padding_bottom }}px {{ compare_price_padding_left }}px;{% endif %}
+      "{% else %} style="color: red !important;"{% endif %}>{{- compare_at_price -}}</span>
+    </span>
+  {% endif %}
+
+  {% if show_compare_price %}
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+      <span class="price"{% if sale_price_color != '' or sale_price_font != '' or sale_price_font_size != '' or sale_price_font_weight != '' or sale_price_text_transform != '' or sale_price_letter_spacing != 0 or sale_price_text_decoration != '' %} style="
+        {% if sale_price_color != '' %}color: {{ sale_price_color }} !important;{% else %}color: blue !important;{% endif %}
+        {% if sale_price_font != '' %}font-family: {{ sale_price_font }};{% endif %}
+        {% if sale_price_font_size != '' %}font-size: {{ sale_price_font_size }};{% endif %}
+        {% if sale_price_font_weight != '' %}font-weight: {{ sale_price_font_weight }};{% endif %}
+        {% if sale_price_text_transform != '' %}text-transform: {{ sale_price_text_transform }};{% endif %}
+        {% if sale_price_letter_spacing != 0 %}letter-spacing: {{ sale_price_letter_spacing }}px;{% endif %}
+        {% if sale_price_text_decoration != '' %}text-decoration: {{ sale_price_text_decoration }};{% endif %}
+      "{% else %} style="color: green !important;"{% endif %}>{{ price | default: '&nbsp;' }}</span>
+    </span>
+  {% else %}
+    <span class="price"{% if price_color != '' or regular_price_font != '' or regular_price_font_size != '' or regular_price_font_weight != '' or regular_price_text_transform != '' or regular_price_letter_spacing != 0 or regular_price_text_decoration != '' %} style="
+      {% if price_color != '' %}color: {{ price_color }} !important;{% else %}color: orange !important;{% endif %}
+      {% if regular_price_font != '' %}font-family: {{ regular_price_font }};{% endif %}
+      {% if regular_price_font_size != '' %}font-size: {{ regular_price_font_size }};{% endif %}
+      {% if regular_price_font_weight != '' %}font-weight: {{ regular_price_font_weight }};{% endif %}
+      {% if regular_price_text_transform != '' %}text-transform: {{ regular_price_text_transform }};{% endif %}
+      {% if regular_price_letter_spacing != 0 %}letter-spacing: {{ regular_price_letter_spacing }}px;{% endif %}
+      {% if regular_price_text_decoration != '' %}text-decoration: {{ regular_price_text_decoration }};{% endif %}
+    "{% else %} style="color: orange !important;"{% endif %}>{{ price | default: '&nbsp;' }}</span>
+  {% endif %}
+
+  {% if show_sale_price_first == true and show_compare_price %}
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+      <span class="compare-at-price"{% if compare_price_color != '' or compare_price_font != '' or compare_price_font_size != '' or compare_price_font_weight != '' or compare_price_text_transform != '' or compare_price_letter_spacing != 0 or compare_price_text_decoration != '' or compare_price_background_color != '' or compare_price_border_width != 0 or compare_price_border_radius != 0 or compare_price_padding_top != 0 or compare_price_padding_bottom != 0 or compare_price_padding_left != 0 or compare_price_padding_right != 0 %} style="
+        {% if compare_price_color != '' %}color: {{ compare_price_color }} !important;{% else %}color: red !important;{% endif %}
+        {% if compare_price_font != '' %}font-family: {{ compare_price_font }};{% endif %}
+        {% if compare_price_font_size != '' %}font-size: {{ compare_price_font_size }};{% endif %}
+        {% if compare_price_font_weight != '' %}font-weight: {{ compare_price_font_weight }};{% endif %}
+        {% if compare_price_text_transform != '' %}text-transform: {{ compare_price_text_transform }};{% endif %}
+        {% if compare_price_letter_spacing != 0 %}letter-spacing: {{ compare_price_letter_spacing }}px;{% endif %}
+        {% if compare_price_text_decoration != '' %}text-decoration: {{ compare_price_text_decoration }};{% endif %}
+        {% if compare_price_background_color != '' %}background-color: {{ compare_price_background_color }};{% endif %}
+        {% if compare_price_border_width != 0 %}border: {{ compare_price_border_width }}px solid {{ compare_price_border_color }};{% endif %}
+        {% if compare_price_border_radius != 0 %}border-radius: {{ compare_price_border_radius }}px;{% endif %}
+        {% if compare_price_padding_top != 0 or compare_price_padding_bottom != 0 or compare_price_padding_left != 0 or compare_price_padding_right != 0 %}padding: {{ compare_price_padding_top }}px {{ compare_price_padding_right }}px {{ compare_price_padding_bottom }}px {{ compare_price_padding_left }}px;{% endif %}
+      "{% else %} style="color: red !important;"{% endif %}>{{- compare_at_price -}}</span>
+    </span>
+  {% endif %}
+  {%- if selected_variant.unit_price and show_unit_price %}
+    {%- liquid
+      if product.handle == closest.product.handle and settings.currency_code_enabled_product_pages
+        assign unit_price = selected_variant.unit_price | money_with_currency
+      elsif product.handle != closest.product.handle and settings.currency_code_enabled_product_cards
+        assign unit_price = selected_variant.unit_price | money_with_currency
+      else
+        assign unit_price = selected_variant.unit_price | money
+      endif
+    -%}
+    {% render 'unit-price', price: unit_price, measurement: selected_variant.unit_price_measurement %}
+  {%- endif -%}
+</div>

@@ -1,0 +1,40 @@
+{%- doc -%}
+  Renders the cart icon, which displays the number of items in the cart via a bubble.
+{%- enddoc -%}
+<cart-icon
+  class="
+    header-actions__cart-icon
+    {% unless cart == empty %} header-actions__cart-icon--has-cart{% endunless %}
+  "
+  data-testid="cart-icon"
+>
+  <span
+    class="svg-wrapper"
+    aria-hidden="true"
+  >
+    {% if section.settings.cart_icon_type == 'custom' and section.settings.cart_icon_custom %}
+      <img 
+        src="{{ section.settings.cart_icon_custom | image_url }}" 
+        alt="Cart"
+        style="width: {{ section.settings.cart_icon_width | default: 20 }}px; height: {{ section.settings.cart_icon_height | default: 20 }}px; object-fit: contain;"
+      >
+    {% else %}
+      {{ 'icon-cart.svg' | inline_asset_content }}
+    {% endif %}
+  </span>
+
+  {% render 'cart-bubble', limit: 100, live_region: true, test_id: test_id %}
+</cart-icon>
+
+{% stylesheet %}
+  cart-icon:has(.cart-bubble__text-count:empty) {
+    --cart-bubble-size: 10px;
+    --cart-bubble-top: 9px;
+    --cart-bubble-right: 9px;
+
+    .svg-wrapper {
+      --cart-bubble-top: 4px;
+      --cart-bubble-right: 4px;
+    }
+  }
+{% endstylesheet %}

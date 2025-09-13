@@ -1,0 +1,791 @@
+
+
+{% assign has_applied_colour_filter = false %}
+{% if collection.filters %}
+  {% for filter in collection.filters %}
+    {% if filter.type == 'list' and filter.param_name contains 'color' %}
+      {% if filter.active_values.size > 0 %}
+        {% assign has_applied_colour_filter = true %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% capture children %}
+  {% unless closest.product == blank %}
+    {% render 'product-card-badges', product: closest.product %}
+    {%  if settings.quick_add or settings.mobile_quick_add %}
+      {% render 'quick-add', product: closest.product, section_id: section.id %}
+    {% endif %}
+  {% endunless %}
+{% endcapture %}
+
+{% render 'card-gallery', children: children, has_applied_colour_filter: has_applied_colour_filter %}
+
+{% # Title and price for the zoomed out grid view %}
+<div class="product-grid-view-zoom-out--details">
+  {% if closest.product == blank %}
+    <h3 class="h4">{{ 'content.product_card_placeholder' | t }}</h3>
+  {% else %}
+    <h3 class="h4">{{ closest.product.title }}</h3>
+    <div class="h6 zoom-out-price">
+      <product-price data-product-id="{{ closest.product.id }}">
+        {% render 'price', product_resource: closest.product, show_unit_price: false %}
+      </product-price>
+    </div>
+  {% endif %}
+</div>
+
+{% javascript %}
+  // Function to get default price block settings from the main collection
+  function getDefaultPriceBlockSettings() {
+    // Look for the default price block in the main collection
+    const defaultPriceBlock = document.querySelector('.product-grid .product-card .text-block[data-block-id]');
+    if (!defaultPriceBlock) {
+      // Fallback: return default settings from collection.json
+      return {
+        type_preset: 'h6',
+        font: 'var(--font-body--family)',
+        font_size: '1rem',
+        line_height: 'normal',
+        letter_spacing: 'normal',
+        case: 'none',
+        color: 'var(--color-foreground)',
+        alignment: 'left',
+        
+        // Compare Price Typography settings
+        compare_price_font: 'var(--font-body--family)',
+        compare_price_font_size: '0.875rem',
+        compare_price_font_weight: '400',
+        compare_price_text_transform: 'none',
+        compare_price_letter_spacing: 0,
+        compare_price_text_decoration: 'line-through',
+        compare_price_background_color: '#ffffff',
+        compare_price_border_color: '#000000',
+        compare_price_border_width: 0,
+        compare_price_border_radius: 0,
+        compare_price_padding_top: 0,
+        compare_price_padding_bottom: 0,
+        compare_price_padding_left: 0,
+        compare_price_padding_right: 0,
+
+        // Sale Price Typography settings
+        sale_price_font: 'var(--font-body--family)',
+        sale_price_font_size: '1rem',
+        sale_price_font_weight: 'inherit',
+        sale_price_text_transform: 'none',
+        sale_price_letter_spacing: 0,
+        sale_price_text_decoration: 'none',
+        sale_price_color: 'var(--color-foreground)',
+
+        // Regular Price Typography settings
+        regular_price_font: 'var(--font-body--family)',
+        regular_price_font_size: '1rem',
+        regular_price_font_weight: 'inherit',
+        regular_price_text_transform: 'none',
+        regular_price_letter_spacing: 0,
+        regular_price_text_decoration: 'none',
+        regular_price_color: 'var(--color-foreground)',
+        regular_price_background_color: '#ffffff',
+        regular_price_border_color: '#000000',
+        regular_price_border_width: 0,
+        regular_price_border_radius: 0,
+        regular_price_padding_top: 0,
+        regular_price_padding_bottom: 0,
+        regular_price_padding_left: 0,
+        regular_price_padding_right: 0
+      };
+    }
+    
+    // Extract styles from the default price block
+    const defaultStyles = window.getComputedStyle(defaultPriceBlock);
+    
+    // Look for compare price elements in multiple ways
+    let defaultComparePrice = defaultPriceBlock.querySelector('.compare-at-price, .price__compare');
+    
+    // If not found in the price block, look in the entire product card
+    if (!defaultComparePrice) {
+      const productCard = defaultPriceBlock.closest('.product-card');
+      if (productCard) {
+        defaultComparePrice = productCard.querySelector('.compare-at-price, .price__compare');
+      }
+    }
+    
+    // If still not found, look in the entire product grid
+    if (!defaultComparePrice) {
+      defaultComparePrice = document.querySelector('.product-grid .compare-at-price, .product-grid .price__compare');
+    }
+    
+    // Look for sale price elements (when there's a compare price)
+    let defaultSalePrice = null;
+    if (defaultComparePrice) {
+      // If there's a compare price, look for the sale price in the same container
+      const priceContainer = defaultComparePrice.closest('span[role="group"]');
+      if (priceContainer) {
+        defaultSalePrice = priceContainer.querySelector('.price');
+      }
+    }
+    
+    // If not found, try other methods
+    if (!defaultSalePrice) {
+      defaultSalePrice = defaultPriceBlock.querySelector('.price');
+    }
+    
+    // Look for regular price elements (when there's no sale)
+    let defaultRegularPrice = null;
+    if (!defaultComparePrice) {
+      // If there's no compare price, this might be a regular price
+      defaultRegularPrice = defaultPriceBlock.querySelector('.price');
+    }
+    
+    // If not found, look in the entire product card
+    if (!defaultSalePrice && !defaultRegularPrice) {
+      const productCard = defaultPriceBlock.closest('.product-card');
+      if (productCard) {
+        const allPrices = productCard.querySelectorAll('.price');
+        allPrices.forEach(price => {
+          // Check if this price has a compare price sibling (making it a sale price)
+          const hasCompareSibling = price.closest('span[role="group"]')?.querySelector('.compare-at-price');
+          if (hasCompareSibling && !defaultSalePrice) {
+            defaultSalePrice = price;
+          } else if (!hasCompareSibling && !defaultRegularPrice) {
+            defaultRegularPrice = price;
+          }
+        });
+      }
+    }
+    
+    // Get the actual computed font sizes from the default price block
+    const defaultComputedStyles = window.getComputedStyle(defaultPriceBlock);
+    const defaultFontSize = defaultComputedStyles.fontSize;
+    
+    // Debug logging (reduced to prevent console spam)
+    if (window.debugPriceInheritance) {
+      console.log('Default compare price element found:', defaultComparePrice);
+      console.log('Default sale price element found:', defaultSalePrice);
+      console.log('Default regular price element found:', defaultRegularPrice);
+      console.log('Default price block computed font-size:', defaultFontSize);
+    }
+    
+    let comparePriceSettings = {
+      compare_price_font: 'var(--font-body--family)',
+      compare_price_font_size: defaultFontSize,
+      compare_price_font_weight: '400',
+      compare_price_text_transform: 'none',
+      compare_price_letter_spacing: 0,
+      compare_price_text_decoration: 'line-through',
+      compare_price_background_color: '#ffffff',
+      compare_price_border_color: '#000000',
+      compare_price_border_width: 0,
+      compare_price_border_radius: 0,
+      compare_price_padding_top: 0,
+      compare_price_padding_bottom: 0,
+      compare_price_padding_left: 0,
+      compare_price_padding_right: 0
+    };
+    
+    let salePriceSettings = {
+      sale_price_font: 'var(--font-body--family)',
+      sale_price_font_size: defaultFontSize,
+      sale_price_font_weight: 'inherit',
+      sale_price_text_transform: 'none',
+      sale_price_letter_spacing: 0,
+      sale_price_text_decoration: 'none',
+      sale_price_color: 'var(--color-foreground)'
+    };
+    
+    let regularPriceSettings = {
+      regular_price_font: 'var(--font-body--family)',
+      regular_price_font_size: defaultFontSize,
+      regular_price_font_weight: 'inherit',
+      regular_price_text_transform: 'none',
+      regular_price_letter_spacing: 0,
+      regular_price_text_decoration: 'none',
+      regular_price_color: 'var(--color-foreground)',
+      regular_price_background_color: '#ffffff',
+      regular_price_border_color: '#000000',
+      regular_price_border_width: 0,
+      regular_price_border_radius: 0,
+      regular_price_padding_top: 0,
+      regular_price_padding_bottom: 0,
+      regular_price_padding_left: 0,
+      regular_price_padding_right: 0
+    };
+    
+    // If we found a compare price element, extract its settings
+    if (defaultComparePrice) {
+      // First try to get settings from inline styles (more reliable)
+      const inlineStyle = defaultComparePrice.getAttribute('style');
+      if (inlineStyle) {
+        // Parse inline styles to extract compare price settings
+        const styleMatch = inlineStyle.match(/color:\s*([^;!]+)/);
+        if (styleMatch) comparePriceSettings.compare_price_color = styleMatch[1].trim();
+        
+        const fontMatch = inlineStyle.match(/font-family:\s*([^;!]+)/);
+        if (fontMatch) comparePriceSettings.compare_price_font = fontMatch[1].trim();
+        
+        const fontSizeMatch = inlineStyle.match(/font-size:\s*([^;!]+)/);
+        if (fontSizeMatch) comparePriceSettings.compare_price_font_size = fontSizeMatch[1].trim();
+        
+        const fontWeightMatch = inlineStyle.match(/font-weight:\s*([^;!]+)/);
+        if (fontWeightMatch) comparePriceSettings.compare_price_font_weight = fontWeightMatch[1].trim();
+        
+        const textTransformMatch = inlineStyle.match(/text-transform:\s*([^;!]+)/);
+        if (textTransformMatch) comparePriceSettings.compare_price_text_transform = textTransformMatch[1].trim();
+        
+        const textDecorationMatch = inlineStyle.match(/text-decoration:\s*([^;!]+)/);
+        if (textDecorationMatch) comparePriceSettings.compare_price_text_decoration = textDecorationMatch[1].trim();
+        
+        const backgroundColorMatch = inlineStyle.match(/background-color:\s*([^;!]+)/);
+        if (backgroundColorMatch) comparePriceSettings.compare_price_background_color = backgroundColorMatch[1].trim();
+        
+        const borderMatch = inlineStyle.match(/border:\s*([^;!]+)/);
+        if (borderMatch) {
+          const borderParts = borderMatch[1].trim().split(' ');
+          if (borderParts.length >= 3) {
+            comparePriceSettings.compare_price_border_width = parseInt(borderParts[0]) || 0;
+            comparePriceSettings.compare_price_border_color = borderParts[2];
+          }
+        }
+        
+        const borderRadiusMatch = inlineStyle.match(/border-radius:\s*([^;!]+)/);
+        if (borderRadiusMatch) comparePriceSettings.compare_price_border_radius = parseInt(borderRadiusMatch[1]) || 0;
+        
+        const paddingMatch = inlineStyle.match(/padding:\s*([^;!]+)/);
+        if (paddingMatch) {
+          const paddingParts = paddingMatch[1].trim().split(' ');
+          if (paddingParts.length >= 4) {
+            comparePriceSettings.compare_price_padding_top = parseInt(paddingParts[0]) || 0;
+            comparePriceSettings.compare_price_padding_right = parseInt(paddingParts[1]) || 0;
+            comparePriceSettings.compare_price_padding_bottom = parseInt(paddingParts[2]) || 0;
+            comparePriceSettings.compare_price_padding_left = parseInt(paddingParts[3]) || 0;
+          }
+        }
+      }
+      
+      // Fallback to computed styles if inline styles don't have all settings
+      const compareStyles = window.getComputedStyle(defaultComparePrice);
+      if (!comparePriceSettings.compare_price_font) comparePriceSettings.compare_price_font = compareStyles.fontFamily;
+      if (!comparePriceSettings.compare_price_font_size) comparePriceSettings.compare_price_font_size = compareStyles.fontSize;
+      if (!comparePriceSettings.compare_price_font_weight) comparePriceSettings.compare_price_font_weight = compareStyles.fontWeight;
+      if (!comparePriceSettings.compare_price_text_transform) comparePriceSettings.compare_price_text_transform = compareStyles.textTransform;
+      if (!comparePriceSettings.compare_price_text_decoration) comparePriceSettings.compare_price_text_decoration = compareStyles.textDecoration;
+      if (!comparePriceSettings.compare_price_background_color || comparePriceSettings.compare_price_background_color === 'rgba(0, 0, 0, 0)') comparePriceSettings.compare_price_background_color = compareStyles.backgroundColor;
+      if (!comparePriceSettings.compare_price_border_color || comparePriceSettings.compare_price_border_color === 'rgba(0, 0, 0, 0)') comparePriceSettings.compare_price_border_color = compareStyles.borderColor;
+      if (comparePriceSettings.compare_price_border_width === 0) comparePriceSettings.compare_price_border_width = parseInt(compareStyles.borderWidth) || 0;
+      if (comparePriceSettings.compare_price_border_radius === 0) comparePriceSettings.compare_price_border_radius = parseInt(compareStyles.borderRadius) || 0;
+      if (comparePriceSettings.compare_price_padding_top === 0) comparePriceSettings.compare_price_padding_top = parseInt(compareStyles.paddingTop) || 0;
+      if (comparePriceSettings.compare_price_padding_bottom === 0) comparePriceSettings.compare_price_padding_bottom = parseInt(compareStyles.paddingBottom) || 0;
+      if (comparePriceSettings.compare_price_padding_left === 0) comparePriceSettings.compare_price_padding_left = parseInt(compareStyles.paddingLeft) || 0;
+      if (comparePriceSettings.compare_price_padding_right === 0) comparePriceSettings.compare_price_padding_right = parseInt(compareStyles.paddingRight) || 0;
+    }
+    
+    // If we found a sale price element, extract its settings
+    if (defaultSalePrice) {
+      // First try to get settings from inline styles (more reliable)
+      const inlineStyle = defaultSalePrice.getAttribute('style');
+      if (inlineStyle) {
+        // Parse inline styles to extract sale price settings
+        const styleMatch = inlineStyle.match(/color:\s*([^;!]+)/);
+        if (styleMatch) salePriceSettings.sale_price_color = styleMatch[1].trim();
+        
+        const fontMatch = inlineStyle.match(/font-family:\s*([^;!]+)/);
+        if (fontMatch) salePriceSettings.sale_price_font = fontMatch[1].trim();
+        
+        const fontSizeMatch = inlineStyle.match(/font-size:\s*([^;!]+)/);
+        if (fontSizeMatch) salePriceSettings.sale_price_font_size = fontSizeMatch[1].trim();
+        
+        const fontWeightMatch = inlineStyle.match(/font-weight:\s*([^;!]+)/);
+        if (fontWeightMatch) salePriceSettings.sale_price_font_weight = fontWeightMatch[1].trim();
+        
+        const textTransformMatch = inlineStyle.match(/text-transform:\s*([^;!]+)/);
+        if (textTransformMatch) salePriceSettings.sale_price_text_transform = textTransformMatch[1].trim();
+        
+        const textDecorationMatch = inlineStyle.match(/text-decoration:\s*([^;!]+)/);
+        if (textDecorationMatch) salePriceSettings.sale_price_text_decoration = textDecorationMatch[1].trim();
+        
+        const letterSpacingMatch = inlineStyle.match(/letter-spacing:\s*([^;!]+)/);
+        if (letterSpacingMatch) {
+          const spacing = letterSpacingMatch[1].trim();
+          if (spacing.includes('px')) {
+            salePriceSettings.sale_price_letter_spacing = parseFloat(spacing.replace('px', ''));
+          }
+        }
+      }
+      
+      // Fallback to computed styles if inline styles don't have all settings
+      const saleStyles = window.getComputedStyle(defaultSalePrice);
+      if (!salePriceSettings.sale_price_font) salePriceSettings.sale_price_font = saleStyles.fontFamily;
+      if (!salePriceSettings.sale_price_font_size) salePriceSettings.sale_price_font_size = saleStyles.fontSize;
+      if (!salePriceSettings.sale_price_font_weight) salePriceSettings.sale_price_font_weight = saleStyles.fontWeight;
+      if (!salePriceSettings.sale_price_text_transform) salePriceSettings.sale_price_text_transform = saleStyles.textTransform;
+      if (!salePriceSettings.sale_price_text_decoration) salePriceSettings.sale_price_text_decoration = saleStyles.textDecoration;
+      if (!salePriceSettings.sale_price_color) salePriceSettings.sale_price_color = saleStyles.color;
+    }
+    
+    // If we found a regular price element, extract its settings
+    if (defaultRegularPrice) {
+      // First try to get settings from inline styles (more reliable)
+      const inlineStyle = defaultRegularPrice.getAttribute('style');
+      if (inlineStyle) {
+        // Parse inline styles to extract regular price settings
+        const styleMatch = inlineStyle.match(/color:\s*([^;!]+)/);
+        if (styleMatch) regularPriceSettings.regular_price_color = styleMatch[1].trim();
+        
+        const fontMatch = inlineStyle.match(/font-family:\s*([^;!]+)/);
+        if (fontMatch) regularPriceSettings.regular_price_font = fontMatch[1].trim();
+        
+        const fontSizeMatch = inlineStyle.match(/font-size:\s*([^;!]+)/);
+        if (fontSizeMatch) regularPriceSettings.regular_price_font_size = fontSizeMatch[1].trim();
+        
+        const fontWeightMatch = inlineStyle.match(/font-weight:\s*([^;!]+)/);
+        if (fontWeightMatch) regularPriceSettings.regular_price_font_weight = fontWeightMatch[1].trim();
+        
+        const textTransformMatch = inlineStyle.match(/text-transform:\s*([^;!]+)/);
+        if (textTransformMatch) regularPriceSettings.regular_price_text_transform = textTransformMatch[1].trim();
+        
+        const textDecorationMatch = inlineStyle.match(/text-decoration:\s*([^;!]+)/);
+        if (textDecorationMatch) regularPriceSettings.regular_price_text_decoration = textDecorationMatch[1].trim();
+        
+        const letterSpacingMatch = inlineStyle.match(/letter-spacing:\s*([^;!]+)/);
+        if (letterSpacingMatch) {
+          const spacing = letterSpacingMatch[1].trim();
+          if (spacing.includes('px')) {
+            regularPriceSettings.regular_price_letter_spacing = parseFloat(spacing.replace('px', ''));
+          }
+        }
+        
+        const backgroundColorMatch = inlineStyle.match(/background-color:\s*([^;!]+)/);
+        if (backgroundColorMatch) regularPriceSettings.regular_price_background_color = backgroundColorMatch[1].trim();
+        
+        const borderMatch = inlineStyle.match(/border:\s*([^;!]+)/);
+        if (borderMatch) {
+          const borderParts = borderMatch[1].trim().split(' ');
+          if (borderParts.length >= 3) {
+            regularPriceSettings.regular_price_border_width = parseInt(borderParts[0]) || 0;
+            regularPriceSettings.regular_price_border_color = borderParts[2];
+          }
+        }
+        
+        const borderRadiusMatch = inlineStyle.match(/border-radius:\s*([^;!]+)/);
+        if (borderRadiusMatch) regularPriceSettings.regular_price_border_radius = parseInt(borderRadiusMatch[1]) || 0;
+        
+        const paddingMatch = inlineStyle.match(/padding:\s*([^;!]+)/);
+        if (paddingMatch) {
+          const paddingParts = paddingMatch[1].trim().split(' ');
+          if (paddingParts.length >= 4) {
+            regularPriceSettings.regular_price_padding_top = parseInt(paddingParts[0]) || 0;
+            regularPriceSettings.regular_price_padding_right = parseInt(paddingParts[1]) || 0;
+            regularPriceSettings.regular_price_padding_bottom = parseInt(paddingParts[2]) || 0;
+            regularPriceSettings.regular_price_padding_left = parseInt(paddingParts[3]) || 0;
+          }
+        }
+      }
+      
+      // Fallback to computed styles if inline styles don't have all settings
+      const regularStyles = window.getComputedStyle(defaultRegularPrice);
+      if (!regularPriceSettings.regular_price_font) regularPriceSettings.regular_price_font = regularStyles.fontFamily;
+      if (!regularPriceSettings.regular_price_font_size) regularPriceSettings.regular_price_font_size = regularStyles.fontSize;
+      if (!regularPriceSettings.regular_price_font_weight) regularPriceSettings.regular_price_font_weight = regularStyles.fontWeight;
+      if (!regularPriceSettings.regular_price_text_transform) regularPriceSettings.regular_price_text_transform = regularStyles.textTransform;
+      if (!regularPriceSettings.regular_price_text_decoration) regularPriceSettings.regular_price_text_decoration = regularStyles.textDecoration;
+      if (!regularPriceSettings.regular_price_color) regularPriceSettings.regular_price_color = regularStyles.color;
+      if (!regularPriceSettings.regular_price_background_color || regularPriceSettings.regular_price_background_color === 'rgba(0, 0, 0, 0)') regularPriceSettings.regular_price_background_color = regularStyles.backgroundColor;
+      if (!regularPriceSettings.regular_price_border_color || regularPriceSettings.regular_price_border_color === 'rgba(0, 0, 0, 0)') regularPriceSettings.regular_price_border_color = regularStyles.borderColor;
+      if (regularPriceSettings.regular_price_border_width === 0) regularPriceSettings.regular_price_border_width = parseInt(regularStyles.borderWidth) || 0;
+      if (regularPriceSettings.regular_price_border_radius === 0) regularPriceSettings.regular_price_border_radius = parseInt(regularStyles.borderRadius) || 0;
+      if (regularPriceSettings.regular_price_padding_top === 0) regularPriceSettings.regular_price_padding_top = parseInt(regularStyles.paddingTop) || 0;
+      if (regularPriceSettings.regular_price_padding_bottom === 0) regularPriceSettings.regular_price_padding_bottom = parseInt(regularStyles.paddingBottom) || 0;
+      if (regularPriceSettings.regular_price_padding_left === 0) regularPriceSettings.regular_price_padding_left = parseInt(regularStyles.paddingLeft) || 0;
+      if (regularPriceSettings.regular_price_padding_right === 0) regularPriceSettings.regular_price_padding_right = parseInt(regularStyles.paddingRight) || 0;
+    }
+    
+    return {
+      // Default price block settings from collection.json
+      type_preset: 'h6',
+      font: defaultStyles.fontFamily || 'var(--font-body--family)',
+      font_size: defaultFontSize,
+      line_height: defaultStyles.lineHeight || 'normal',
+      letter_spacing: defaultStyles.letterSpacing || 'normal',
+      case: defaultStyles.textTransform || 'none',
+      color: defaultStyles.color || 'var(--color-foreground)',
+      alignment: 'left',
+      
+      // Compare Price Typography settings
+      ...comparePriceSettings,
+      
+      // Sale Price Typography settings
+      ...salePriceSettings,
+      
+      // Regular Price Typography settings
+      ...regularPriceSettings
+    };
+    
+    // Debug: Log all extracted settings (only if debug is enabled)
+    if (window.debugPriceInheritance) {
+      console.log('All extracted price settings:', {
+        default: {
+          font_size: defaultFontSize,
+          font: defaultStyles.fontFamily || 'var(--font-body--family)',
+          color: defaultStyles.color || 'var(--color-foreground)'
+        },
+        compare: comparePriceSettings,
+        sale: salePriceSettings,
+        regular: regularPriceSettings
+      });
+    }
+  }
+
+  // Force price inheritance in zoom-out view by overriding inline styles
+  function overrideZoomOutPriceStyles() {
+    const zoomOutPrices = document.querySelectorAll('.product-grid-view-zoom-out--details .zoom-out-price');
+    const defaultSettings = getDefaultPriceBlockSettings();
+    
+    zoomOutPrices.forEach(priceContainer => {
+      // Find all price elements within this container
+      const priceElements = priceContainer.querySelectorAll('span[style*="color"], .price, .price__regular, .price__sale, .price__compare, [class*="price"], [class*="compare"], [class*="sale"], .compare-at-price');
+      
+      priceElements.forEach(element => {
+        // First, remove all existing inline styles that might conflict
+        element.removeAttribute('style');
+        
+        // Check if this is a compare-at-price element for special styling
+        const isComparePrice = element.classList.contains('compare-at-price') || 
+                              element.classList.contains('price__compare') ||
+                              element.querySelector('.compare-at-price');
+        
+        // Check if this is a sale price element for special styling
+        const isSalePrice = element.classList.contains('price') && 
+                           !element.classList.contains('compare-at-price') &&
+                           !element.classList.contains('price__compare') &&
+                           element.closest('.zoom-out-price')?.querySelector('.compare-at-price');
+        
+        // Check if this is a regular price element for special styling
+        const isRegularPrice = element.classList.contains('price') && 
+                              !element.classList.contains('compare-at-price') &&
+                              !element.classList.contains('price__compare') &&
+                              !isSalePrice;
+        
+        if (isComparePrice && defaultSettings) {
+          // Apply Compare Price Typography settings from default view
+          if (window.debugPriceInheritance) {
+            console.log('Applying compare price styles - font-size:', defaultSettings.compare_price_font_size);
+          }
+          element.style.setProperty('color', defaultSettings.compare_price_color || 'var(--color-foreground-secondary)', 'important');
+          element.style.setProperty('font-family', defaultSettings.compare_price_font, 'important');
+          element.style.setProperty('font-size', defaultSettings.compare_price_font_size, 'important');
+          element.style.setProperty('line-height', 'normal', 'important');
+          element.style.setProperty('letter-spacing', defaultSettings.compare_price_letter_spacing + 'px', 'important');
+          element.style.setProperty('text-transform', defaultSettings.compare_price_text_transform, 'important');
+          element.style.setProperty('font-weight', defaultSettings.compare_price_font_weight, 'important');
+          element.style.setProperty('text-decoration', defaultSettings.compare_price_text_decoration, 'important');
+          
+          // Apply background color if set (always apply, even if white)
+          if (defaultSettings.compare_price_background_color && 
+              defaultSettings.compare_price_background_color !== 'rgba(0, 0, 0, 0)' &&
+              defaultSettings.compare_price_background_color !== 'transparent') {
+            element.style.setProperty('background-color', defaultSettings.compare_price_background_color, 'important');
+          }
+          
+          // Apply border if set
+          if (defaultSettings.compare_price_border_width > 0) {
+            element.style.setProperty('border', defaultSettings.compare_price_border_width + 'px solid ' + defaultSettings.compare_price_border_color, 'important');
+          }
+          
+          // Apply border radius if set
+          if (defaultSettings.compare_price_border_radius > 0) {
+            element.style.setProperty('border-radius', defaultSettings.compare_price_border_radius + 'px', 'important');
+          }
+          
+          // Apply padding if set (always apply padding values, even if 0)
+          const paddingTop = defaultSettings.compare_price_padding_top || 0;
+          const paddingRight = defaultSettings.compare_price_padding_right || 0;
+          const paddingBottom = defaultSettings.compare_price_padding_bottom || 0;
+          const paddingLeft = defaultSettings.compare_price_padding_left || 0;
+          
+          element.style.setProperty('padding', paddingTop + 'px ' + paddingRight + 'px ' + paddingBottom + 'px ' + paddingLeft + 'px', 'important');
+          
+        } else if (isSalePrice && defaultSettings) {
+          // Apply Sale Price Typography settings from default view
+          if (window.debugPriceInheritance) {
+            console.log('Applying sale price styles - font-size:', defaultSettings.sale_price_font_size);
+          }
+          element.style.setProperty('color', defaultSettings.sale_price_color, 'important');
+          element.style.setProperty('font-family', defaultSettings.sale_price_font, 'important');
+          element.style.setProperty('font-size', defaultSettings.sale_price_font_size, 'important');
+          element.style.setProperty('line-height', 'normal', 'important');
+          element.style.setProperty('letter-spacing', defaultSettings.sale_price_letter_spacing + 'px', 'important');
+          element.style.setProperty('text-transform', defaultSettings.sale_price_text_transform, 'important');
+          element.style.setProperty('font-weight', defaultSettings.sale_price_font_weight, 'important');
+          element.style.setProperty('text-decoration', defaultSettings.sale_price_text_decoration, 'important');
+          
+        } else if (isRegularPrice && defaultSettings) {
+          // Apply Regular Price Typography settings from default view
+          if (window.debugPriceInheritance) {
+            console.log('Applying regular price styles - font-size:', defaultSettings.regular_price_font_size);
+          }
+          element.style.setProperty('color', defaultSettings.regular_price_color, 'important');
+          element.style.setProperty('font-family', defaultSettings.regular_price_font, 'important');
+          element.style.setProperty('font-size', defaultSettings.regular_price_font_size, 'important');
+          element.style.setProperty('line-height', 'normal', 'important');
+          element.style.setProperty('letter-spacing', defaultSettings.regular_price_letter_spacing + 'px', 'important');
+          element.style.setProperty('text-transform', defaultSettings.regular_price_text_transform, 'important');
+          element.style.setProperty('font-weight', defaultSettings.regular_price_font_weight, 'important');
+          element.style.setProperty('text-decoration', defaultSettings.regular_price_text_decoration, 'important');
+          
+          // Apply background color if set (always apply, even if white)
+          if (defaultSettings.regular_price_background_color && 
+              defaultSettings.regular_price_background_color !== 'rgba(0, 0, 0, 0)' &&
+              defaultSettings.regular_price_background_color !== 'transparent') {
+            element.style.setProperty('background-color', defaultSettings.regular_price_background_color, 'important');
+          }
+          
+          // Apply border if set
+          if (defaultSettings.regular_price_border_width > 0) {
+            element.style.setProperty('border', defaultSettings.regular_price_border_width + 'px solid ' + defaultSettings.regular_price_border_color, 'important');
+          }
+          
+          // Apply border radius if set
+          if (defaultSettings.regular_price_border_radius > 0) {
+            element.style.setProperty('border-radius', defaultSettings.regular_price_border_radius + 'px', 'important');
+          }
+          
+          // Apply padding if set (always apply padding values, even if 0)
+          const paddingTop = defaultSettings.regular_price_padding_top || 0;
+          const paddingRight = defaultSettings.regular_price_padding_right || 0;
+          const paddingBottom = defaultSettings.regular_price_padding_bottom || 0;
+          const paddingLeft = defaultSettings.regular_price_padding_left || 0;
+          
+          element.style.setProperty('padding', paddingTop + 'px ' + paddingRight + 'px ' + paddingBottom + 'px ' + paddingLeft + 'px', 'important');
+          
+        } else if (defaultSettings) {
+          // Apply exact default price block settings from collection template
+          if (window.debugPriceInheritance) {
+            console.log('Applying default price styles - font-size:', defaultSettings.font_size);
+          }
+          element.style.setProperty('color', defaultSettings.color, 'important');
+          element.style.setProperty('font-family', defaultSettings.font, 'important');
+          element.style.setProperty('font-size', defaultSettings.font_size, 'important');
+          element.style.setProperty('line-height', defaultSettings.line_height, 'important');
+          element.style.setProperty('letter-spacing', defaultSettings.letter_spacing, 'important');
+          element.style.setProperty('text-transform', defaultSettings.case, 'important');
+          element.style.setProperty('font-weight', 'inherit', 'important');
+          element.style.setProperty('text-decoration', 'none', 'important');
+        }
+        
+        // Common styles for all price elements (but preserve compare and regular price backgrounds/padding)
+        if (!isComparePrice && !isRegularPrice) {
+          element.style.setProperty('background', 'none', 'important');
+          element.style.setProperty('border', 'none', 'important');
+        }
+        element.style.setProperty('margin', '0', 'important');
+        
+        // Add h6 class styling to match type_preset: "h6"
+        element.classList.add('h6');
+        
+        // Force override any remaining inline styles by setting them again (less aggressive)
+        setTimeout(() => {
+          if (isComparePrice && defaultSettings) {
+            element.style.setProperty('color', defaultSettings.compare_price_color || 'var(--color-foreground-secondary)', 'important');
+            element.style.setProperty('font-size', defaultSettings.compare_price_font_size, 'important');
+            element.style.setProperty('text-decoration', defaultSettings.compare_price_text_decoration, 'important');
+          } else if (isSalePrice && defaultSettings) {
+            element.style.setProperty('color', defaultSettings.sale_price_color, 'important');
+            element.style.setProperty('font-size', defaultSettings.sale_price_font_size, 'important');
+            element.style.setProperty('font-weight', defaultSettings.sale_price_font_weight, 'important');
+          } else if (isRegularPrice && defaultSettings) {
+            element.style.setProperty('color', defaultSettings.regular_price_color, 'important');
+            element.style.setProperty('font-size', defaultSettings.regular_price_font_size, 'important');
+            element.style.setProperty('font-weight', defaultSettings.regular_price_font_weight, 'important');
+          } else if (defaultSettings) {
+            element.style.setProperty('color', defaultSettings.color, 'important');
+            element.style.setProperty('font-size', defaultSettings.font_size, 'important');
+          }
+        }, 50);
+      });
+      
+      // Also apply h6 styling to the price container itself
+      if (defaultSettings) {
+        priceContainer.classList.add('h6');
+        priceContainer.style.setProperty('font-family', defaultSettings.font, 'important');
+        priceContainer.style.setProperty('font-size', defaultSettings.font_size, 'important');
+        priceContainer.style.setProperty('color', defaultSettings.color, 'important');
+      }
+    });
+  }
+
+  // Run when DOM is ready
+  document.addEventListener('DOMContentLoaded', overrideZoomOutPriceStyles);
+
+  // Run when grid view changes
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'product-grid-view') {
+        setTimeout(overrideZoomOutPriceStyles, 100);
+      }
+    });
+  });
+
+  // Observe the product grid for view changes
+  const productGrid = document.querySelector('.product-grid, [product-grid-view]');
+  if (productGrid) {
+    observer.observe(productGrid, { attributes: true, attributeFilter: ['product-grid-view'] });
+  }
+
+  // Debounced function to prevent excessive calls
+  let timeoutId;
+  function debouncedOverrideZoomOutPriceStyles() {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(overrideZoomOutPriceStyles, 300);
+  }
+  
+  // Run periodically but less frequently to prevent loops
+  setInterval(debouncedOverrideZoomOutPriceStyles, 2000);
+  
+  // Run when zoom-out view is activated
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('[data-grid-view-toggle]') || e.target.closest('.grid-view-toggle')) {
+      debouncedOverrideZoomOutPriceStyles();
+    }
+  });
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:names.product_image",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_media"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:options.auto"
+        },
+        {
+          "value": "portrait",
+          "label": "t:options.portrait"
+        },
+        {
+          "value": "square",
+          "label": "t:options.square"
+        },
+        {
+          "value": "landscape",
+          "label": "t:options.landscape"
+        }
+      ],
+      "default": "portrait",
+      "label": "t:settings.aspect_ratio",
+      "info": "t:info.aspect_ratio_adjusted"
+    },
+    {
+      "type": "header",
+      "content": "t:content.borders"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.thickness",
+      "default": 1,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.opacity",
+      "default": 100,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_card_media",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

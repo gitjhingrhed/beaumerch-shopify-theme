@@ -1,0 +1,42 @@
+COMPREHENSIVE SHOPIFY THEME BACKUP
+===================================
+Backup Date: Sat Sep 13 02:32:17 PDT 2025
+Backup Directory: backups/comprehensive-backup-20250913-023208
+Theme ID: 180638384500
+
+BACKUP CONTENTS:
+- All template files (.liquid, .json)
+- All section files
+- All snippet files  
+- All asset files (images, CSS, JS)
+- All locale files
+- All configuration files
+- All block files
+- Theme settings (settings_schema.json, settings_data.json)
+- Layout files
+- Live theme data pull
+- Customizer template data
+
+FILES BACKED UP:
+     816
+Total files backed up:      816
+
+DIRECTORY STRUCTURE:
+backups/comprehensive-backup-20250913-023208
+backups/comprehensive-backup-20250913-023208/assets
+backups/comprehensive-backup-20250913-023208/blocks
+backups/comprehensive-backup-20250913-023208/config
+backups/comprehensive-backup-20250913-023208/customizer-data
+backups/comprehensive-backup-20250913-023208/live-theme-data
+backups/comprehensive-backup-20250913-023208/live-theme-data/assets
+backups/comprehensive-backup-20250913-023208/live-theme-data/blocks
+backups/comprehensive-backup-20250913-023208/live-theme-data/config
+backups/comprehensive-backup-20250913-023208/live-theme-data/layout
+backups/comprehensive-backup-20250913-023208/live-theme-data/locales
+backups/comprehensive-backup-20250913-023208/live-theme-data/sections
+backups/comprehensive-backup-20250913-023208/live-theme-data/snippets
+backups/comprehensive-backup-20250913-023208/live-theme-data/templates
+backups/comprehensive-backup-20250913-023208/locales
+backups/comprehensive-backup-20250913-023208/sections
+backups/comprehensive-backup-20250913-023208/snippets
+backups/comprehensive-backup-20250913-023208/templates

@@ -1,0 +1,1256 @@
+
+
+{% assign block_settings = block.settings %}
+<div
+  class="email-signup-block size-style spacing-style email-signup-block--custom-spacing email-signup-block--custom-width"
+  style="{% render 'size-style', settings: block_settings %}{% render 'spacing-style', settings: block_settings %}padding-top: {{ block_settings.container_padding_top | default: 0 }}px; padding-bottom: {{ block_settings.container_padding_bottom | default: 0 }}px; padding-left: {{ block_settings.container_padding_left | default: 0 }}px; padding-right: {{ block_settings.container_padding_right | default: 0 }}px; margin-top: {{ block_settings.container_margin_top | default: 0 }}px; margin-bottom: {{ block_settings.container_margin_bottom | default: 0 }}px; margin-left: {{ block_settings.container_margin_left | default: 0 }}px; margin-right: {{ block_settings.container_margin_right | default: 0 }}px;{% if block_settings.enable_container_background %} background-color: {{ block_settings.container_background_color | default: '#ffffff' }};{% endif %}{% if block_settings.width == 'fill' %} width: 100%;{% elsif block_settings.width == 'custom' %} width: {{ block_settings.custom_width | default: 400 }}px;{% endif %}"
+  {{ block.shopify_attributes }}
+>
+  {%- form 'customer', class: 'email-signup__form spacing-style' %}
+    <div
+      class="email-signup__input-group email-signup__input-group--custom-spacing {% if block_settings.inherit_color_scheme == false %}color-{{ block_settings.color_scheme }}{% endif %}"
+      style="--border-width: {{ block_settings.border_width }}px; --border-radius: {{ block_settings.border_radius }}px; --input-group-gap: {{ block_settings.input_group_gap | default: 8 }}px; padding-top: {{ block_settings.input_group_padding_top | default: 0 }}px; padding-bottom: {{ block_settings.input_group_padding_bottom | default: 0 }}px; padding-left: {{ block_settings.input_group_padding_left | default: 0 }}px; padding-right: {{ block_settings.input_group_padding_right | default: 0 }}px;{% if block_settings.enable_input_group_background %} background-color: {{ block_settings.input_group_background_color | default: '#f8f9fa' }};{% endif %}"
+    >
+      <label
+        for="EmailInput-{{ block.id }}"
+        class="visually-hidden"
+      >
+        {{ 'blocks.email_signup.label' | t }}
+      </label>
+      <input
+        id="EmailInput-{{ block.id }}"
+        class="email-signup__input email-signup__input--{{ block_settings.border_style }} {{ block_settings.input_type_preset }} {{ block_settings.border_variation }} email-signup__input--custom-spacing email-signup__input--custom-typography email-signup__input--custom-background email-signup__input--custom-font-color email-signup__input--custom-placeholder-color"
+        type="email"
+        name="contact[email]"
+        autocorrect="off"
+        autocapitalize="off"
+        autocomplete="email"
+        placeholder="{{ 'blocks.email_signup.placeholder' | t }}"
+        required
+        style="--input-padding-top: {{ block_settings.input_padding_top | default: 12 }}px; --input-padding-bottom: {{ block_settings.input_padding_bottom | default: 12 }}px; --input-padding-left: {{ block_settings.input_padding_left | default: 16 }}px; --input-padding-right: {{ block_settings.input_padding_right | default: 16 }}px; --input-margin-top: {{ block_settings.input_margin_top | default: 0 }}px; --input-margin-bottom: {{ block_settings.input_margin_bottom | default: 0 }}px; --input-margin-left: {{ block_settings.input_margin_left | default: 0 }}px; --input-margin-right: {{ block_settings.input_margin_right | default: 0 }}px; --input-font-family: {{ block_settings.input_font_family | default: 'var(--font-body--family)' }}; --input-font-size: {{ block_settings.input_font_size | default: 16 }}px; --input-font-weight: {{ block_settings.input_font_weight | default: 400 }}; --input-text-transform: {{ block_settings.input_text_transform | default: 'none' }}; --input-letter-spacing: {{ block_settings.input_letter_spacing | default: 0 }}px;{% if block_settings.enable_input_background %} --input-background-color: {{ block_settings.input_background_color | default: '#ffffff' }};{% endif %}{% if block_settings.enable_input_font_color %} --input-font-color: {{ block_settings.input_font_color | default: '#000000' }};{% endif %}{% if block_settings.enable_input_placeholder_font_color %} --input-placeholder-font-color: {{ block_settings.input_placeholder_font_color | default: '#6c757d' }};{% endif %}"
+        {% if form.errors %}
+          autofocus
+          aria-invalid="true"
+          aria-describedby="Email-signup__message-error-{{ block.id }}"
+        {% elsif form.posted_successfully? %}
+          aria-describedby="Email-signup__message-success-{{ block.id }}"
+        {% endif %}
+      >
+      <button
+        class="email-signup__button email-signup__button--custom-spacing email-signup__button--custom-typography {% if block_settings.integrated_button or block_settings.border_style == 'underline' %}email-signup__button--integrated{% endif %} email-signup__button--{{ block_settings.display_type }} {{ block_settings.button_type_preset }} {{ block_settings.style_class }} {{ block_settings.style_class }}--{{ block.id }} {% if block_settings.inherit_color_scheme == false %}color-{{ block_settings.color_scheme }}{% endif %}"
+        style="--button-padding-top: {{ block_settings.button_padding_top | default: 12 }}px; --button-padding-bottom: {{ block_settings.button_padding_bottom | default: 12 }}px; --button-padding-left: {{ block_settings.button_padding_left | default: 24 }}px; --button-padding-right: {{ block_settings.button_padding_right | default: 24 }}px; --button-margin-top: {{ block_settings.button_margin_top | default: 0 }}px; --button-margin-bottom: {{ block_settings.button_margin_bottom | default: 0 }}px; --button-margin-left: {{ block_settings.button_margin_left | default: 0 }}px; --button-margin-right: {{ block_settings.button_margin_right | default: 0 }}px; --button-font-family: {{ block_settings.button_font_family | default: 'var(--font-body--family)' }}; --button-font-size: {{ block_settings.button_font_size | default: 16 }}px; --button-font-weight: {{ block_settings.button_font_weight | default: 500 }}; --button-text-transform: {{ block_settings.button_text_transform | default: 'none' }}; --button-letter-spacing: {{ block_settings.button_letter_spacing | default: 0 }}px;"
+        {% if block_settings.display_type != 'text' %}
+          aria-label="{{ 'actions.sign_up' | t }}"
+        {% endif %}
+      >
+        {% if block_settings.display_type == 'text' %}
+          {{ block_settings.label }}
+        {% else %}
+          <svg
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+            focusable="false"
+            aria-hidden="true"
+            class="email-signup__button-icon"
+          >
+            {% render 'icon', icon: 'arrow' %}
+          </svg>
+        {% endif %}
+      </button>
+    </div>
+
+    {%- if form.errors -%}
+      <div
+        id="Email-signup__message-error-{{ block.id }}"
+        class="email-signup__message email-signup__message--error"
+        tabindex="-1"
+      >
+        <svg
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+          focusable="false"
+          aria-hidden="true"
+          class="icon-error"
+        >
+          {%- render 'icon', icon: 'error'  -%}
+        </svg>
+        {{- form.errors.translated_fields.email | capitalize }}
+        {{ form.errors.messages.email -}}
+      </div>
+    {%- endif -%}
+
+    {%- if form.posted_successfully? -%}
+      <div
+        id="Email-signup__message-success-{{ block.id }}"
+        class="email-signup__message email-signup__message--success"
+        tabindex="-1"
+      >
+        <span class="svg-wrapper icon-success">
+          {{ 'icon-checkmark.svg' | inline_asset_content }}
+        </span>
+        <p class="email-signup__message-text">{{ 'blocks.email_signup.success' | t }}</p>
+      </div>
+    {%- endif -%}
+  {% endform %}
+</div>
+
+{% stylesheet %}
+  .email-signup-block {
+    @media screen and (max-width: 749px) {
+      width: 100%;
+    }
+  }
+
+  .email-signup__form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .email-signup__input-group {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    background-color: transparent;
+  }
+
+  .email-signup__input-group:not(:has(.email-signup__button--integrated)) {
+    gap: var(--gap-xs);
+  }
+
+  .email-signup__input-group:not(:has(.email-signup__button--arrow)) {
+    @media screen and (max-width: 749px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .email-signup__input {
+    width: 100%;
+    border-width: var(--border-width);
+    border-radius: var(--border-radius);
+    border-style: solid;
+    border-color: var(--color-input-border);
+  }
+
+  .email-signup__input.paragraph {
+    color: var(--color-input-text);
+    outline-color: var(--color-input-background);
+  }
+
+  .email-signup__button {
+    white-space: nowrap;
+    padding: 0;
+
+    @media screen and (max-width: 749px) {
+      width: 100%;
+    }
+  }
+
+  .email-signup__input,
+  .email-signup__button--text {
+    padding: var(--padding-lg) var(--padding-3xl);
+  }
+
+  /* Override default padding with custom input spacing settings */
+  .email-signup__input--custom-spacing {
+    padding: var(--input-padding-top, var(--padding-lg)) var(--input-padding-right, var(--padding-3xl)) var(--input-padding-bottom, var(--padding-lg)) var(--input-padding-left, var(--padding-3xl)) !important;
+    margin: var(--input-margin-top, 0) var(--input-margin-right, 0) var(--input-margin-bottom, 0) var(--input-margin-left, 0) !important;
+  }
+
+  /* Ensure custom spacing works with all border styles */
+  .email-signup__input--custom-spacing.email-signup__input--underline {
+    padding: var(--input-padding-top, 12px) var(--input-padding-right, 0) var(--input-padding-bottom, 12px) var(--input-padding-left, 0) !important;
+  }
+
+  .email-signup__input--custom-spacing.email-signup__input--none {
+    padding: var(--input-padding-top, var(--padding-lg)) var(--input-padding-right, var(--padding-3xl)) var(--input-padding-bottom, var(--padding-lg)) var(--input-padding-left, var(--padding-3xl)) !important;
+  }
+
+  /* Button custom spacing */
+  .email-signup__button--custom-spacing {
+    padding: var(--button-padding-top, 12px) var(--button-padding-right, 24px) var(--button-padding-bottom, 12px) var(--button-padding-left, 24px) !important;
+    margin: var(--button-margin-top, 0) var(--button-margin-right, 0) var(--button-margin-bottom, 0) var(--button-margin-left, 0) !important;
+  }
+
+  /* Input group custom spacing */
+  .email-signup__input-group--custom-spacing {
+    gap: var(--input-group-gap, 8px) !important;
+    padding: var(--input-group-padding-top, 0) var(--input-group-padding-right, 0) var(--input-group-padding-bottom, 0) var(--input-group-padding-left, 0) !important;
+  }
+
+  /* Container custom spacing */
+  .email-signup-block--custom-spacing {
+    padding: var(--container-padding-top, 0) var(--container-padding-right, 0) var(--container-padding-bottom, 0) var(--container-padding-left, 0) !important;
+    margin: var(--container-margin-top, 0) var(--container-margin-right, 0) var(--container-margin-bottom, 0) var(--container-margin-left, 0) !important;
+  }
+
+  /* Input custom typography */
+  .email-signup__input--custom-typography {
+    font-family: var(--input-font-family, var(--font-body--family)) !important;
+    font-size: var(--input-font-size, 16px) !important;
+    font-weight: var(--input-font-weight, 400) !important;
+    text-transform: var(--input-text-transform, none) !important;
+    letter-spacing: var(--input-letter-spacing, 0px) !important;
+  }
+
+  /* Input custom background */
+  .email-signup__input--custom-background {
+    background-color: var(--input-background-color, transparent) !important;
+  }
+
+  /* Input custom font color - Higher specificity to override theme styles */
+  .email-signup__input-group .email-signup__input--custom-font-color,
+  .email-signup__input.email-signup__input--custom-font-color,
+  .email-signup__input--custom-font-color {
+    color: var(--input-font-color, inherit) !important;
+  }
+
+  /* Input custom placeholder font color - Higher specificity to override theme styles */
+  .email-signup__input-group .email-signup__input--custom-placeholder-color::placeholder,
+  .email-signup__input.email-signup__input--custom-placeholder-color::placeholder,
+  .email-signup__input--custom-placeholder-color::placeholder {
+    color: var(--input-placeholder-font-color, inherit) !important;
+  }
+
+  /* Button custom typography */
+  .email-signup__button--custom-typography {
+    font-family: var(--button-font-family, var(--font-body--family)) !important;
+    font-size: var(--button-font-size, 16px) !important;
+    font-weight: var(--button-font-weight, 500) !important;
+    text-transform: var(--button-text-transform, none) !important;
+    letter-spacing: var(--button-letter-spacing, 0px) !important;
+  }
+
+  /* Custom width settings */
+  .email-signup-block--custom-width {
+    width: 100% !important; /* Default to full width */
+  }
+
+
+  /* Responsive width adjustments */
+  @media screen and (max-width: 749px) {
+    .email-signup-block--custom-width {
+      width: 100% !important; /* Always full width on mobile */
+    }
+  }
+
+  /* Ensure shopify-block takes full width when it contains email-signup-block */
+  .shopify-block:has(.email-signup-block) {
+    width: 100% !important;
+  }
+
+  .email-signup__input-group .email-signup__input--underline {
+    --box-shadow-color: var(--color-input-border);
+    --box-shadow-multiplier: 1;
+
+    color: var(--color-input-text);
+    background-color: transparent;
+    padding: 12px 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: 0 calc(var(--border-width) * var(--box-shadow-multiplier)) 0 var(--box-shadow-color);
+    transition: box-shadow var(--animation-values);
+
+    &:focus-visible {
+      --box-shadow-multiplier: 1.75;
+      --box-shadow-color: var(--color-input-text);
+
+      outline: none;
+    }
+  }
+
+  .email-signup__input::placeholder {
+    color: rgb(var(--color-input-text-rgb) / var(--opacity-70));
+  }
+
+  .email-signup__input-group .email-signup__input--none {
+    color: var(--color-input-text);
+    background-color: var(--color-input-background);
+    border: none;
+  }
+
+  .email-signup__input:has(+ .email-signup__button--arrow),
+  .email-signup__input:has(+ .email-signup__button--integrated) {
+    @media screen and (max-width: 749px) {
+      text-align: left;
+    }
+  }
+
+  .email-signup__button-icon {
+    fill: currentcolor;
+    padding: 5px;
+
+    @media screen and (max-width: 749px) {
+      padding: 0;
+      align-self: center;
+      justify-self: center;
+      width: var(--icon-size-lg);
+      height: var(--icon-size-lg);
+    }
+  }
+
+  .email-signup__button--arrow {
+    aspect-ratio: 1;
+    padding-inline: var(--padding-xs);
+
+    &:not(.email-signup__button--integrated) {
+      width: auto;
+    }
+  }
+
+  .email-signup__button--integrated {
+    --button-offset: var(--margin-xs);
+
+    position: absolute;
+    height: calc(100% - (var(--button-offset) * 2) - (var(--border-width) * 2));
+    right: calc(var(--button-offset) + var(--border-width));
+    top: calc(var(--button-offset) + var(--border-width));
+
+    @media screen and (max-width: 749px) {
+      width: fit-content;
+    }
+
+    &.email-signup__button--text {
+      padding: 0 var(--padding-3xl);
+    }
+
+    &.email-signup__button--text.button-unstyled {
+      padding: 0 var(--padding-xl);
+    }
+
+    &.button-unstyled {
+      border-radius: var(--border-radius);
+    }
+
+    > .email-signup__button-icon {
+      padding: 0;
+    }
+  }
+
+  .email-signup__input--underline + .email-signup__button--integrated {
+    --button-offset: calc(10% - var(--border-width));
+
+    right: 0;
+
+    &.email-signup__button--text.button-unstyled {
+      padding: 0;
+    }
+
+    &.button-unstyled {
+      border-radius: 0;
+    }
+  }
+
+  .email-signup__button:not(.button-unstyled) {
+    background-color: var(--button-background-color);
+    color: var(--button-color);
+    font-weight: var(--button-font-weight-primary);
+    text-transform: var(--button-text-case-primary);
+  }
+
+  .email-signup__button.button-secondary {
+    font-weight: var(--button-font-weight-secondary);
+    text-transform: var(--button-text-case-secondary);
+  }
+
+  .email-signup__button.button-tertiary {
+    font-family: var(--button-font-family-tertiary);
+    font-weight: var(--button-font-weight-tertiary);
+    text-transform: var(--button-text-case-tertiary);
+    border-radius: var(--style-border-radius-buttons-tertiary);
+    --button-color: var(--color-tertiary-button-text);
+    --button-background-color: var(--color-tertiary-button-background);
+    --button-border-color: var(--color-tertiary-button-border);
+    --button-border-width: var(--style-border-width-tertiary);
+    background-color: var(--color-tertiary-button-background) !important;
+  }
+
+  .email-signup__button.button-tertiary:hover {
+    --button-color: var(--color-tertiary-button-hover-text);
+    --button-background-color: var(--color-tertiary-button-hover-background);
+    --button-border-color: var(--color-tertiary-button-hover-border);
+  }
+
+  .email-signup__button.button-unstyled {
+    background-color: transparent;
+    color: var(--color-input-text);
+  }
+
+  .email-signup__button.button-unstyled:hover {
+    color: rgb(var(--color-input-text-rgb) / var(--opacity-70));
+    cursor: pointer;
+  }
+
+  .email-signup__message {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+  }
+
+  .email-signup__message-text {
+    margin: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.email_signup",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.email_signups_create_customer_profiles"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "fill",
+          "label": "Wide (100%)"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "fill"
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "t:settings.custom_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.width == \"custom\" }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "t:settings.inherit_color_scheme",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "primary",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+    },
+    {
+      "type": "header",
+      "content": "Background Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_container_background",
+      "label": "Enable Container Background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "container_background_color",
+      "label": "Container Background Color",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.enable_container_background == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_input_group_background",
+      "label": "Enable Input Group Background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "input_group_background_color",
+      "label": "Input Group Background Color",
+      "default": "#f8f9fa",
+      "visible_if": "{{ block.settings.enable_input_group_background == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_input_background",
+      "label": "Enable Input Field Background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Input Field Background Color",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.enable_input_background == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_input_font_color",
+      "label": "Enable Input Field Font Color",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "input_font_color",
+      "label": "Input Field Font Color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.enable_input_font_color == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_input_placeholder_font_color",
+      "label": "Enable Input Field Placeholder Font Color",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "input_placeholder_font_color",
+      "label": "Input Field Placeholder Font Color",
+      "default": "#6c757d",
+      "visible_if": "{{ block.settings.enable_input_placeholder_font_color == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.input"
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "t:settings.border",
+      "options": [
+        {
+          "value": "all",
+          "label": "t:options.all"
+        },
+        {
+          "value": "underline",
+          "label": "t:options.underline"
+        },
+        {
+          "value": "none",
+          "label": "t:options.none"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "t:settings.border_width",
+      "min": 0,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.border_style != \"none\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 100,
+      "visible_if": "{{ block.settings.border_style != \"underline\" }}"
+    },
+    {
+      "type": "select",
+      "id": "input_type_preset",
+      "label": "t:settings.type_preset",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "paragraph",
+          "label": "t:options.paragraph"
+        },
+        {
+          "value": "h1",
+          "label": "t:options.h1"
+        },
+        {
+          "value": "h2",
+          "label": "t:options.h2"
+        },
+        {
+          "value": "h3",
+          "label": "t:options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:options.h6"
+        }
+      ],
+      "default": "paragraph",
+      "info": "t:info.edit_presets_in_theme_settings"
+    },
+    {
+      "type": "header",
+      "content": "Input Typography"
+    },
+    {
+      "type": "select",
+      "id": "input_font_family",
+      "label": "Input Font Family",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "Body Font"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "Heading Font"
+        },
+        {
+          "value": "var(--font-subheading--family)",
+          "label": "Subheading Font"
+        },
+        {
+          "value": "var(--font-accent--family)",
+          "label": "Accent Font"
+        }
+      ],
+      "default": "var(--font-body--family)"
+    },
+    {
+      "type": "range",
+      "id": "input_font_size",
+      "label": "Input Font Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "input_font_weight",
+      "label": "Input Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "input_text_transform",
+      "label": "Input Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "input_letter_spacing",
+      "label": "Input Letter Spacing",
+      "min": -2,
+      "max": 5,
+      "step": 0.1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.submit_button"
+    },
+    {
+      "type": "select",
+      "id": "style_class",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "button",
+          "label": "t:options.primary"
+        },
+        {
+          "value": "button-secondary",
+          "label": "t:options.secondary"
+        },
+        {
+          "value": "button-tertiary",
+          "label": "Tertiary"
+        },
+        {
+          "value": "button-unstyled",
+          "label": "t:options.link"
+        }
+      ],
+      "default": "button"
+    },
+    {
+      "type": "select",
+      "id": "display_type",
+      "label": "t:settings.display",
+      "options": [
+        {
+          "value": "text",
+          "label": "t:options.text"
+        },
+        {
+          "value": "arrow",
+          "label": "t:options.arrow"
+        }
+      ],
+      "default": "text"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:settings.label",
+      "default": "t:text_defaults.sign_up",
+      "visible_if": "{{ block.settings.display_type == \"text\" }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "integrated_button",
+      "label": "t:settings.integrated_button",
+      "default": false,
+      "visible_if": "{{ block.settings.border_style != \"underline\" }}"
+    },
+    {
+      "type": "select",
+      "id": "button_type_preset",
+      "label": "t:settings.type_preset",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "paragraph",
+          "label": "t:options.paragraph"
+        },
+        {
+          "value": "h1",
+          "label": "t:options.h1"
+        },
+        {
+          "value": "h2",
+          "label": "t:options.h2"
+        },
+        {
+          "value": "h3",
+          "label": "t:options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:options.h6"
+        }
+      ],
+      "default": "paragraph",
+      "info": "t:info.edit_presets_in_theme_settings",
+      "visible_if": "{{ block.settings.display_type == \"text\" }}"
+    },
+    {
+      "type": "header",
+      "content": "Button Typography"
+    },
+    {
+      "type": "select",
+      "id": "button_font_family",
+      "label": "Button Font Family",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "Body Font"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "Heading Font"
+        },
+        {
+          "value": "var(--font-subheading--family)",
+          "label": "Subheading Font"
+        },
+        {
+          "value": "var(--font-accent--family)",
+          "label": "Accent Font"
+        }
+      ],
+      "default": "var(--font-body--family)"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Button Font Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Button Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "button_text_transform",
+      "label": "Button Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "button_letter_spacing",
+      "label": "Button Letter Spacing",
+      "min": -2,
+      "max": 5,
+      "step": 0.1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Input Field Spacing"
+    },
+    {
+      "type": "range",
+      "id": "input_padding_top",
+      "label": "Input Padding Top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "input_padding_bottom",
+      "label": "Input Padding Bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "input_padding_left",
+      "label": "Input Padding Left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "input_padding_right",
+      "label": "Input Padding Right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "input_margin_top",
+      "label": "Input Margin Top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "input_margin_bottom",
+      "label": "Input Margin Bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "input_margin_left",
+      "label": "Input Margin Left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "input_margin_right",
+      "label": "Input Margin Right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Button Spacing"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_top",
+      "label": "Button Padding Top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_bottom",
+      "label": "Button Padding Bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_left",
+      "label": "Button Padding Left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "button_padding_right",
+      "label": "Button Padding Right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "label": "Button Margin Top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_margin_bottom",
+      "label": "Button Margin Bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_margin_left",
+      "label": "Button Margin Left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_margin_right",
+      "label": "Button Margin Right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Container Spacing"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_top",
+      "label": "Container Padding Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_padding_bottom",
+      "label": "Container Padding Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_padding_left",
+      "label": "Container Padding Left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_padding_right",
+      "label": "Container Padding Right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_margin_top",
+      "label": "Container Margin Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_margin_bottom",
+      "label": "Container Margin Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_margin_left",
+      "label": "Container Margin Left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_margin_right",
+      "label": "Container Margin Right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Input Group Spacing"
+    },
+    {
+      "type": "range",
+      "id": "input_group_gap",
+      "label": "Gap Between Input and Button",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "input_group_padding_top",
+      "label": "Input Group Padding Top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "input_group_padding_bottom",
+      "label": "Input Group Padding Bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "input_group_padding_left",
+      "label": "Input Group Padding Left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "input_group_padding_right",
+      "label": "Input Group Padding Right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.email_signup",
+      "category": "t:categories.forms"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,281 @@
+{%- doc -%}
+  Renders the facets actions
+
+  @param {string} results_url - the url to remove the filters
+  @param {boolean} is_active - whether the clear all button is active
+  @param {number} products_count - the number of products in the results
+  @param {string} [form_component] - the form component to use for the clear all button
+  @param {boolean} [should_show_clear_all] - whether to show the clear all button
+  @param {number} [shadow_opacity] - the opacity of the shadow for the sticky action bar
+{%- enddoc -%}
+
+<div
+  class="facets__actions{% if is_active %} facets__actions--active{% endif %}"
+  style="--color-shadow: rgb(var(--color-foreground-rgb) / {{ shadow_opacity | default: 1.0 }});"
+>
+  {% if should_show_clear_all %}
+    <style>
+      .facets__clear-all:hover {
+        background-color: {{ clear_all_button_hover_background_color | default: '#333333' }} !important;
+        background: {{ clear_all_button_hover_background_color | default: '#333333' }} !important;
+        color: {{ clear_all_button_hover_text_color | default: '#ffffff' }} !important;
+        border-color: {{ clear_all_button_hover_border_color | default: '#333333' }} !important;
+        text-decoration: {{ clear_all_button_hover_text_decoration | default: 'none' }} !important;
+      }
+      
+      /* More specific selectors */
+      button.facets__clear-all:hover,
+      .button.facets__clear-all:hover,
+      .facets__actions .facets__clear-all:hover {
+        background-color: {{ clear_all_button_hover_background_color | default: '#333333' }} !important;
+        background: {{ clear_all_button_hover_background_color | default: '#333333' }} !important;
+        color: {{ clear_all_button_hover_text_color | default: '#ffffff' }} !important;
+        border-color: {{ clear_all_button_hover_border_color | default: '#333333' }} !important;
+        text-decoration: {{ clear_all_button_hover_text_decoration | default: 'none' }} !important;
+      }
+    </style>
+    <facet-remove-component
+      data-url="{{ results_url }}"
+    >
+      <button
+        type="button"
+        class="button button-secondary facets__clear-all{% if is_active %} active{% endif %}"
+        ref="clearButton"
+        onmouseenter="this.style.backgroundColor='{{ clear_all_button_hover_background_color | default: '#333333' }}'; this.style.color='{{ clear_all_button_hover_text_color | default: '#ffffff' }}'; this.style.borderColor='{{ clear_all_button_hover_border_color | default: '#333333' }}'; this.style.textDecoration='{{ clear_all_button_hover_text_decoration | default: 'none' }}';"
+        onmouseleave="this.style.backgroundColor='{{ clear_all_button_background_color | default: '#C42D46' }}'; this.style.color='{{ clear_all_button_text_color | default: '#000000' }}'; this.style.borderColor='{{ clear_all_button_border_color | default: '#C42D46' }}'; this.style.textDecoration='none';"
+        style="
+          --clear-all-button-hover-bg: {{ clear_all_button_hover_background_color | default: '#333333' }};
+          --clear-all-button-hover-text: {{ clear_all_button_hover_text_color | default: '#ffffff' }};
+          --clear-all-button-hover-border: {{ clear_all_button_hover_border_color | default: '#333333' }};
+          --clear-all-button-hover-decoration: {{ clear_all_button_hover_text_decoration | default: 'none' }};
+          --clear-all-button-padding-top: {{ clear_all_button_padding_top | default: 8 }}px;
+          --clear-all-button-padding-bottom: {{ clear_all_button_padding_bottom | default: 8 }}px;
+          --clear-all-button-padding-left: {{ clear_all_button_padding_left | default: 16 }}px;
+          --clear-all-button-padding-right: {{ clear_all_button_padding_right | default: 16 }}px;
+          --clear-all-button-margin-top: {{ clear_all_button_margin_top | default: 0 }}px;
+          --clear-all-button-margin-bottom: {{ clear_all_button_margin_bottom | default: 0 }}px;
+          --clear-all-button-margin-left: {{ clear_all_button_margin_left | default: 0 }}px;
+          --clear-all-button-margin-right: {{ clear_all_button_margin_right | default: 0 }}px;
+          --clear-all-button-font-family: var(--font-{{ clear_all_button_font_family | default: 'body' }}--family);
+          --clear-all-button-font-size: {{ clear_all_button_font_size | default: 14 }}px;
+          --clear-all-button-font-weight: {{ clear_all_button_font_weight | default: '400' }};
+          --clear-all-button-text-transform: {{ clear_all_button_text_transform | default: 'none' }};
+          --clear-all-button-letter-spacing: {{ clear_all_button_letter_spacing | default: 0 }}px;
+          --clear-all-button-border-radius: {{ clear_all_button_border_radius | default: 4 }}px;
+          --clear-all-button-width: {{ clear_all_button_width | default: 'auto' }};
+          --clear-all-button-height: {{ clear_all_button_height | default: 'auto' }};
+          --clear-all-button-background-color: {{ clear_all_button_background_color | default: '#C42D46' }};
+          --clear-all-button-text-color: {{ clear_all_button_text_color | default: '#000000' }};
+          --clear-all-button-border-color: {{ clear_all_button_border_color | default: '#C42D46' }};
+          padding: var(--clear-all-button-padding-top) var(--clear-all-button-padding-right) var(--clear-all-button-padding-bottom) var(--clear-all-button-padding-left) !important;
+          margin: var(--clear-all-button-margin-top) var(--clear-all-button-margin-right) var(--clear-all-button-margin-bottom) var(--clear-all-button-margin-left) !important;
+          font-family: var(--clear-all-button-font-family) !important;
+          font-size: var(--clear-all-button-font-size) !important;
+          font-weight: var(--clear-all-button-font-weight) !important;
+          text-transform: var(--clear-all-button-text-transform) !important;
+          letter-spacing: var(--clear-all-button-letter-spacing) !important;
+          border-radius: var(--clear-all-button-border-radius) !important;
+          width: var(--clear-all-button-width) !important;
+          height: var(--clear-all-button-height) !important;
+          background-color: var(--clear-all-button-background-color) !important;
+          background: var(--clear-all-button-background-color) !important;
+          color: var(--clear-all-button-text-color) !important;
+          border-color: var(--clear-all-button-border-color) !important;
+        "
+        {% if form_component != blank %}
+          on:click="/removeFilter?form={{ form_component }}"
+          on:keydown="/removeFilter?form={{ form_component }}"
+        {% else %}
+          on:click="/removeFilter?form="
+          on:keydown="/removeFilter?form="
+        {% endif %}
+      >
+        {{- 'actions.clear_all' | t -}}
+      </button>
+    </facet-remove-component>
+  {% endif %}
+
+  {% if products_count > 0 %}
+    <button
+      class="button button-primary facets__see-results"
+      type="button"
+      on:click="dialog-component/closeDialog"
+    >
+      {{- 'actions.see_items' | t: count: products_count -}}
+    </button>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  /* Facets - Actions */
+  .facets__actions {
+    --to-top-gradient-background: linear-gradient(
+      to top,
+      rgb(var(--color-background-rgb) / var(--opacity-90)),
+      rgb(var(--color-background-rgb) / var(--opacity-80)),
+      rgb(var(--color-background-rgb) / var(--opacity-40)),
+      transparent
+    );
+
+    order: 1;
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: var(--gap-sm);
+    background-image: var(--to-top-gradient-background);
+    z-index: var(--facets-sticky-z-index);
+    padding-block-start: var(--padding-xs);
+    padding-block-end: var(--padding-md);
+    padding-inline: var(--padding-lg);
+    margin-top: auto;
+  }
+
+  .facets:not(.facets--drawer) .facets__actions {
+    @media screen and (min-width: 750px) {
+      position: static;
+    }
+  }
+
+  .facets--vertical .facets__actions {
+    padding-inline: 0;
+    justify-content: center;
+  }
+
+  .facets--horizontal .facets__actions {
+    @media screen and (min-width: 750px) {
+      order: 0;
+      bottom: auto;
+      position: static;
+      padding: 0;
+      z-index: var(--layer-flat);
+      flex-shrink: 0;
+      align-items: center;
+      margin-top: initial;
+      background-image: none;
+    }
+  }
+
+  .facets--horizontal .facets__actions--active::before {
+    @media screen and (min-width: 750px) {
+      content: '';
+      border-inline-start: var(--style-border-width) solid var(--color-border);
+      height: var(--font-paragraph--size);
+      position: absolute;
+    }
+  }
+
+  /* Clear button */
+  .facets__clear {
+    display: none;
+  }
+
+  .facets--horizontal .facets__clear {
+    @media screen and (min-width: 750px) {
+      width: 100%;
+      justify-content: flex-end;
+      padding: 0 var(--facets-clear-padding) var(--facets-clear-padding) 0;
+      cursor: pointer;
+    }
+  }
+
+  .facets__clear--active {
+    @media screen and (min-width: 750px) {
+      display: flex;
+    }
+  }
+
+  .clear-filter:hover {
+    text-decoration: underline;
+    background-color: transparent;
+  }
+
+  /* Clear all button */
+  .facets__clear-all {
+    display: none;
+    cursor: pointer;
+    min-width: var(--facets-clear-all-min-width);
+    transition: transform var(--animation-values), opacity var(--animation-values);
+    opacity: 0;
+    transform: translateY(100%);
+    flex-grow: 1;
+    padding-block: var(--padding-lg);
+  }
+
+  .facets:not(.facets--drawer) .facets__clear-all {
+    box-shadow: none;
+  }
+
+  .facets--horizontal .facets__clear-all {
+    @media screen and (min-width: 750px) {
+      --facets-clear-all-min-width: var(--minimum-touch-target);
+      --button-color: var(--color-primary);
+
+      text-decoration: underline transparent 0.075em;
+      text-underline-offset: 0.125em;
+      width: auto;
+      transform: none;
+      opacity: 1;
+      height: var(--minimum-touch-target);
+      align-items: center;
+      flex-grow: 0;
+      transition: text-decoration-color var(--animation-speed) var(--animation-easing);
+    }
+  }
+
+  .facets--horizontal .facets__clear-all:hover {
+    @media screen and (min-width: 750px) {
+      --button-color: var(--color-primary-hover);
+    }
+  }
+
+  @starting-style {
+    .facets__clear-all {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .facets__clear-all.active {
+    transform: translateY(0);
+    opacity: 1;
+    display: grid;
+  }
+
+  .facets--horizontal .facets__clear-all.active {
+    @media screen and (min-width: 750px) {
+      padding-block: 0;
+      padding-inline: var(--facets-form-horizontal-gap);
+      background-color: transparent;
+      position: static;
+      transform: none;
+    }
+  }
+
+  @starting-style {
+    .facets__clear-all.active {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+
+    .facets--horizontal .facets__clear-all.active {
+      @media screen and (min-width: 750px) {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+
+  .facets__see-results {
+    min-width: var(--facets-see-results-min-width);
+    flex-grow: 1;
+    padding-block: var(--padding-lg);
+  }
+
+  .facets:not(.facets--drawer) .facets__see-results {
+    @media screen and (min-width: 750px) {
+      display: none;
+    }
+  }
+{% endstylesheet %}
