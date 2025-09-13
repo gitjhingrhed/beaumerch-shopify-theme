@@ -1,11 +1,8 @@
 
 
 {% liquid
-  assign order = 'logo,menu,localization,search,mobile_search,actions'
-
-  if shop.customer_accounts_enabled
-    assign order = 'mobile_search,logo,menu,localization,search,actions'
-  endif
+  # Use default theme layout
+  assign order = 'logo,menu,localization,search,actions'
 
   assign rows = 'top,bottom' | split: ','
   assign search_style = 'none'
@@ -63,35 +60,10 @@
     render 'header-actions'
   endcapture
 
-  if shop.customer_accounts_enabled
-    assign search_class = 'mobile:hidden'
-  endif
-
-  if section.settings.search_position == 'left'
-    if shop.customer_accounts_enabled
-      assign order = 'mobile_search,logo,search,menu,localization,actions'
-    else
-      assign order = 'logo,search,menu,localization,mobile_search,actions'
-    endif
-  endif
   capture search
-    render 'search', style: search_style, class: search_class
+    render 'search', style: search_style
   endcapture
 
-  # Skip mobile search under specific conditions:
-  # Always render if search_row is bottom
-  # Don't render when shop.customer_accounts_enabled is false and search_position is left and search_style is not none
-  assign skip_mobile_search = false
-  if shop.customer_accounts_enabled == false and section.settings.search_position == 'left' and search_style != 'none'
-    assign skip_mobile_search = true
-  endif
-
-  if section.settings.search_row == 'bottom' or search_style != 'none' and skip_mobile_search == false
-    # Mobile search duplicate for when search is not in the right order for mobile layout
-    capture mobile_search
-      render 'search', class: 'desktop:hidden', style: search_style
-    endcapture
-  endif
 
   assign show_language = section.settings.show_language
   if localization.available_languages.size <= 1
@@ -449,6 +421,284 @@
     }
   }
 
+  /* Right Section Customization */
+  .header__column--right {
+    justify-content: {{ section.settings.right_section_alignment | default: 'flex-end' }};
+    gap: {{ section.settings.right_section_gap | default: 16 }}px;
+    padding: {{ section.settings.right_section_padding | default: 8 }}px;
+  }
+
+  /* Search Icon Customization */
+  .search-action,
+  .search-action .svg-wrapper,
+  .search-action .search-modal__button,
+  .search-action button {
+    width: {% case section.settings.search_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    height: {% case section.settings.search_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    color: {{ section.settings.search_icon_color | default: '#000000' }};
+    margin: {{ section.settings.search_icon_spacing | default: 8 }}px !important;
+    padding: {{ section.settings.search_icon_padding | default: 0 }}px !important;
+  }
+
+  /* Custom Search Icon */
+  {% if section.settings.search_icon_type == 'custom' and section.settings.search_icon_custom %}
+    .search-action .svg-wrapper img {
+      width: {{ section.settings.search_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.search_icon_height | default: 20 }}px !important;
+      display: block !important;
+      visibility: visible !important;
+    }
+  {% endif %}
+
+  /* ACCOUNT ICON VISIBILITY - FORCE SHOW */
+  <!-- DEBUG: account_icon_enabled = {{ section.settings.account_icon_enabled }} -->
+  {% comment %} FORCE ENABLE ACCOUNT ICON {% endcomment %}
+  {% assign force_account_enabled = true %}
+  {% if force_account_enabled %}
+    /* Force show account button with maximum specificity */
+    .header__column--right .header-actions .account-button,
+    header-actions .account-button,
+    .account-button {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      align-items: center;
+      justify-content: center;
+      width: auto !important;
+      height: auto !important;
+      min-width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+      min-height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+    }
+    
+    /* Show account popover only on desktop */
+    .account-popover {
+      display: block !important;
+      @media screen and (max-width: 749px) {
+        display: none !important;
+      }
+    }
+    
+    /* Hide the account button inside the popover component to prevent duplicates */
+    .account-popover .account-button {
+      display: none !important;
+    }
+    
+    /* Position the account popover correctly */
+    .account-popover__panel {
+      position: fixed !important;
+      top: calc(var(--header-height, 80px) + 10px) !important;
+      right: 20px !important;
+      left: auto !important;
+      transform: none !important;
+      z-index: 1000 !important;
+    }
+    
+    /* Show account drawer only on mobile */
+    .account-drawer {
+      @media screen and (max-width: 749px) {
+        display: block !important;
+      }
+      @media screen and (min-width: 750px) {
+        display: none !important;
+      }
+    }
+    
+    /* Ensure account button shows on mobile */
+    .account-button {
+      @media screen and (max-width: 749px) {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+    
+  {% else %}
+    /* Hide account icons when disabled - BUT FORCED ENABLED */
+    <!-- DEBUG: This should not show since force_account_enabled = true -->
+  {% endif %}
+
+  /* Account Icon Customization */
+  {% if section.settings.account_icon_enabled %}
+    .account-button,
+    .account-button button {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      padding: {{ section.settings.account_icon_padding | default: 0 }}px !important;
+      margin: {{ section.settings.account_icon_spacing | default: 8 }}px !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-button__icon {
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: {% case section.settings.account_icon_size %}
+        {% when 'small' %}16px
+        {% when 'medium' %}20px
+        {% when 'large' %}24px
+        {% else %}20px
+      {% endcase %};
+      height: {% case section.settings.account_icon_size %}
+        {% when 'small' %}16px
+        {% when 'medium' %}20px
+        {% when 'large' %}24px
+        {% else %}20px
+      {% endcase %};
+      color: {{ section.settings.account_icon_color | default: '#000000' }};
+      margin: {{ section.settings.account_icon_spacing | default: 8 }}px !important;
+      padding: {{ section.settings.account_icon_padding | default: 0 }}px !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-button__icon img {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      object-fit: contain;
+    }
+  {% endif %}
+
+  /* Custom Account Icon */
+  {% if section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom %}
+    .account-button__icon img {
+      width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      object-fit: contain !important;
+      border: none !important;
+      background: none !important;
+    }
+    
+    .account-button__icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+    }
+  {% endif %}
+
+  /* Force Show Account Icon */
+  {% if section.settings.force_show_account_icon %}
+    .account-popover,
+    .account-drawer,
+    .account-button,
+    .force-account-icon {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    .header-actions .account-button,
+    .header-actions .force-account-icon {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: var(--button-size) !important;
+      height: var(--button-size) !important;
+    }
+    .account-button__icon,
+    .force-account-icon .account-button__icon {
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    
+    /* Ensure custom icon images are visible when forced */
+    {% if section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom %}
+      .account-button__icon img {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: {{ section.settings.account_icon_width | default: 20 }}px !important;
+        height: {{ section.settings.account_icon_height | default: 20 }}px !important;
+        object-fit: contain !important;
+      }
+    {% endif %}
+    
+  {% endif %}
+
+  /* Cart Icon Customization */
+  cart-icon,
+  cart-icon .svg-wrapper,
+  .header-actions__cart-icon,
+  .header-actions__action.action__cart,
+  .header-actions__action.action__cart a {
+    width: {% case section.settings.cart_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    height: {% case section.settings.cart_icon_size %}
+      {% when 'small' %}16px
+      {% when 'medium' %}20px
+      {% when 'large' %}24px
+      {% else %}20px
+    {% endcase %};
+    color: {{ section.settings.cart_icon_color | default: '#000000' }};
+    margin: {{ section.settings.cart_icon_spacing | default: 8 }}px !important;
+    padding: {{ section.settings.cart_icon_padding | default: 0 }}px !important;
+  }
+
+  /* Custom Cart Icon */
+  {% if section.settings.cart_icon_type == 'custom' and section.settings.cart_icon_custom %}
+    cart-icon .svg-wrapper img {
+      width: {{ section.settings.cart_icon_width | default: 20 }}px !important;
+      height: {{ section.settings.cart_icon_height | default: 20 }}px !important;
+      display: block !important;
+      visibility: visible !important;
+    }
+  {% endif %}
+
+  /* Cart Bubble Customization */
+  .cart-bubble {
+    background-color: {{ section.settings.cart_bubble_color | default: '#ff0000' }};
+    color: {{ section.settings.cart_bubble_text_color | default: '#ffffff' }};
+  }
+
+  /* Hover Effects */
+  {% if section.settings.enable_hover_effects %}
+    .header-actions__action:hover,
+    .search-action .header-actions__action:hover {
+      background-color: {{ section.settings.hover_background_color | default: '#f5f5f5' }};
+      opacity: {{ section.settings.hover_opacity | default: 0.8 }};
+      transition: all 0.3s ease;
+    }
+  {% endif %}
+
+
+  /* Mobile Header Specific CSS */
+  @media screen and (max-width: 749px) {
+    .search-modal__button {
+      width: 50px;
+      padding: 0px !important;
+    }
+    .account-button .account-button__icon {
+      padding: 0px !important;
+      width: 20px;
+    }
+    .header-actions__action {
+      padding: 8px 6px;
+    }
+  }
+
   .header__columns {
     /* Three column layout */
     --header-left: 1fr;
@@ -620,6 +870,66 @@
       margin-top: calc(var(--header-height) * var(--transparent-header-offset-boolean) * -1);
     }
   }
+
+  /* DESKTOP LAYOUT - Show desktop elements, hide mobile elements */
+  @media screen and (min-width: 750px) {
+    /* Completely hide mobile elements on desktop */
+    .mobile_search,
+    .first,
+    .header__column--left .mobile_search,
+    .header__column--left .first,
+    .header__column--center .mobile_search,
+    .header__column--center .first,
+    .header__column--right .mobile_search,
+    .header__column--right .first {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    /* Show desktop elements */
+    .menu,
+    .search {
+      display: block !important;
+      visibility: visible !important;
+    }
+
+    /* Ensure desktop layout works properly */
+    .header__column--left {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+    }
+    .header__column--center {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .header__column--right {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+    }
+
+    /* Desktop specific positioning */
+    .header__column--left .logo {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .header__column--center .menu {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .header__column--right .search,
+    .header__column--right .actions {
+      display: flex !important;
+      visibility: visible !important;
+    }
+  }
+
 {% endstylesheet %}
 
 {% schema %}
@@ -743,6 +1053,475 @@
       ],
       "default": "top",
       "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "header",
+      "content": "Right Section Controls"
+    },
+    {
+      "type": "paragraph",
+      "content": "Customize the appearance and behavior of items in the header right section (Search, Account, Cart, etc.)"
+    },
+    {
+      "type": "header",
+      "content": "Search Icon Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "search_icon_enabled",
+      "label": "Enable Search Icon",
+      "default": true,
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "select",
+      "id": "search_icon_type",
+      "label": "Search Icon Type",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (Magnifying Glass)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Upload"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "search_icon_custom",
+      "label": "Custom Search Icon",
+      "info": "Upload a custom search icon (SVG recommended for best quality)",
+      "visible_if": "{{ section.settings.search_icon_type == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "search_icon_size",
+      "label": "Search Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (16px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (20px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (24px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "search_icon_color",
+      "label": "Search Icon Color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.search_icon_enabled and section.settings.search_icon_type == 'default' }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_spacing",
+      "label": "Search Icon Spacing",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_padding",
+      "label": "Search Icon Padding",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.search_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_width",
+      "label": "Custom Search Icon Width",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.search_icon_type == 'custom' and section.settings.search_icon_custom }}"
+    },
+    {
+      "type": "range",
+      "id": "search_icon_height",
+      "label": "Custom Search Icon Height",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.search_icon_type == 'custom' and section.settings.search_icon_custom }}"
+    },
+    {
+      "type": "header",
+      "content": "Account Icon Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "account_icon_enabled",
+      "label": "Enable Account Icon",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "account_icon_type",
+      "label": "Account Icon Type",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (User Icon)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Upload"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "account_icon_custom",
+      "label": "Custom Account Icon",
+      "info": "Upload a custom account icon (SVG recommended for best quality)",
+      "visible_if": "{{ section.settings.account_icon_type == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "account_icon_size",
+      "label": "Account Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (16px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (20px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (24px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "account_icon_color",
+      "label": "Account Icon Color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.account_icon_enabled and section.settings.account_icon_type == 'default' }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_spacing",
+      "label": "Account Icon Spacing",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_padding",
+      "label": "Account Icon Padding",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_width",
+      "label": "Custom Account Icon Width",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom }}"
+    },
+    {
+      "type": "range",
+      "id": "account_icon_height",
+      "label": "Custom Account Icon Height",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "force_show_account_icon",
+      "label": "Always Show Account Icon",
+      "info": "Show account icon even when customer accounts are disabled",
+      "default": false,
+      "visible_if": "{{ section.settings.account_icon_enabled }}"
+    },
+    {
+      "type": "header",
+      "content": "Cart Icon Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "cart_icon_enabled",
+      "label": "Enable Cart Icon",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "cart_icon_type",
+      "label": "Cart Icon Type",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (Shopping Bag)"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Upload"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "cart_icon_custom",
+      "label": "Custom Cart Icon",
+      "info": "Upload a custom cart icon (SVG recommended for best quality)",
+      "visible_if": "{{ section.settings.cart_icon_type == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "cart_icon_size",
+      "label": "Cart Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (16px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (20px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (24px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "cart_icon_color",
+      "label": "Cart Icon Color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.cart_icon_enabled and section.settings.cart_icon_type == 'default' }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_spacing",
+      "label": "Cart Icon Spacing",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_padding",
+      "label": "Cart Icon Padding",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_width",
+      "label": "Custom Cart Icon Width",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.cart_icon_type == 'custom' and section.settings.cart_icon_custom }}"
+    },
+    {
+      "type": "range",
+      "id": "cart_icon_height",
+      "label": "Custom Cart Icon Height",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ section.settings.cart_icon_type == 'custom' and section.settings.cart_icon_custom }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "cart_bubble_enabled",
+      "label": "Show Cart Item Count Bubble",
+      "default": true,
+      "visible_if": "{{ section.settings.cart_icon_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "cart_bubble_color",
+      "label": "Cart Bubble Background Color",
+      "default": "#ff0000",
+      "visible_if": "{{ section.settings.cart_bubble_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "cart_bubble_text_color",
+      "label": "Cart Bubble Text Color",
+      "default": "#ffffff",
+      "visible_if": "{{ section.settings.cart_bubble_enabled }}"
+    },
+    {
+      "type": "header",
+      "content": "Right Section Layout"
+    },
+    {
+      "type": "select",
+      "id": "right_section_alignment",
+      "label": "Right Section Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "flex-end"
+    },
+    {
+      "type": "range",
+      "id": "right_section_gap",
+      "label": "Gap Between Icons",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "right_section_padding",
+      "label": "Right Section Padding",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Hover Effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_effects",
+      "label": "Enable Hover Effects",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "hover_background_color",
+      "label": "Hover Background Color",
+      "default": "#f5f5f5",
+      "visible_if": "{{ section.settings.enable_hover_effects }}"
+    },
+    {
+      "type": "range",
+      "id": "hover_opacity",
+      "label": "Hover Opacity",
+      "min": 0.1,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.8,
+      "visible_if": "{{ section.settings.enable_hover_effects }}"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_icons_enabled",
+      "label": "Show Icons on Mobile",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "mobile_icon_size",
+      "label": "Mobile Icon Size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (14px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (18px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (22px)"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.mobile_icons_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_icon_spacing",
+      "label": "Mobile Icon Spacing",
+      "min": 0,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ section.settings.mobile_icons_enabled }}"
     },
     {
       "type": "header",

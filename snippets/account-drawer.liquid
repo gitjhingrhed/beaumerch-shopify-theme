@@ -11,7 +11,7 @@
   class="account-drawer"
   {{ block.shopify_attributes }}
 >
-  {% render 'account-button', attributes: 'on:click="/showDialog"' %}
+  {% comment %} Account button rendered in header-actions {% endcomment %}
   <dialog
     ref="dialog"
     class="color-{{ settings.popover_color_scheme }} dialog-modal dialog-drawer dialog-bottom-sheet account-drawer__dialog"
@@ -36,9 +36,15 @@
 
 {% stylesheet %}
   .account-drawer {
-    @media screen and (min-width: 750px) {
-      display: none;
-    }
+    {% if section.settings.force_show_account_icon %}
+      @media screen and (max-width: 749px) {
+        display: block !important;
+      }
+    {% else %}
+      @media screen and (min-width: 750px) {
+        display: none;
+      }
+    {% endif %}
   }
 
   .account-drawer__dialog {

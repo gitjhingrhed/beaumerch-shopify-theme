@@ -18,7 +18,23 @@
   ref="trigger"
   {{ attributes }}
 >
-  {%- if customer.has_avatar? -%}
+  {%- if section.settings.force_show_account_icon -%}
+    {%- comment -%} Always show icon when force_show_account_icon is enabled {%- endcomment -%}
+    <span
+      class="account-button__icon"
+      aria-hidden="true"
+    >
+      {% if section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom %}
+        <img 
+          src="{{ section.settings.account_icon_custom | image_url }}" 
+          alt="Account"
+          style="width: {{ section.settings.account_icon_width | default: 20 }}px; height: {{ section.settings.account_icon_height | default: 20 }}px; object-fit: contain;"
+        >
+      {% else %}
+        {{- 'icon-account.svg' | inline_asset_content -}}
+      {% endif %}
+    </span>
+  {%- elsif customer.has_avatar? -%}
     {{ customer | avatar }}
   {%- elsif customer.first_name or customer.email -%}
     {%- liquid
@@ -39,7 +55,15 @@
       class="account-button__icon"
       aria-hidden="true"
     >
-      {{- 'icon-account.svg' | inline_asset_content -}}
+      {% if section.settings.account_icon_type == 'custom' and section.settings.account_icon_custom %}
+        <img 
+          src="{{ section.settings.account_icon_custom | image_url }}" 
+          alt="Account"
+          style="width: {{ section.settings.account_icon_width | default: 20 }}px; height: {{ section.settings.account_icon_height | default: 20 }}px; object-fit: contain;"
+        >
+      {% else %}
+        {{- 'icon-account.svg' | inline_asset_content -}}
+      {% endif %}
     </span>
   {%- endif -%}
 </{{ tag }}>
@@ -57,6 +81,7 @@
     justify-content: center;
     align-content: center;
     transition: color var(--animation-speed) var(--animation-easing);
+    padding: 0 !important;
   }
 
   .account-button__avatar {
@@ -81,6 +106,15 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .account-button__icon img {
+    display: block !important;
+    object-fit: contain !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: 100%;
+    max-height: 100%;
   }
 
   /* The shop avatar doesn't bubble the click event up to our button, so we need to prevent that or the button doesn't work */

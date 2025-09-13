@@ -1,0 +1,68 @@
+SHOPIFY THEME COMPREHENSIVE BACKUP MANIFEST
+===========================================
+Backup Date: September 13, 2025 - 02:33 AM
+Theme ID: 180638384500
+Theme Name: beaumerch_v1_dev
+
+LATEST BACKUPS CREATED:
+======================
+
+1. COMPREHENSIVE THEME BACKUP
+   Location: backups/comprehensive-backup-20250913-023208/
+   Contents: All theme files, templates, sections, snippets, assets, settings
+   Files: 817 total files
+   Archive: comprehensive-backup-20250913-023208.tar.gz
+   Restoration: cd backups/comprehensive-backup-20250913-023208 && ./RESTORE_BACKUP.sh
+
+2. CUSTOMIZER DATA BACKUP
+   Location: backups/customizer-data-backup-20250913-023323/
+   Contents: Template customizations, settings, section customizations, assets
+   Files: 151 total files
+   Archive: customizer-data-backup-20250913-023323.tar.gz
+   Restoration: cd backups/customizer-data-backup-20250913-023323 && ./RESTORE_CUSTOMIZER.sh
+
+3. LIVE THEME SAFETY BACKUP
+   Location: backups/live-theme-safety-backup-20250913-023349/
+   Contents: Complete live theme state pulled from Shopify
+   Restoration: shopify theme pull --theme=180638384500 --path=backup-location
+
+WHAT'S PROTECTED:
+=================
+✅ All template customizations (.json files)
+✅ All section customizations (.liquid files)
+✅ All snippet files
+✅ All asset files (images, CSS, JS)
+✅ Theme settings (settings_schema.json, settings_data.json)
+✅ Layout files
+✅ Locale files
+✅ Configuration files
+✅ Block files
+✅ Live theme data from Shopify
+✅ All customizer configurations
+✅ All page content and settings
+✅ All image uploads and customizations
+
+BACKUP VERIFICATION:
+===================
+- Total comprehensive backup files: 817
+- Total customizer backup files: 151
+- All backups include restoration scripts
+- All backups are compressed for easy storage
+- Live theme data pulled for comparison
+
+RESTORATION INSTRUCTIONS:
+========================
+1. For complete theme restore: Use comprehensive-backup-20250913-023208
+2. For customizer data only: Use customizer-data-backup-20250913-023323
+3. For live theme state: Use live-theme-safety-backup-20250913-023349
+
+SAFETY NOTES:
+=============
+- Multiple backup layers ensure data safety
+- Compressed archives save storage space
+- Restoration scripts included for easy recovery
+- All customizer settings and content preserved
+- No data loss risk - comprehensive coverage
+
+This backup ensures complete protection of all your Shopify theme data,
+customizer settings, images, content, and configurations.

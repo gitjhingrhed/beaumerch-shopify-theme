@@ -7,9 +7,9 @@
 {%- enddoc -%}
 <anchored-popover-component
   data-close-on-resize="true"
-  class="account-popover mobile:hidden"
+  class="account-popover{% if section.settings.force_show_account_icon %} desktop:visible mobile:hidden{% else %} mobile:hidden{% endif %}"
 >
-  {% render 'account-button' with 'account-popover' as popover_id %}
+  {% comment %} Account button rendered in header-actions, this is just the popover panel {% endcomment %}
   <div
     class="account-popover__panel details-content color-{{ settings.popover_color_scheme }}"
     id="account-popover"

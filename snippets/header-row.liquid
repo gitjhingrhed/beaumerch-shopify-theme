@@ -17,6 +17,13 @@
     case item
       when 'actions':
         assign item_column = 'right'
+      when 'first':
+        assign item_column = 'left'
+      # Let logo and menu use customizer settings
+      # when 'menu':
+      #   assign item_column = 'center'
+      # when 'logo':
+      #   assign item_column = 'left'
     endcase
 
     if item_row == row
@@ -66,8 +73,6 @@
               {{ localization }}
             {% when 'search' %}
               {{ search }}
-            {% when 'mobile_search' %}
-              {{ mobile_search }}
             {% when 'actions' %}
               {{ actions }}
           {% endcase %}
