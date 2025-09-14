@@ -1495,7 +1495,20 @@
       color: {{ block_settings.filters_drawer_clear_all_text_color | default: '#ffffff' }} !important;
     }
   }
-  
+
+  /* Mobile Filter Drawer CSS */
+  #filters-drawer .facets__actions {
+    gap: 0px !important;
+  }
+  #filters-drawer .facets__actions--active {
+    gap: 15px !important;
+  }
+  #filters-drawer .facets__actions .facets__clear-all {
+    display: none !important;
+  }
+  #filters-drawer .facets__actions--active .facets__clear-all {
+    display: block !important;
+  }
   
   
 
