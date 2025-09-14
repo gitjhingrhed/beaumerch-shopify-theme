@@ -26,6 +26,7 @@
     {% endif %}
   >
     <details
+      id="menu-block-{{ block.id }}"
       class="
         menu__details
         spacing-style
@@ -38,9 +39,28 @@
       "
       {{ block.shopify_attributes }}
     >
-      <summary class="menu__heading{% if heading == blank %} menu__heading--empty{% endif %} {{ block_settings.heading_preset }}">
-        <span class="menu__heading__default">{{ heading }}</span>
-        <span class="menu__heading__accordion">
+      <summary class="menu__heading{% if heading == blank %} menu__heading--empty{% endif %} {{ block_settings.heading_preset }}" style="
+        color: {{ block_settings.heading_color | default: '#000000' }} !important;
+        font-size: {{ block_settings.heading_font_size | default: 18 }}px !important;
+        font-weight: {{ block_settings.heading_font_weight | default: 'bold' }} !important;
+        letter-spacing: {{ block_settings.heading_letter_spacing | default: 0 }}px !important;
+        line-height: {{ block_settings.heading_line_height | default: 1.2 }} !important;
+        margin-bottom: {{ block_settings.heading_margin_bottom | default: 8 }}px !important;
+      ">
+        <span class="menu__heading__default" style="
+          color: {{ block_settings.heading_color | default: '#000000' }} !important;
+          font-size: {{ block_settings.heading_font_size | default: 18 }}px !important;
+          font-weight: {{ block_settings.heading_font_weight | default: 'bold' }} !important;
+          letter-spacing: {{ block_settings.heading_letter_spacing | default: 0 }}px !important;
+          line-height: {{ block_settings.heading_line_height | default: 1.2 }} !important;
+        ">{{ heading }}</span>
+        <span class="menu__heading__accordion" style="
+          color: {{ block_settings.heading_color | default: '#000000' }} !important;
+          font-size: {{ block_settings.heading_font_size | default: 18 }}px !important;
+          font-weight: {{ block_settings.heading_font_weight | default: 'bold' }} !important;
+          letter-spacing: {{ block_settings.heading_letter_spacing | default: 0 }}px !important;
+          line-height: {{ block_settings.heading_line_height | default: 1.2 }} !important;
+        ">
           {{ heading | default: menu.title }}
           <span class="menu__heading__toggle svg-wrapper icon-caret icon-animated">
             {{- 'icon-caret.svg' | inline_asset_content -}}
@@ -128,6 +148,8 @@
   .menu--plus .icon-caret {
     display: none;
   }
+
+  /* Custom typography styles are now applied inline for better compatibility */
 {% endstylesheet %}
 
 {% schema %}
@@ -206,6 +228,95 @@
     {
       "type": "header",
       "content": "t:content.typography"
+    },
+    {
+      "type": "header",
+      "content": "Heading Typography"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading Font Size",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Heading Font Weight",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "bold",
+          "label": "Bold"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        }
+      ],
+      "default": "bold"
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "label": "Heading Letter Spacing",
+      "min": -2,
+      "max": 5,
+      "step": 0.1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "label": "Heading Line Height",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "heading_margin_bottom",
+      "label": "Heading Bottom Margin",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 8
     },
     {
       "type": "select",
